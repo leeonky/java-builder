@@ -1,4 +1,7 @@
 # Java-builder
+[![travis-ci](https://travis-ci.org/leeonky/java-builder.svg?branch=master)](https://travis-ci.org/leeonky/java-builder)
+[![coveralls](https://coveralls.io/repos/github/leeonky/java-builder/badge.svg?branch=master)](https://coveralls.io/github/leeonky/java-builder)
+
 A library for building objects in test.
 
 ## Getting Started
