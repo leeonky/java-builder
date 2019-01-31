@@ -14,12 +14,13 @@ public class DefaultFactory<T> implements Factory<T> {
 
     @Override
     public T createObject() {
+        T instance;
         try {
-            T instance = type.getDeclaredConstructor().newInstance();
-            consumer.accept(instance);
-            return instance;
+            instance = type.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new IllegalStateException(e);
         }
+        consumer.accept(instance);
+        return instance;
     }
 }
