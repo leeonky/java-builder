@@ -16,23 +16,23 @@ public class Bean {
 };
 ```
 
-Create BuilderSet for registering and building:
+Create FactorySet for registering and building:
 
 ```java
-BuilderSet builderSet = new BuilderSet();
+FactorySet factorySet = new FactorySet();
 ```
 
-Define builder and build
+Register and build
 
 ```java
 
 // Register class
-builderSet.register(Bean.class, bean -> {
+factorySet.register(Bean.class, bean -> {
     bean.setStrValue("hello world");
 });
 
 // Build one object
-Bean bean = builderSet.type(Bean.class).build();
+Bean bean = factorySet.type(Bean.class).build();
 
 // Output is "hello world"
 println(bean.getStrValue());
