@@ -39,7 +39,7 @@ Bean bean = factorySet.type(Bean.class).build();
 println(bean.getStrValue());
 ```
 
-###Reigister class
+### Reigister class
 
 - With sequence
 
