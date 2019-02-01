@@ -1,26 +1,28 @@
 package com.github.leeonky;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.function.Consumer;
+import java.util.Map;
 
-public class DefaultFactory<T> implements Factory<T> {
-    private final Class<T> type;
-    private final Consumer<T> consumer;
+class DefaultFactory<T> implements Factory<T> {
+    private final TriConsumer<T, Integer, Map<String, Object>> consumer;
+    private final Constructor<T> constructor;
+    private int sequence = 0;
 
-    public DefaultFactory(Class<T> type, Consumer<T> consumer) {
-        this.type = type;
+    public DefaultFactory(TriConsumer<T, Integer, Map<String, Object>> consumer, Constructor<T> constructor) {
+        this.constructor = constructor;
         this.consumer = consumer;
     }
 
     @Override
-    public T createObject() {
+    public T createObject(Map<String, Object> params) {
         T instance;
         try {
-            instance = type.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            instance = constructor.newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(e);
         }
-        consumer.accept(instance);
+        consumer.accept(instance, ++sequence, params);
         return instance;
     }
 }

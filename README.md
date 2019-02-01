@@ -16,7 +16,7 @@ public class Bean {
 };
 ```
 
-Create FactorySet for registering and building:
+Create FactorySet
 
 ```java
 FactorySet factorySet = new FactorySet();
@@ -34,6 +34,38 @@ factorySet.register(Bean.class, bean -> {
 // Build one object
 Bean bean = factorySet.type(Bean.class).build();
 
-// Output is "hello world"
+// Output is
+// hello world
 println(bean.getStrValue());
+```
+
+###Reigister class
+
+- With sequence
+
+```java
+factorySet.register(Bean.class, (bean, sequence) -> {
+    bean.setStrValue("hello " + sequence);
+});
+Builder<Bean> builder = factorySet.type(Bean.class);
+
+// Output is:
+// hello 1
+// hello 2
+println(builder.build().getStrValue());
+println(builder.build().getStrValue());
+```
+
+- With sequence and params
+
+```java
+factorySet.register(Bean.class, (bean, sequence, params) -> {
+    bean.setStrValue("hello " + params.get("message"));
+});
+
+// Output is:
+// hello world
+println(factorySet.type(Bean.class).params(new HashMap<String, Object>{{
+    put("message", "world");
+}}).build().getStrValue());
 ```
