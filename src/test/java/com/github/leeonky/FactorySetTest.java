@@ -3,7 +3,9 @@ package com.github.leeonky;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -50,6 +52,14 @@ class FactorySetTest {
         assertThat(factorySet.type(Bean.class).params(new HashMap<String, Object>() {{
             put("message", "world");
         }}).build().getStrValue()).isEqualTo("Hello world");
+    }
+
+    @Test
+    void build_object_list() {
+        factorySet.register(Bean.class, (bean, seq) -> bean.setStrValue("Hello" + seq));
+
+        assertThat(factorySet.type(Bean.class).build(2).map(Bean::getStrValue).collect(Collectors.toList()))
+                .isEqualTo(asList("Hello1", "Hello2"));
     }
 
     static class Bean {
