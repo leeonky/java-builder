@@ -12,9 +12,29 @@ plugins {
 }
 
 apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
-group = 'com.example'
-version = '0.0.1-SNAPSHOT'
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+group = 'com.github.leeonky'
+version = '0.0.2' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -36,4 +56,48 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: System.env.ossrhUsername, password: System.env.ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: System.env.ossrhUsername, password: System.env.ossrhPassword)
+            }
+
+            pom.project {
+                name project.name
+                packaging 'jar'
+                description project.description
+                url 'https://github.com/leeonky/' + project.name
+
+                scm {
+                    connection 'scm:git:https://github.com/leeonky/' + project.name + '.git'
+                    developerConnection 'scm:git:git@github.com:leeonky' + project.name + '.git'
+                    url 'https://github.com/leeonky/' + project.name + '.git'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'leeonky'
+                        name 'Liangchen'
+                        email 'leeonky@gmail.com'
+                    }
+                }
+            }
+        }
+    }
 }
