@@ -3,7 +3,7 @@ language: java
 jobs:
   include:
   - stage: test
-    before_script:
+    before_install:
     - echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
     after_success:
     - ./gradlew jacocoTestReport coveralls
@@ -11,14 +11,14 @@ jobs:
   - stage: snapshot
     env:
     - VERSION_SCOPE='-SNAPSHOT'
-    before_script:
+    before_install:
     - echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
     script: ./gradlew uploadArchives -x check
 
   - stage: release
     env:
     - VERSION_SCOPE=''
-    before_script:
+    before_install:
     - echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
     script: ./gradlew uploadArchives -x check
 
