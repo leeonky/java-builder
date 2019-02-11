@@ -9,10 +9,10 @@ buildscript {
 plugins {
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.2'
+    id 'de.marcphilipp.nexus-publish' version '0.2.0'
 }
 
 apply plugin: 'java'
-apply plugin: 'maven'
 apply plugin: 'signing'
 
 task javadocJar(type: Jar) {
@@ -58,46 +58,41 @@ test {
     useJUnitPlatform()
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: System.env.ossrhUsername, password: System.env.ossrhPassword)
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: System.env.ossrhUsername, password: System.env.ossrhPassword)
-            }
-
-            pom.project {
-                name project.name
-                packaging 'jar'
-                description project.description
-                url 'https://github.com/leeonky/' + project.name
-
-                scm {
-                    connection 'scm:git:https://github.com/leeonky/' + project.name + '.git'
-                    developerConnection 'scm:git:git@github.com:leeonky' + project.name + '.git'
-                    url 'https://github.com/leeonky/' + project.name + '.git'
-                }
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from(components.java)
+            pom {
+                name = project.name
+                description = project.description
+                url = 'https://github.com/leeonky/' + project.name
 
                 licenses {
                     license {
-                        name 'The Apache License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
                 }
 
                 developers {
                     developer {
-                        id 'leeonky'
-                        name 'Liangchen'
-                        email 'leeonky@gmail.com'
+                        id = 'leeonky'
+                        name = 'Liangchen'
+                        email = 'leeonky@gmail.com'
                     }
+                }
+
+                scm {
+                    connection = 'scm:git:https://github.com/leeonky/' + project.name + '.git'
+                    developerConnection = 'scm:git:git@github.com:leeonky' + project.name + '.git'
+                    url = 'https://github.com/leeonky/' + project.name + '.git'
                 }
             }
         }
     }
+}
+
+nexusPublishing {
+    username = System.env.ossrhUsername
+    password = System.env.ossrhPassword
 }

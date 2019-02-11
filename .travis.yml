@@ -17,7 +17,7 @@ jobs:
     - VERSION_SCOPE='-SNAPSHOT'
     script:
     - echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
-    - ./gradlew -Dorg.gradle.project.signing.keyId="$SIGNING_KEYID" -Dorg.gradle.project.signing.password="$SIGNING_PASSWORD" -Dorg.gradle.project.signing.secretKeyRingFile="$SIGNING_SECRETKEYRINGFILE" build uploadArchives -x check
+    - ./gradlew -Dorg.gradle.project.signing.keyId="$SIGNING_KEYID" -Dorg.gradle.project.signing.password="$SIGNING_PASSWORD" -Dorg.gradle.project.signing.secretKeyRingFile="$SIGNING_SECRETKEYRINGFILE" build publishToNexus -x check
 
   - stage: release
     install: skip
@@ -25,9 +25,9 @@ jobs:
     - VERSION_SCOPE=''
     script:
     - echo $GPG_KEY | base64 --decode > ${SIGNING_SECRETKEYRINGFILE}
-    - ./gradlew -Dorg.gradle.project.signing.keyId="$SIGNING_KEYID" -Dorg.gradle.project.signing.password="$SIGNING_PASSWORD" -Dorg.gradle.project.signing.secretKeyRingFile="$SIGNING_SECRETKEYRINGFILE" build uploadArchives -x check
-#    on:
-#      tags: true
+    - ./gradlew -Dorg.gradle.project.signing.keyId="$SIGNING_KEYID" -Dorg.gradle.project.signing.password="$SIGNING_PASSWORD" -Dorg.gradle.project.signing.secretKeyRingFile="$SIGNING_SECRETKEYRINGFILE" build publishToNexus -x check
+    on:
+      tags: true
 
 stages:
 - name: test
