@@ -99,7 +99,7 @@ nexusPublishing {
 
 task checkTag {
     doLast {
-        if (System.env.TRAVIS_TAG != project.version) {
+        if (System.env.TRAVIS_BRANCH == 'release' && System.env.TRAVIS_TAG != project.version) {
             throw new InvalidUserDataException("Tag and version does not match, expect '" + version + "', but '" + System.env.TRAVIS_TAG + "'")
         }
     }
