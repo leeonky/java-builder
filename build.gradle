@@ -96,3 +96,13 @@ nexusPublishing {
     username = System.env.ossrhUsername
     password = System.env.ossrhPassword
 }
+
+task 'checkTag' {
+    if (System.env.TRAVIS_TAG != project.version) {
+        throw new InvalidUserDataException("Tag and version does not match, expect '" + version + "', but '" + System.env.TRAVIS_TAG + "'")
+    }
+}
+
+publishToNexus {
+    dependsOn 'checkTag'
+}
