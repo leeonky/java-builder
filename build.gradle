@@ -25,16 +25,8 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-signing {
-    sign configurations.archives
-}
-
 group = 'com.github.leeonky'
-version = '0.0.3' + System.env.VERSION_SCOPE
+version = '0.0.4' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -66,7 +58,7 @@ publishing {
             artifact javadocJar
             pom {
                 name = project.name
-                description = project.description
+                description = project.name
                 url = 'https://github.com/leeonky/' + project.name
 
                 licenses {
@@ -92,6 +84,10 @@ publishing {
             }
         }
     }
+}
+
+signing {
+    sign publishing.publications.mavenJava
 }
 
 nexusPublishing {
