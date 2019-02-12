@@ -34,7 +34,7 @@ signing {
 }
 
 group = 'com.github.leeonky'
-version = '0.0.2' + System.env.VERSION_SCOPE
+version = '0.0.3' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -107,4 +107,10 @@ task checkTag {
 
 publishToNexus {
     dependsOn 'checkTag'
+}
+
+task currentVersion {
+    doLast {
+        println project.version
+    }
 }
