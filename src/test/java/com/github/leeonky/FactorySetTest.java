@@ -14,10 +14,10 @@ class FactorySetTest {
 
     @Test
     void register_and_build() {
-        factorySet.register(Bean.class, bean -> bean.setStrValue("Hello"));
+        factorySet.register(Bean.class, bean -> bean.setStringValue("Hello"));
 
         assertThat(factorySet.type(Bean.class).build())
-                .hasFieldOrPropertyWithValue("strValue", "Hello");
+                .hasFieldOrPropertyWithValue("stringValue", "Hello");
     }
 
     @Test
@@ -38,40 +38,38 @@ class FactorySetTest {
 
     @Test
     void register_with_sequence() {
-        factorySet.register(Bean.class, (bean, seq) -> bean.setStrValue("Hello" + seq));
+        factorySet.register(Bean.class, (bean, seq) -> bean.setStringValue("Hello" + seq));
         Builder<Bean> builder = factorySet.type(Bean.class);
 
-        assertThat(builder.build().getStrValue()).isEqualTo("Hello1");
-        assertThat(builder.build().getStrValue()).isEqualTo("Hello2");
+        assertThat(builder.build().getStringValue()).isEqualTo("Hello1");
+        assertThat(builder.build().getStringValue()).isEqualTo("Hello2");
     }
 
     @Test
     void register_with_sequence_and_params() {
-        factorySet.register(Bean.class, (bean, seq, params) -> bean.setStrValue("Hello " + params.get("message")));
+        factorySet.register(Bean.class, (bean, seq, params) -> bean.setStringValue("Hello " + params.get("message")));
 
         assertThat(factorySet.type(Bean.class).params(new HashMap<String, Object>() {{
             put("message", "world");
-        }}).build().getStrValue()).isEqualTo("Hello world");
+        }}).build().getStringValue()).isEqualTo("Hello world");
     }
 
     @Test
     void build_object_list() {
-        factorySet.register(Bean.class, (bean, seq) -> bean.setStrValue("Hello" + seq));
+        factorySet.register(Bean.class, (bean, seq) -> bean.setStringValue("Hello" + seq));
 
-        assertThat(factorySet.type(Bean.class).build(2).map(Bean::getStrValue).collect(Collectors.toList()))
+        assertThat(factorySet.type(Bean.class).build(2).map(Bean::getStringValue).collect(Collectors.toList()))
                 .isEqualTo(asList("Hello1", "Hello2"));
     }
 
-    static class Bean {
-        private String strValue;
+    @Test
+    void build_with_property() {
+        factorySet.register(Bean.class, bean -> {
+        });
 
-        public String getStrValue() {
-            return strValue;
-        }
-
-        public void setStrValue(String strValue) {
-            this.strValue = strValue;
-        }
+        assertThat(factorySet.type(Bean.class).properties(new HashMap<String, Object>() {{
+            put("stringValue", "Hello");
+        }}).build()).hasFieldOrPropertyWithValue("stringValue", "Hello");
     }
 
     static class BeanWithNoDefaultConstructor {

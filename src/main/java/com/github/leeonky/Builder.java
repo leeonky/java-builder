@@ -7,6 +7,8 @@ import java.util.stream.Stream;
 public interface Builder<T> {
     Builder<T> params(Map<String, Object> params);
 
+    Builder<T> properties(Map<String, Object> properties);
+
     T build();
 
     default Stream<T> build(int count) {

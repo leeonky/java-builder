@@ -6,6 +6,7 @@ import java.util.Map;
 class DefaultBuilder<T> implements Builder<T> {
     private final Factory<T> factory;
     private Map<String, Object> params = new HashMap<>();
+    private Map<String, Object> properties = new HashMap<>();
 
     public DefaultBuilder(Factory<T> factory) {
         this.factory = factory;
@@ -25,7 +26,15 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
+    public Builder<T> properties(Map<String, Object> properties) {
+        DefaultBuilder<T> builder = copy();
+        builder.properties.putAll(properties);
+        return builder;
+    }
+
+    @Override
     public T build() {
-        return factory.createObject(params);
+        T object = factory.createObject(params);
+        return new BeanUtil<>(object).assignProperties(properties);
     }
 }
