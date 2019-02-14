@@ -1,6 +1,6 @@
 # Java-builder
 [![travis-ci](https://travis-ci.org/leeonky/java-builder.svg?branch=master)](https://travis-ci.org/leeonky/java-builder)
-[![coveralls](https://coveralls.io/repos/github/leeonky/java-builder/badge.svg?branch=master&kill_cache=1)](https://coveralls.io/github/leeonky/java-builder)
+[![coveralls](https://coveralls.io/repos/github/leeonky/java-builder/badge.svg?branch=master&service=github&kill_cache=1)](https://coveralls.io/github/leeonky/java-builder)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.leeonky/java-builder/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.leeonky/java-builder)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
