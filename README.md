@@ -29,7 +29,7 @@ Register and build
 ```java
 
 // Register class
-factorySet.register(Bean.class, bean -> {
+factorySet.onBuild(Bean.class, bean -> {
     bean.setStrValue("hello world");
 });
 
@@ -46,7 +46,7 @@ println(bean.getStrValue());
 - With sequence
 
 ```java
-factorySet.register(Bean.class, (bean, sequence) -> {
+factorySet.onBuild(Bean.class, (bean, sequence) -> {
     bean.setStrValue("hello " + sequence);
 });
 Builder<Bean> builder = factorySet.type(Bean.class);
@@ -61,7 +61,7 @@ println(builder.build().getStrValue());
 - With sequence and params
 
 ```java
-factorySet.register(Bean.class, (bean, sequence, params) -> {
+factorySet.onBuild(Bean.class, (bean, sequence, params) -> {
     bean.setStrValue("hello " + params.get("message"));
 });
 
@@ -70,4 +70,18 @@ factorySet.register(Bean.class, (bean, sequence, params) -> {
 println(factorySet.type(Bean.class).params(new HashMap<String, Object>{{
     put("message", "world");
 }}).build().getStrValue());
+```
+
+- with no default constructor
+```java
+factorySet.register(Bean.class, (sequence) -> {
+    Bean bean = new Bean();
+    bean.setStrValue("hello " + sequence);
+    return bean;
+});
+Builder<Bean> builder = factorySet.type(Bean.class);
+
+// Output is:
+// hello 1
+println(builder.build().getStrValue());
 ```
