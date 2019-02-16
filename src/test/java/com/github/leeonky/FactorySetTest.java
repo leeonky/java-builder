@@ -86,7 +86,7 @@ class FactorySetTest {
 
     @Test
     void register_and_build_with_no_default_constructor_and_sequence() {
-        factorySet.register(BeanWithNoDefaultConstructor.class, (seq) -> new BeanWithNoDefaultConstructor(seq));
+        factorySet.register(BeanWithNoDefaultConstructor.class, BeanWithNoDefaultConstructor::new);
 
         assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).build())
                 .hasFieldOrPropertyWithValue("intValue", 1);
