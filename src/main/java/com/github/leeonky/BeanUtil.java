@@ -9,10 +9,16 @@ import java.util.function.Predicate;
 import static java.util.stream.Stream.of;
 
 public class BeanUtil {
-    private Converter converter = new Converter();
+    private Converter converter = new Converter() {{
+        addTypeConverter(Object.class, String.class, Object::toString);
+        addTypeConverter(String.class, long.class, Long::valueOf);
+        addTypeConverter(String.class, int.class, Integer::valueOf);
+    }};
 
     public <T> T assignProperties(T object, Map<String, Object> properties) {
-        properties.entrySet().forEach(e -> assignProperty(object, e));
+        properties.entrySet().stream()
+                .filter(e -> e.getValue() != null)
+                .forEach(e -> assignProperty(object, e));
         return object;
     }
 
