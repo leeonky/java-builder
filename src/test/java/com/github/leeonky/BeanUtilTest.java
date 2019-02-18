@@ -33,6 +33,34 @@ class BeanUtilTest {
     @Nested
     class TypeConvert {
 
+        @Test
+        void no_right_converter() {
+            beanUtil.getConverter().addTypeConverter(Long.class, Bean.class, s -> null);
+            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> beanUtil.assignProperties(new Bean(), new HashMap<String, Object>() {{
+                put("beanValue", "Bean");
+            }}));
+            assertThat(illegalStateException.getCause()).isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        void no_defined_converter() {
+            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> beanUtil.assignProperties(new Bean(), new HashMap<String, Object>() {{
+                put("beanValue", "Bean");
+            }}));
+            assertThat(illegalStateException.getCause()).isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        void assign_sub_type_to_base() {
+            Bean.SubBean subBean = new Bean.SubBean();
+            beanUtil.getConverter().addTypeConverter(Bean.SubBean.class, Bean.class, sb -> {
+                throw new RuntimeException();
+            });
+            assertThat(beanUtil.assignProperties(new Bean(), new HashMap<String, Object>() {{
+                put("beanValue", subBean);
+            }})).hasFieldOrPropertyWithValue("beanValue", subBean);
+        }
+
         @Nested
         class AnyTypeToString {
 
@@ -67,9 +95,5 @@ class BeanUtilTest {
                 }})).hasFieldOrPropertyWithValue("intValue", 100);
             }
         }
-
-        //assign to base type
-        //no defined converter
-        //no defined source type converter
     }
 }

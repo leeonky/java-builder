@@ -9,7 +9,7 @@ class DefaultFactory<T> implements Factory<T> {
     private final Constructor<T> constructor;
     private int sequence = 0;
 
-    public DefaultFactory(TriConsumer<T, Integer, Map<String, Object>> consumer, Constructor<T> constructor) {
+    DefaultFactory(TriConsumer<T, Integer, Map<String, Object>> consumer, Constructor<T> constructor) {
         this.constructor = constructor;
         this.consumer = consumer;
     }

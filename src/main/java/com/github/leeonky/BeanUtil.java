@@ -9,11 +9,15 @@ import java.util.function.Predicate;
 import static java.util.stream.Stream.of;
 
 public class BeanUtil {
-    private Converter converter = new Converter() {{
+    private final Converter converter = new Converter() {{
         addTypeConverter(Object.class, String.class, Object::toString);
         addTypeConverter(String.class, long.class, Long::valueOf);
         addTypeConverter(String.class, int.class, Integer::valueOf);
     }};
+
+    public Converter getConverter() {
+        return converter;
+    }
 
     public <T> T assignProperties(T object, Map<String, Object> properties) {
         properties.entrySet().stream()

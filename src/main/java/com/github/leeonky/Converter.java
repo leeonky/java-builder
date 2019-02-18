@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
 public class Converter {
@@ -16,27 +17,32 @@ public class Converter {
         return this;
     }
 
-    private Optional<Function> findTypeConverter(Class<?> source, Class<?> target) {
-        TypeConverter typeConverter = getPreciseTypeConverter(source, target);
-        if (typeConverter == null)
-            typeConverter = getBaseTypeConverter(source, target);
-        return ofNullable(typeConverter.getConverter());
+    private Optional<TypeConverter> findTypeConverter(Class<?> source, Class<?> target) {
+        Map<Class<?>, TypeConverter> typeConverters = this.typeConverters.get(target);
+        if (typeConverters != null) {
+            Optional<TypeConverter> preciseTypeConverter = getPreciseTypeConverter(source, typeConverters);
+            if (preciseTypeConverter.isPresent())
+                return preciseTypeConverter;
+            return getBaseTypeConverter(source, typeConverters);
+        }
+        return empty();
     }
 
-    private TypeConverter getBaseTypeConverter(Class<?> source, Class<?> target) {
-        return typeConverters.get(target).get(Object.class);
+    private Optional<TypeConverter> getBaseTypeConverter(Class<?> source, Map<Class<?>, TypeConverter> typeConverters) {
+        return ofNullable(typeConverters.get(Object.class));
     }
 
-    private TypeConverter getPreciseTypeConverter(Class<?> source, Class<?> target) {
-        return typeConverters.get(target).get(source);
+    private Optional<TypeConverter> getPreciseTypeConverter(Class<?> source, Map<Class<?>, TypeConverter> typeConverters) {
+        return ofNullable(typeConverters.get(source));
     }
 
     @SuppressWarnings("unchecked")
     public Object convert(Class<?> type, Object value) {
         Class<?> sourceType = value.getClass();
-        if (sourceType != type) {
-            return findTypeConverter(sourceType, type).get().apply(value);
-        }
+        if (!type.isAssignableFrom(sourceType))
+            return findTypeConverter(sourceType, type)
+                    .map(c -> c.getConverter().apply(value))
+                    .orElse(value);
         return value;
     }
 }

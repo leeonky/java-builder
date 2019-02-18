@@ -12,7 +12,7 @@ class TypeConverter {
         this.converter = converter;
     }
 
-    public Function getConverter() {
+    Function getConverter() {
         return converter;
     }
 }
