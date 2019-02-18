@@ -37,7 +37,7 @@ public class Converter {
     }
 
     @SuppressWarnings("unchecked")
-    public Object convert(Class<?> type, Object value) {
+    public Object tryConvert(Class<?> type, Object value) {
         Class<?> sourceType = value.getClass();
         if (!type.isAssignableFrom(sourceType))
             return findTypeConverter(sourceType, type)

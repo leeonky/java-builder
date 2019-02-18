@@ -29,7 +29,7 @@ public class BeanUtil {
     private void assignProperty(Object object, Map.Entry<String, Object> e) {
         Method method = getMethod(object, e.getKey());
         try {
-            method.invoke(object, converter.convert(method.getParameterTypes()[0], e.getValue()));
+            method.invoke(object, converter.tryConvert(method.getParameterTypes()[0], e.getValue()));
         } catch (Exception ex) {
             throw new IllegalStateException(String.format("Got exception in '%s::%s'", object.getClass().getName(), method.getName()), ex);
         }
