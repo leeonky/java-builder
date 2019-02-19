@@ -33,39 +33,30 @@ class BeanUtilTest {
     @Nested
     class TypeConvert {
 
-        @Nested
-        class AnyTypeToString {
-
-            @Test
-            void not_null() {
-                assertThat(beanUtil.assignProperties(new Bean(), new HashMap<String, Object>() {{
-                    put("stringValue", 100);
-                }})).hasFieldOrPropertyWithValue("stringValue", "100");
-            }
-
-            @Test
-            void is_null() {
-                assertThat(beanUtil.assignProperties(new Bean(), new HashMap<String, Object>() {{
-                    put("stringValue", null);
-                }})).hasFieldOrPropertyWithValue("stringValue", null);
-            }
+        @Test
+        void object_to_string() {
+            assertThat(beanUtil.assignProperties(new Bean(), new HashMap<String, Object>() {{
+                put("stringValue", new Object() {
+                    @Override
+                    public String toString() {
+                        return "toString";
+                    }
+                });
+            }})).hasFieldOrPropertyWithValue("stringValue", "toString");
         }
 
-        @Nested
-        class StringToNumber {
-            @Test
-            void to_long() {
-                assertThat(beanUtil.assignProperties(new Bean(), new HashMap<String, Object>() {{
-                    put("longValue", "100");
-                }})).hasFieldOrPropertyWithValue("longValue", 100L);
-            }
+        @Test
+        void string_to_long() {
+            assertThat(beanUtil.assignProperties(new Bean(), new HashMap<String, Object>() {{
+                put("longValue", "100");
+            }})).hasFieldOrPropertyWithValue("longValue", 100L);
+        }
 
-            @Test
-            void to_int() {
-                assertThat(beanUtil.assignProperties(new Bean(), new HashMap<String, Object>() {{
-                    put("intValue", "100");
-                }})).hasFieldOrPropertyWithValue("intValue", 100);
-            }
+        @Test
+        void string_to_int() {
+            assertThat(beanUtil.assignProperties(new Bean(), new HashMap<String, Object>() {{
+                put("intValue", "100");
+            }})).hasFieldOrPropertyWithValue("intValue", 100);
         }
     }
 }

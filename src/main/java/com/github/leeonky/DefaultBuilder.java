@@ -7,6 +7,7 @@ class DefaultBuilder<T> implements Builder<T> {
     private final Factory<T> factory;
     private Map<String, Object> params = new HashMap<>();
     private Map<String, Object> properties = new HashMap<>();
+    private BeanUtil beanUtil = new BeanUtil();
 
     public DefaultBuilder(Factory<T> factory) {
         this.factory = factory;
@@ -34,7 +35,6 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T build() {
-        T object = factory.createObject(params);
-        return new BeanUtil().assignProperties(object, properties);
+        return beanUtil.assignProperties(factory.createObject(params), properties);
     }
 }

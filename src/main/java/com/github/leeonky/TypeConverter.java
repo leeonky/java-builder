@@ -15,4 +15,12 @@ class TypeConverter {
     Function getConverter() {
         return converter;
     }
+
+    boolean isBaseType(Class<?> source) {
+        return this.source.isAssignableFrom(source);
+    }
+
+    boolean isPreciseType(Class<?> source) {
+        return this.source == source;
+    }
 }
