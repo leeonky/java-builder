@@ -24,10 +24,9 @@ public class Converter {
     @SuppressWarnings("unchecked")
     public Object tryConvert(Class<?> type, Object value) {
         Class<?> sourceType = value.getClass();
-        if (!type.isAssignableFrom(sourceType))
-            return findTypeConverter(sourceType, type)
-                    .map(c -> c.getConverter().apply(value))
-                    .orElse(value);
-        return value;
+        return type.isAssignableFrom(sourceType) ? value
+                : findTypeConverter(sourceType, type)
+                .map(c -> c.getConverter().apply(value))
+                .orElse(value);
     }
 }

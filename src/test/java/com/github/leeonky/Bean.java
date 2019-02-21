@@ -6,6 +6,12 @@ import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -30,6 +36,14 @@ class Bean {
 
     private BigInteger bigIntegerValue;
     private BigDecimal bigDecimalValue;
+
+    private UUID uuidValue;
+
+    private Instant instantValue;
+    private Date dateValue;
+    private LocalTime localTimeValue;
+    private LocalDate localDateValue;
+    private LocalDateTime localDateTimeValue;
 
     private Bean beanValue;
 

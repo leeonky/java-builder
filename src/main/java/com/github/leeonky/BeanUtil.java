@@ -5,7 +5,15 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 import static java.util.stream.Stream.of;
@@ -31,6 +39,20 @@ public class BeanUtil {
 
         addTypeConverter(String.class, BigInteger.class, BigInteger::new);
         addTypeConverter(String.class, BigDecimal.class, BigDecimal::new);
+
+        addTypeConverter(String.class, UUID.class, UUID::fromString);
+
+        addTypeConverter(String.class, Instant.class, Instant::parse);
+        addTypeConverter(String.class, Date.class, source -> {
+            try {
+                return new SimpleDateFormat("yyyy-MM-dd").parse(source);
+            } catch (ParseException e) {
+                throw new IllegalArgumentException(e);
+            }
+        });
+        addTypeConverter(String.class, LocalTime.class, LocalTime::parse);
+        addTypeConverter(String.class, LocalDate.class, LocalDate::parse);
+        addTypeConverter(String.class, LocalDateTime.class, LocalDateTime::parse);
     }};
 
     public Converter getConverter() {
