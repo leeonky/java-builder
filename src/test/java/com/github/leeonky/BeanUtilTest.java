@@ -31,7 +31,6 @@ class BeanUtilTest {
         assertThat(illegalStateException).hasMessage("No setter was found in 'com.github.leeonky.Bean' for property 'value'");
     }
 
-
     @Test
     void type_convert() {
         assertThat(beanUtil.assignProperties(new Bean(), new HashMap<String, Object>() {{
@@ -66,12 +65,14 @@ class BeanUtilTest {
                 .hasFieldOrPropertyWithValue("shortValue", (short) 100)
                 .hasFieldOrPropertyWithValue("byteValue", (byte) 100)
                 .hasFieldOrPropertyWithValue("doubleValue", (double) 100)
+                .hasFieldOrPropertyWithValue("floatValue", (float) 100)
                 .hasFieldOrPropertyWithValue("booleanValue", true)
                 .hasFieldOrPropertyWithValue("boxedLongValue", 100L)
                 .hasFieldOrPropertyWithValue("boxedIntValue", 100)
                 .hasFieldOrPropertyWithValue("boxedShortValue", (short) 100)
                 .hasFieldOrPropertyWithValue("boxedByteValue", (byte) 100)
                 .hasFieldOrPropertyWithValue("boxedDoubleValue", (double) 100)
+                .hasFieldOrPropertyWithValue("boxedFloatValue", (float) 100)
                 .hasFieldOrPropertyWithValue("boxedBooleanValue", true)
                 .hasFieldOrPropertyWithValue("bigIntegerValue", new BigInteger("100"))
                 .hasFieldOrPropertyWithValue("bigDecimalValue", new BigDecimal("100"))
