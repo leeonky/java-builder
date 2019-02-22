@@ -6,9 +6,11 @@ import java.util.function.*;
 
 public class FactorySet {
     private Map<Class, Factory> factories = new HashMap<>();
+    private Consumer<Converter> register = c -> {
+    };
 
     public <T> Builder<T> type(Class<T> type) {
-        return new DefaultBuilder<T>(factories.get(type));
+        return new DefaultBuilder<T>(factories.get(type), register);
     }
 
     public <T> void onBuild(Class<T> type, Consumer<T> consumer) {
@@ -39,5 +41,10 @@ public class FactorySet {
 
     public <T> void register(Class<T> type, BiFunction<Integer, Map<String, Object>, T> supplier) {
         factories.put(type, new ConstructorFactory<>(supplier));
+    }
+
+    public FactorySet registerConverter(Consumer<Converter> register) {
+        this.register = register;
+        return this;
     }
 }

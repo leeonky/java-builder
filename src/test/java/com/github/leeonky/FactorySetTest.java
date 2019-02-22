@@ -102,4 +102,16 @@ class FactorySetTest {
             return bean;
         });
     }
+
+    @Test
+    void add_customer_converter() {
+        factorySet.onBuild(Bean.class, b -> {
+        });
+
+        factorySet.registerConverter(converter -> converter.addTypeConverter(Long.class, int.class, Long::intValue));
+
+        assertThat(factorySet.type(Bean.class).properties(new HashMap<String, Object>() {{
+            put("intValue", 1L);
+        }}).build().getIntValue()).isEqualTo(1);
+    }
 }
