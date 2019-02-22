@@ -90,7 +90,7 @@ Builder<Bean> builder = factorySet.type(Bean.class);
 println(builder.build().getStrValue());
 ```
 
-###Build with property
+### Build with property
 
 ```java
 factorySet.onBuild(Bean.class, (bean) -> {
