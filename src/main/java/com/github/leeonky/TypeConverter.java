@@ -1,18 +1,16 @@
 package com.github.leeonky;
 
-import java.util.function.Function;
-
-class TypeConverter {
+class TypeConverter<F> {
     private final Class<?> source;
 
-    private final Function converter;
+    private final F converter;
 
-    TypeConverter(Class<?> source, Function converter) {
+    TypeConverter(Class<?> source, F converter) {
         this.source = source;
         this.converter = converter;
     }
 
-    Function getConverter() {
+    F getConverter() {
         return converter;
     }
 
