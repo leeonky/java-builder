@@ -65,7 +65,7 @@ public class Converter {
                     try {
                         return new SimpleDateFormat("yyyy-MM-dd").parse(source);
                     } catch (ParseException e) {
-                        throw new IllegalArgumentException(e);
+                        throw new IllegalArgumentException("Cannot convert '" + source + "' to " + Date.class.getName(), e);
                     }
                 })
                 .addTypeConverter(String.class, LocalTime.class, LocalTime::parse)

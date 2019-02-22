@@ -99,4 +99,13 @@ class BeanUtilTest {
                 .hasFieldOrPropertyWithValue("localDateTimeValue", LocalDateTime.parse("1996-01-23T00:00:01"))
         ;
     }
+
+    @Test
+    void convert_string_date_error() {
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> beanUtil.assignProperties(new Bean(), new HashMap<String, Object>() {{
+            put("dateValue", "invalid format");
+        }}));
+
+        assertThat(exception.getCause()).hasMessage("Cannot convert 'invalid format' to java.util.Date");
+    }
 }
