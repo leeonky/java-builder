@@ -1,6 +1,6 @@
 # Java-builder
 [![travis-ci](https://travis-ci.org/leeonky/java-builder.svg?branch=master)](https://travis-ci.org/leeonky/java-builder)
-[![coveralls](https://coveralls.io/repos/github/leeonky/java-builder/badge.svg?branch=master&service=github&kill_cache=1)](https://coveralls.io/github/leeonky/java-builder)
+[![coveralls](https://img.shields.io/coveralls/github/leeonky/java-builder/master.svg)](https://coveralls.io/github/leeonky/java-builder)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.leeonky/java-builder/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.leeonky/java-builder)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -15,6 +15,7 @@ Given a bean class:
 @Setter
 public class Bean {
     private String strValue;
+    private int intValue;
 };
 ```
 
@@ -41,7 +42,7 @@ Bean bean = factorySet.type(Bean.class).build();
 println(bean.getStrValue());
 ```
 
-### Register class
+### Register
 
 - With sequence
 
@@ -84,4 +85,45 @@ Builder<Bean> builder = factorySet.type(Bean.class);
 // Output is:
 // hello 1
 println(builder.build().getStrValue());
+```
+
+###Build with property
+
+```java
+factorySet.onBuild(Bean.class, (bean) -> {
+});
+
+// Output is:
+// hello world
+println(factorySet.type(Bean.class).properties(new HashMap<String, Object>{{
+    put("strValue", "hello world");
+}}).build().getStrValue());
+```
+
+- guess and convert to right type
+
+```java
+factorySet.onBuild(Bean.class, (bean) -> {
+});
+
+// Output is:
+// 100
+println(factorySet.type(Bean.class).properties(new HashMap<String, Object>{{
+    put("intValue", "100");
+}}).build().getIntValue());
+```
+- register customer converter
+
+```java
+factorySet.onBuild(Bean.class, (bean) -> {
+});
+
+factorySet.registerConverter(converter ->
+    converter.addTypeConverter(Long.class, int.class, Long::intValue));
+
+// Output is:
+// 100
+println(factorySet.type(Bean.class).properties(new HashMap<String, Object>{{
+    put("intValue", 100L);
+}}).build().getIntValue());
 ```
