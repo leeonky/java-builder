@@ -36,8 +36,13 @@ class ConverterTest {
         }
     }
 
-    interface ValueEnum<V> {
-        static <E extends ValueEnum<V>, V> E fromValue(Class<E> type, V value) {
+    interface ValueEnum<V extends Number> {
+        static <E extends ValueEnum<V>, V extends Number> E fromValue(Class<E> type, V value) {
+            return Arrays.stream(type.getEnumConstants()).filter((v) -> v.getValue().equals(value))
+                    .findFirst().orElseThrow(() -> new IllegalArgumentException("Unsupported enum value '" + value + "'"));
+        }
+
+        static <E extends ValueEnum<V>, V extends Number> E fromNumber(Class<E> type, Number value) {
             return Arrays.stream(type.getEnumConstants()).filter((v) -> v.getValue().equals(value))
                     .findFirst().orElseThrow(() -> new IllegalArgumentException("Unsupported enum value '" + value + "'"));
         }
@@ -101,6 +106,20 @@ class ConverterTest {
         @Test
         void convert_to_customer_enum_with_enum_type_auto_boxed() {
             converter.addEnumConverter(int.class, ValueEnums.class, ValueEnum::fromValue);
+
+            assertThat(converter.tryConvert(ValueEnums.class, 1)).isEqualTo(ValueEnums.E2);
+        }
+
+        @Test
+        void convert_to_customer_enum_with_enum_type_and_sub_value_type() {
+            converter.addEnumConverter(Number.class, ValueEnums.class, ValueEnum::fromNumber);
+
+            assertThat(converter.tryConvert(ValueEnums.class, 1)).isEqualTo(ValueEnums.E2);
+        }
+
+        @Test
+        void convert_to_customer_enum_with_enum_base_type() {
+            converter.addEnumConverter(Integer.class, Enum.class, (c, i) -> ValueEnums.E2);
 
             assertThat(converter.tryConvert(ValueEnums.class, 1)).isEqualTo(ValueEnums.E2);
         }

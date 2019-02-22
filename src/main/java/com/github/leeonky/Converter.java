@@ -3,7 +3,6 @@ package com.github.leeonky;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
@@ -35,8 +34,9 @@ public class Converter {
         return this;
     }
 
-    private Optional<TypeConverter<Function>> findTypeConverter(Class<?> source, Class<?> target) {
-        List<TypeConverter<Function>> converters = typeConverters.getOrDefault(target, emptyList());
+    private <T> Optional<TypeConverter<T>> findTypeConverter(Class<?> source, Class<?> target,
+                                                             Map<Class<?>, List<TypeConverter<T>>> typeConverters, List<TypeConverter<T>> defaultValue) {
+        List<TypeConverter<T>> converters = typeConverters.getOrDefault(target, defaultValue);
         return Stream.concat(converters.stream().filter(t -> t.isPreciseType(source)),
                 converters.stream().filter(t -> t.isBaseType(source))).findFirst();
     }
@@ -45,23 +45,21 @@ public class Converter {
     public Object tryConvert(Class<?> type, Object value) {
         Class<?> sourceType = value.getClass();
         return type.isAssignableFrom(sourceType) ? value
-                : findTypeConverter(sourceType, type)
+                : findTypeConverter(sourceType, type, typeConverters, emptyList())
                 .map(c -> c.getConverter().apply(value))
-                .orElseGet(noTypeConverter(sourceType, type, value));
+                .orElseGet(() -> type.isEnum() ?
+                        findTypeConverter(sourceType, type, enumConverters, getBaseEnumTypeConverts(type, enumConverters))
+                                .map(c -> c.getConverter().apply(type, value))
+                                .orElseGet(() -> Enum.valueOf((Class) type, value.toString())) :
+                        value);
     }
 
-    @SuppressWarnings("unchecked")
-    private Supplier<Object> noTypeConverter(Class<?> sourceType, Class<?> type, Object value) {
-        return () -> {
-            if (type.isEnum()) {
-                try {
-                    return enumConverters.get(type).stream().filter(t -> t.isPreciseType(sourceType)).findFirst().get().getConverter().apply(type, value);
-                } catch (Exception e) {
-                    return Enum.valueOf((Class) type, value.toString());
-                }
-            }
-            return value;
-        };
+    private List<TypeConverter<BiFunction>> getBaseEnumTypeConverts(Class<?> type,
+                                                                    Map<Class<?>, List<TypeConverter<BiFunction>>> enumConverters) {
+        return enumConverters.entrySet().stream()
+                .filter(e -> e.getKey().isAssignableFrom(type))
+                .map(Map.Entry::getValue)
+                .findFirst().orElse(emptyList());
     }
 
     @SuppressWarnings("unchecked")
