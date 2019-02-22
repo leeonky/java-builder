@@ -11,6 +11,16 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 class ConverterTest {
     private Converter converter = new Converter();
 
+    @Test
+    void box_class() {
+        assertThat(Converter.boxedClass(int.class)).isEqualTo(Integer.class);
+        assertThat(Converter.boxedClass(short.class)).isEqualTo(Short.class);
+        assertThat(Converter.boxedClass(long.class)).isEqualTo(Long.class);
+        assertThat(Converter.boxedClass(float.class)).isEqualTo(Float.class);
+        assertThat(Converter.boxedClass(double.class)).isEqualTo(Double.class);
+        assertThat(Converter.boxedClass(boolean.class)).isEqualTo(Boolean.class);
+    }
+
     enum NameEnums {
         E1, E2
     }

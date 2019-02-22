@@ -13,8 +13,19 @@ public class Converter {
     private Map<Class<?>, List<TypeConverter<BiFunction>>> enumConverters = new HashMap<>();
 
     public static Class<?> boxedClass(Class<?> source) {
-        if (source == int.class)
-            source = Integer.class;
+        if (source.isPrimitive())
+            if (source == int.class)
+                source = Integer.class;
+            else if (source == short.class)
+                source = Short.class;
+            else if (source == long.class)
+                source = Long.class;
+            else if (source == float.class)
+                source = Float.class;
+            else if (source == double.class)
+                source = Double.class;
+            else if (source == boolean.class)
+                source = Boolean.class;
         return source;
     }
 
@@ -55,9 +66,7 @@ public class Converter {
 
     @SuppressWarnings("unchecked")
     public <E, V> Converter addEnumConverter(Class<V> source, Class<E> target, BiFunction<Class<E>, V, E> converter) {
-        if (source.isPrimitive()) {
-            source = (Class<V>) boxedClass(source);
-        }
+        source = (Class<V>) boxedClass(source);
         enumConverters.computeIfAbsent(target, k -> new ArrayList<>())
                 .add(new TypeConverter<>(source, converter));
         return this;
