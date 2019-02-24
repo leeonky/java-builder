@@ -1,11 +1,14 @@
 # Java-builder
 [![travis-ci](https://travis-ci.org/leeonky/java-builder.svg?branch=master)](https://travis-ci.org/leeonky/java-builder)
 [![coveralls](https://img.shields.io/coveralls/github/leeonky/java-builder/master.svg)](https://coveralls.io/github/leeonky/java-builder)
+[![Lost commit](https://img.shields.io/github/last-commit/leeonky/java-builder.svg)](https://github.com/leeonky/java-builder)
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.leeonky/java-builder.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.leeonky/java-builder)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Lost commit](https://img.shields.io/github/last-commit/leeonky/java-builder.svg)](https://github.com/leeonky/java-builder)
+
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b6f87097011245d8b3fcfa4324292640)](https://www.codacy.com/app/leeonky/java-builder?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=leeonky/java-builder&amp;utm_campaign=Badge_Grade)
 [![Maintainability](https://api.codeclimate.com/v1/badges/69d279626d49cac2bdc8/maintainability)](https://codeclimate.com/github/leeonky/java-builder/maintainability)
+![Code Climate issues](https://img.shields.io/codeclimate/issues/leeonky/java-builder.svg)
+![Code Climate maintainability (percentage)](https://img.shields.io/codeclimate/maintainability-percentage/leeonky/java-builder.svg)
 
 A library for building objects in test.
 
