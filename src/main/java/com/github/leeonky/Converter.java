@@ -75,9 +75,8 @@ public class Converter {
 
     @SuppressWarnings("unchecked")
     public <T, R> Converter addTypeConverter(Class<T> source, Class<R> target, Function<T, R> converter) {
-        source = (Class<T>) boxedClass(source);
         typeConverters.computeIfAbsent(target, k -> new ArrayList<>())
-                .add(new TypeConverter<>(source, converter));
+                .add(new TypeConverter<>(boxedClass(source), converter));
         return this;
     }
 
@@ -111,9 +110,8 @@ public class Converter {
 
     @SuppressWarnings("unchecked")
     public <E, V> Converter addEnumConverter(Class<V> source, Class<E> target, BiFunction<Class<E>, V, E> converter) {
-        source = (Class<V>) boxedClass(source);
         enumConverters.computeIfAbsent(target, k -> new ArrayList<>())
-                .add(new TypeConverter<>(source, converter));
+                .add(new TypeConverter<>(boxedClass(source), converter));
         return this;
     }
 }
