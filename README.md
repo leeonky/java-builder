@@ -7,8 +7,8 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b6f87097011245d8b3fcfa4324292640)](https://www.codacy.com/app/leeonky/java-builder?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=leeonky/java-builder&amp;utm_campaign=Badge_Grade)
 [![Maintainability](https://api.codeclimate.com/v1/badges/69d279626d49cac2bdc8/maintainability)](https://codeclimate.com/github/leeonky/java-builder/maintainability)
-![Code Climate issues](https://img.shields.io/codeclimate/issues/leeonky/java-builder.svg)
-![Code Climate maintainability (percentage)](https://img.shields.io/codeclimate/maintainability-percentage/leeonky/java-builder.svg)
+[![Code Climate issues](https://img.shields.io/codeclimate/issues/leeonky/java-builder.svg)](https://codeclimate.com/github/leeonky/java-builder/maintainability)
+[![Code Climate maintainability (percentage)](https://img.shields.io/codeclimate/maintainability-percentage/leeonky/java-builder.svg)](https://codeclimate.com/github/leeonky/java-builder/maintainability)
 
 A library for building objects in test.
 

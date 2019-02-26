@@ -22,17 +22,17 @@ public class Converter {
     public static Class<?> boxedClass(Class<?> source) {
         if (source.isPrimitive())
             if (source == int.class)
-                source = Integer.class;
+                return Integer.class;
             else if (source == short.class)
-                source = Short.class;
+                return Short.class;
             else if (source == long.class)
-                source = Long.class;
+                return Long.class;
             else if (source == float.class)
-                source = Float.class;
+                return Float.class;
             else if (source == double.class)
-                source = Double.class;
+                return Double.class;
             else if (source == boolean.class)
-                source = Boolean.class;
+                return Boolean.class;
         return source;
     }
 
