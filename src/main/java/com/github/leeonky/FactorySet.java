@@ -11,12 +11,15 @@ public class FactorySet {
 
     @SuppressWarnings("unchecked")
     public <T> Builder<T> type(Class<T> type) {
-        return new DefaultBuilder<T>(queryFactory(type, ""), register);
+        return new DefaultBuilder<T>(queryFactory(type), register);
     }
 
-    private <T> Factory queryFactory(Class<T> type, String extend) {
-        Factory factory = factories.get(type);
-        return extend == null || extend.isEmpty() ? factory : factory.query(extend);
+    public <T> Factory queryFactory(Class<T> type, String extend) {
+        return queryFactory(type).query(extend);
+    }
+
+    public <T> Factory queryFactory(Class<T> type) {
+        return factories.get(type);
     }
 
     @SuppressWarnings("unchecked")

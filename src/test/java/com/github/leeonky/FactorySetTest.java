@@ -117,22 +117,18 @@ class FactorySetTest {
 
     @Test
     void extend_factory() {
-        factorySet.onBuild(Bean.class,
-                b -> b.setStringValue("Hello")
-        ).extend("extend",
-                (b, i, p) -> b.setStringValue(b.getStringValue() + " world"));
+        factorySet.onBuild(Bean.class, b -> b.setStringValue("Hello"))
+                .extend("extend",
+                        b -> b.setStringValue(b.getStringValue() + " world"))
+                .extend("extend.extend2",
+                        (b, i) -> b.setStringValue(b.getStringValue() + " again " + i))
+                .extend("extend.extend2.extend3",
+                        (b, i, p) -> b.setStringValue(b.getStringValue() + " and again " + p.get("name")));
 
         assertThat(factorySet.type(Bean.class, "extend").build().getStringValue()).isEqualTo("Hello world");
-    }
-
-    @Test
-    void extend_factory_and_sequence() {
-        factorySet.onBuild(Bean.class,
-                b -> b.setStringValue("Hello")
-        ).extend("extend",
-                (b, i, p) -> b.setStringValue(b.getStringValue() + " world " + i));
-
-        assertThat(factorySet.type(Bean.class, "extend").build().getStringValue()).isEqualTo("Hello world 1");
-        assertThat(factorySet.type(Bean.class, "extend").build().getStringValue()).isEqualTo("Hello world 2");
+        assertThat(factorySet.type(Bean.class, "extend.extend2").build().getStringValue()).isEqualTo("Hello world again 2");
+        assertThat(factorySet.type(Bean.class, "extend.extend2.extend3").params(new HashMap<String, Object>() {{
+            put("name", "tom");
+        }}).build().getStringValue()).isEqualTo("Hello world again 3 and again tom");
     }
 }
