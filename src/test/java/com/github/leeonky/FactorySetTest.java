@@ -114,4 +114,14 @@ class FactorySetTest {
             put("intValue", 1L);
         }}).build().getIntValue()).isEqualTo(1);
     }
+
+    @Test
+    void extend_factory() {
+        factorySet.onBuild(Bean.class,
+                b -> b.setStringValue("Hello")
+        ).extend("extend",
+                (b, i, p) -> b.setStringValue(b.getStringValue() + " world"));
+
+        assertThat(factorySet.type(Bean.class, "extend").build().getStringValue()).isEqualTo("Hello world");
+    }
 }

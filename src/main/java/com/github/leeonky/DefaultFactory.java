@@ -4,7 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
-class DefaultFactory<T> implements Factory<T> {
+class DefaultFactory<T> extends AbstractFactory<T> {
     private final TriConsumer<T, Integer, Map<String, Object>> consumer;
     private final Constructor<T> constructor;
     private int sequence = 0;
