@@ -39,6 +39,6 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T build() {
-        return beanUtil.assignProperties(factory.createObject(params), properties);
+        return beanUtil.assignProperties(factory.createObject(factory.getSequence(), params), properties);
     }
 }

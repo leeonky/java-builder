@@ -7,7 +7,6 @@ import java.util.Map;
 class DefaultFactory<T> extends AbstractFactory<T> {
     private final TriConsumer<T, Integer, Map<String, Object>> consumer;
     private final Constructor<T> constructor;
-    private int sequence = 0;
 
     DefaultFactory(TriConsumer<T, Integer, Map<String, Object>> consumer, Constructor<T> constructor) {
         this.constructor = constructor;
@@ -15,14 +14,14 @@ class DefaultFactory<T> extends AbstractFactory<T> {
     }
 
     @Override
-    public T createObject(Map<String, Object> params) {
+    public T createObject(int sequence, Map<String, Object> params) {
         T instance;
         try {
             instance = constructor.newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(e);
         }
-        consumer.accept(instance, ++sequence, params);
+        consumer.accept(instance, sequence, params);
         return instance;
     }
 }

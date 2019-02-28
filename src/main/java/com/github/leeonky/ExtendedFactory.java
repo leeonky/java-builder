@@ -12,9 +12,14 @@ class ExtendedFactory<T> extends AbstractFactory<T> {
     }
 
     @Override
-    public T createObject(Map<String, Object> params) {
-        T object = parent.createObject(params);
-        consumer.accept(object, 0, params);
+    public int getSequence() {
+        return parent.getSequence();
+    }
+
+    @Override
+    public T createObject(int sequence, Map<String, Object> params) {
+        T object = parent.createObject(sequence, params);
+        consumer.accept(object, sequence, params);
         return object;
     }
 }
