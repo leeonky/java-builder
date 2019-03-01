@@ -2,6 +2,7 @@ package com.github.leeonky;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 class DefaultBuilder<T> implements Builder<T> {
@@ -12,7 +13,7 @@ class DefaultBuilder<T> implements Builder<T> {
     private BeanUtil beanUtil = new BeanUtil();
 
     public DefaultBuilder(Factory<T> factory, Consumer<Converter> register) {
-        this.factory = factory;
+        this.factory = Objects.requireNonNull(factory);
         this.register = register;
         register.accept(beanUtil.getConverter());
     }

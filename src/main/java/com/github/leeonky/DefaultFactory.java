@@ -8,7 +8,8 @@ class DefaultFactory<T> extends AbstractFactory<T> {
     private final TriConsumer<T, Integer, Map<String, Object>> consumer;
     private final Constructor<T> constructor;
 
-    DefaultFactory(TriConsumer<T, Integer, Map<String, Object>> consumer, Constructor<T> constructor) {
+    DefaultFactory(TriConsumer<T, Integer, Map<String, Object>> consumer, Constructor<T> constructor, Class<T> type) {
+        super(type);
         this.constructor = constructor;
         this.consumer = consumer;
     }

@@ -38,7 +38,7 @@ public class FactorySet {
     public <T> Factory<T> onBuild(Class<T> type, TriConsumer<T, Integer, Map<String, Object>> consumer) {
         DefaultFactory<T> defaultFactory;
         try {
-            defaultFactory = new DefaultFactory<>(consumer, type.getDeclaredConstructor());
+            defaultFactory = new DefaultFactory<>(consumer, type.getDeclaredConstructor(), type);
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException("No default constructor of class: " + type.getName(), e);
         }
@@ -55,7 +55,7 @@ public class FactorySet {
     }
 
     public <T> Factory<T> register(Class<T> type, BiFunction<Integer, Map<String, Object>, T> supplier) {
-        ConstructorFactory<T> constructorFactory = new ConstructorFactory<>(supplier);
+        ConstructorFactory<T> constructorFactory = new ConstructorFactory<>(supplier, type);
         factories.put(type, constructorFactory);
         return constructorFactory;
     }

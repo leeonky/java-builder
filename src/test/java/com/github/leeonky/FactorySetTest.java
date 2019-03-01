@@ -131,4 +131,30 @@ class FactorySetTest {
             put("name", "tom");
         }}).build().getStringValue()).isEqualTo("Hello world again 3 and again tom");
     }
+
+    @Test
+    void extend_from_non_exist_factory() {
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            factorySet.onBuild(Bean.class, b -> b.setStringValue("Hello"))
+                    .extend("extend.non-exist",
+                            b -> b.setStringValue(b.getStringValue() + " world"));
+        });
+        assertThat(exception).hasMessage("Factory[extend] for com.github.leeonky.Bean dose not exist");
+    }
+
+    @Test
+    void build_from_non_exist_factory() {
+        factorySet.onBuild(Bean.class, b -> {
+        }).extend("a", o -> {
+        });
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> factorySet.type(Bean.class, "extend"));
+        assertThat(exception).hasMessage("Factory[extend] for com.github.leeonky.Bean dose not exist");
+
+        exception = assertThrows(RuntimeException.class, () -> factorySet.type(Bean.class, "a.b"));
+        assertThat(exception).hasMessage("Factory[a.b] for com.github.leeonky.Bean dose not exist");
+
+        exception = assertThrows(RuntimeException.class, () -> factorySet.type(Bean.class, "extend.extend2"));
+        assertThat(exception).hasMessage("Factory[extend.extend2] for com.github.leeonky.Bean dose not exist");
+    }
 }

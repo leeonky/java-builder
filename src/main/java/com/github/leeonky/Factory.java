@@ -5,6 +5,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public interface Factory<T> {
+    Class<T> getType();
+
     int getSequence();
 
     T createObject(int sequence, Map<String, Object> params);
