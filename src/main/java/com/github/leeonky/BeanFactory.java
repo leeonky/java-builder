@@ -4,13 +4,17 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
-class DefaultFactory<T> extends AbstractFactory<T> {
+class BeanFactory<T> extends AbstractFactory<T> {
     private final TriConsumer<T, Integer, Map<String, Object>> consumer;
     private final Constructor<T> constructor;
 
-    DefaultFactory(TriConsumer<T, Integer, Map<String, Object>> consumer, Constructor<T> constructor, Class<T> type) {
+    BeanFactory(Class<T> type, TriConsumer<T, Integer, Map<String, Object>> consumer) {
         super(type);
-        this.constructor = constructor;
+        try {
+            constructor = type.getDeclaredConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException("No default constructor of class: " + type.getName(), e);
+        }
         this.consumer = consumer;
     }
 

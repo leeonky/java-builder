@@ -19,7 +19,7 @@ public class FactorySet {
     }
 
     public <T> Factory queryFactory(Class<T> type) {
-        return factories.get(type);
+        return factories.computeIfAbsent(type, k -> new DefaultBeanFactory<>(type));
     }
 
     @SuppressWarnings("unchecked")
@@ -36,14 +36,9 @@ public class FactorySet {
     }
 
     public <T> Factory<T> onBuild(Class<T> type, TriConsumer<T, Integer, Map<String, Object>> consumer) {
-        DefaultFactory<T> defaultFactory;
-        try {
-            defaultFactory = new DefaultFactory<>(consumer, type.getDeclaredConstructor(), type);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException("No default constructor of class: " + type.getName(), e);
-        }
-        factories.put(type, defaultFactory);
-        return defaultFactory;
+        BeanFactory<T> beanFactory = new BeanFactory<>(type, consumer);
+        factories.put(type, beanFactory);
+        return beanFactory;
     }
 
     public <T> Factory<T> register(Class<T> type, Supplier<T> supplier) {
@@ -55,9 +50,9 @@ public class FactorySet {
     }
 
     public <T> Factory<T> register(Class<T> type, BiFunction<Integer, Map<String, Object>, T> supplier) {
-        ConstructorFactory<T> constructorFactory = new ConstructorFactory<>(supplier, type);
-        factories.put(type, constructorFactory);
-        return constructorFactory;
+        ObjectFactory<T> objectFactory = new ObjectFactory<>(type, supplier);
+        factories.put(type, objectFactory);
+        return objectFactory;
     }
 
     public FactorySet registerConverter(Consumer<Converter> register) {

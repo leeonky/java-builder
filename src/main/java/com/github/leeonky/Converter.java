@@ -16,8 +16,8 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyList;
 
 public class Converter {
-    private Map<Class<?>, List<TypeConverter<Function>>> typeConverters = new HashMap<>();
-    private Map<Class<?>, List<TypeConverter<BiFunction>>> enumConverters = new HashMap<>();
+    private Map<Class<?>, List<TypeOperator<Function>>> typeConverters = new HashMap<>();
+    private Map<Class<?>, List<TypeOperator<BiFunction>>> enumConverters = new HashMap<>();
 
     public static Class<?> boxedClass(Class<?> source) {
         if (source.isPrimitive())
@@ -36,7 +36,7 @@ public class Converter {
         return source;
     }
 
-    public static Converter newDefault() {
+    public static Converter createDefaultConverter() {
         return new Converter()
                 .addTypeConverter(Object.class, String.class, Object::toString)
                 .addTypeConverter(String.class, long.class, Long::valueOf)
@@ -76,13 +76,13 @@ public class Converter {
     @SuppressWarnings("unchecked")
     public <T, R> Converter addTypeConverter(Class<T> source, Class<R> target, Function<T, R> converter) {
         typeConverters.computeIfAbsent(target, k -> new ArrayList<>())
-                .add(new TypeConverter<>(boxedClass(source), converter));
+                .add(new TypeOperator<>(boxedClass(source), converter));
         return this;
     }
 
-    private <T> Optional<TypeConverter<T>> findTypeConverter(Class<?> source, Class<?> target,
-                                                             Map<Class<?>, List<TypeConverter<T>>> typeConverters, List<TypeConverter<T>> defaultValue) {
-        List<TypeConverter<T>> converters = typeConverters.getOrDefault(target, defaultValue);
+    private <T> Optional<TypeOperator<T>> findTypeConverter(Class<?> source, Class<?> target,
+                                                            Map<Class<?>, List<TypeOperator<T>>> typeConverters, List<TypeOperator<T>> defaultValue) {
+        List<TypeOperator<T>> converters = typeConverters.getOrDefault(target, defaultValue);
         return Stream.concat(converters.stream().filter(t -> t.isPreciseType(source)),
                 converters.stream().filter(t -> t.isBaseType(source))).findFirst();
     }
@@ -100,8 +100,8 @@ public class Converter {
                         value);
     }
 
-    private List<TypeConverter<BiFunction>> getBaseEnumTypeConverts(Class<?> type,
-                                                                    Map<Class<?>, List<TypeConverter<BiFunction>>> enumConverters) {
+    private List<TypeOperator<BiFunction>> getBaseEnumTypeConverts(Class<?> type,
+                                                                   Map<Class<?>, List<TypeOperator<BiFunction>>> enumConverters) {
         return enumConverters.entrySet().stream()
                 .filter(e -> e.getKey().isAssignableFrom(type))
                 .map(Map.Entry::getValue)
@@ -111,7 +111,7 @@ public class Converter {
     @SuppressWarnings("unchecked")
     public <E, V> Converter addEnumConverter(Class<V> source, Class<E> target, BiFunction<Class<E>, V, E> converter) {
         enumConverters.computeIfAbsent(target, k -> new ArrayList<>())
-                .add(new TypeConverter<>(boxedClass(source), converter));
+                .add(new TypeOperator<>(boxedClass(source), converter));
         return this;
     }
 }

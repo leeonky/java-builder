@@ -51,7 +51,7 @@ class ConverterTest {
     }
 
     @Nested
-    class TypeConverter {
+    class TypeOperator {
         @Test
         void no_candidate_converter_should_return_original_value() {
             converter.addTypeConverter(Long.class, Bean.class, s -> null);

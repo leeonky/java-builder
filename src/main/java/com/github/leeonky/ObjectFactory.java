@@ -3,10 +3,10 @@ package com.github.leeonky;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-class ConstructorFactory<T> extends AbstractFactory<T> {
+class ObjectFactory<T> extends AbstractFactory<T> {
     private BiFunction<Integer, Map<String, Object>, T> supplier;
 
-    ConstructorFactory(BiFunction<Integer, Map<String, Object>, T> supplier, Class<T> type) {
+    ObjectFactory(Class<T> type, BiFunction<Integer, Map<String, Object>, T> supplier) {
         super(type);
         this.supplier = supplier;
     }

@@ -1,11 +1,11 @@
 package com.github.leeonky;
 
-class TypeConverter<F> {
+class TypeOperator<F> {
     private final Class<?> source;
 
     private final F converter;
 
-    TypeConverter(Class<?> source, F converter) {
+    TypeOperator(Class<?> source, F converter) {
         this.source = source;
         this.converter = converter;
     }

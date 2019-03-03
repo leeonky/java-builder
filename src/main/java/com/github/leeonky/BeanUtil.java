@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 import static java.util.stream.Stream.of;
 
 public class BeanUtil {
-    private final Converter converter = Converter.newDefault();
+    private final Converter converter = Converter.createDefaultConverter();
 
     public Converter getConverter() {
         return converter;

@@ -2,6 +2,7 @@ package com.github.leeonky;
 
 import org.junit.jupiter.api.Test;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
@@ -156,5 +157,60 @@ class FactorySetTest {
 
         exception = assertThrows(RuntimeException.class, () -> factorySet.type(Bean.class, "extend.extend2"));
         assertThat(exception).hasMessage("Factory[extend.extend2] for com.github.leeonky.Bean dose not exist");
+    }
+
+    @Test
+    void default_build() throws ParseException {
+        assertThat(factorySet.type(Bean.class).build())
+                .hasFieldOrPropertyWithValue("stringValue", "stringValue1")
+//                .hasFieldOrPropertyWithValue("longValue", 1L)
+//                .hasFieldOrPropertyWithValue("intValue", 1)
+//                .hasFieldOrPropertyWithValue("shortValue", (short) 1)
+//                .hasFieldOrPropertyWithValue("byteValue", (byte) 1)
+//                .hasFieldOrPropertyWithValue("doubleValue", (double) 1)
+//                .hasFieldOrPropertyWithValue("floatValue", (float) 1)
+//                .hasFieldOrPropertyWithValue("booleanValue", true)
+//                .hasFieldOrPropertyWithValue("boxedLongValue", 1L)
+//                .hasFieldOrPropertyWithValue("boxedIntValue", 1)
+//                .hasFieldOrPropertyWithValue("boxedShortValue", (short) 1)
+//                .hasFieldOrPropertyWithValue("boxedByteValue", (byte) 1)
+//                .hasFieldOrPropertyWithValue("boxedDoubleValue", (double) 1)
+//                .hasFieldOrPropertyWithValue("boxedFloatValue", (float) 1)
+//                .hasFieldOrPropertyWithValue("boxedBooleanValue", true)
+//                .hasFieldOrPropertyWithValue("bigIntegerValue", new BigInteger("1"))
+//                .hasFieldOrPropertyWithValue("bigDecimalValue", new BigDecimal("1"))
+//                .hasFieldOrPropertyWithValue("uuidValue", UUID.fromString("00000000-0000-0000-0000-000000000001"))
+//                .hasFieldOrPropertyWithValue("instantValue", Instant.parse("1996-01-23T00:00:01Z"))
+//                .hasFieldOrPropertyWithValue("dateValue", new SimpleDateFormat("yyyy-MM-dd").parse("1996-01-23"))
+//                .hasFieldOrPropertyWithValue("localTimeValue", LocalTime.parse("00:00:01"))
+//                .hasFieldOrPropertyWithValue("localDateValue", LocalDate.parse("1996-01-23"))
+//                .hasFieldOrPropertyWithValue("localDateTimeValue", LocalDateTime.parse("1996-01-23T00:00:01"))
+        ;
+
+        assertThat(factorySet.type(Bean.class).build())
+                .hasFieldOrPropertyWithValue("stringValue", "stringValue2")
+//                .hasFieldOrPropertyWithValue("longValue", 2L)
+//                .hasFieldOrPropertyWithValue("intValue", 2)
+//                .hasFieldOrPropertyWithValue("shortValue", (short) 2)
+//                .hasFieldOrPropertyWithValue("byteValue", (byte) 2)
+//                .hasFieldOrPropertyWithValue("doubleValue", (double) 2)
+//                .hasFieldOrPropertyWithValue("floatValue", (float) 2)
+//                .hasFieldOrPropertyWithValue("booleanValue", true)
+//                .hasFieldOrPropertyWithValue("boxedLongValue", 2L)
+//                .hasFieldOrPropertyWithValue("boxedIntValue", 2)
+//                .hasFieldOrPropertyWithValue("boxedShortValue", (short) 2)
+//                .hasFieldOrPropertyWithValue("boxedByteValue", (byte) 2)
+//                .hasFieldOrPropertyWithValue("boxedDoubleValue", (double) 2)
+//                .hasFieldOrPropertyWithValue("boxedFloatValue", (float) 2)
+//                .hasFieldOrPropertyWithValue("boxedBooleanValue", false)
+//                .hasFieldOrPropertyWithValue("bigIntegerValue", new BigInteger("2"))
+//                .hasFieldOrPropertyWithValue("bigDecimalValue", new BigDecimal("2"))
+//                .hasFieldOrPropertyWithValue("uuidValue", UUID.fromString("00000000-0000-0000-0000-000000000002"))
+//                .hasFieldOrPropertyWithValue("instantValue", Instant.parse("1996-01-23T00:00:02Z"))
+//                .hasFieldOrPropertyWithValue("dateValue", new SimpleDateFormat("yyyy-MM-dd").parse("1996-01-24"))
+//                .hasFieldOrPropertyWithValue("localTimeValue", LocalTime.parse("00:00:02"))
+//                .hasFieldOrPropertyWithValue("localDateValue", LocalDate.parse("1996-01-24"))
+//                .hasFieldOrPropertyWithValue("localDateTimeValue", LocalDateTime.parse("1996-01-23T00:00:02"))
+        ;
     }
 }
