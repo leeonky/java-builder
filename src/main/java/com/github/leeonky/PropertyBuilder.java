@@ -67,6 +67,7 @@ public class PropertyBuilder {
         return m.getName().startsWith("set") && m.getParameterTypes().length == 1;
     }
 
+    @SuppressWarnings("unchecked")
     private <T> void buildAndAssign(Method method, int sequence, T object) {
         setters.stream()
                 .filter(s -> s.isPreciseType(method.getParameterTypes()[0]))

@@ -4,8 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -168,7 +167,7 @@ class FactorySetTest {
     }
 
     @Test
-    void default_build() throws ParseException {
+    void default_build() {
         assertThat(factorySet.type(Bean.class).build())
                 .hasFieldOrPropertyWithValue("stringValue", "stringValue1")
                 .hasFieldOrPropertyWithValue("longValue", 1L)
@@ -189,7 +188,7 @@ class FactorySetTest {
                 .hasFieldOrPropertyWithValue("bigDecimalValue", new BigDecimal("1"))
                 .hasFieldOrPropertyWithValue("uuidValue", UUID.fromString("00000000-0000-0000-0000-000000000001"))
                 .hasFieldOrPropertyWithValue("instantValue", Instant.parse("1996-01-23T00:00:01Z"))
-                .hasFieldOrPropertyWithValue("dateValue", new SimpleDateFormat("yyyy-MM-dd").parse("1996-01-23"))
+                .hasFieldOrPropertyWithValue("dateValue", Date.from(Instant.parse("1996-01-23T00:00:00Z")))
                 .hasFieldOrPropertyWithValue("localTimeValue", LocalTime.parse("00:00:01"))
                 .hasFieldOrPropertyWithValue("localDateValue", LocalDate.parse("1996-01-23"))
                 .hasFieldOrPropertyWithValue("localDateTimeValue", LocalDateTime.parse("1996-01-23T00:00:01"))
@@ -215,7 +214,7 @@ class FactorySetTest {
                 .hasFieldOrPropertyWithValue("bigDecimalValue", new BigDecimal("2"))
                 .hasFieldOrPropertyWithValue("uuidValue", UUID.fromString("00000000-0000-0000-0000-000000000002"))
                 .hasFieldOrPropertyWithValue("instantValue", Instant.parse("1996-01-23T00:00:02Z"))
-                .hasFieldOrPropertyWithValue("dateValue", new SimpleDateFormat("yyyy-MM-dd").parse("1996-01-24"))
+                .hasFieldOrPropertyWithValue("dateValue", Date.from(Instant.parse("1996-01-24T00:00:00Z")))
                 .hasFieldOrPropertyWithValue("localTimeValue", LocalTime.parse("00:00:02"))
                 .hasFieldOrPropertyWithValue("localDateValue", LocalDate.parse("1996-01-24"))
                 .hasFieldOrPropertyWithValue("localDateTimeValue", LocalDateTime.parse("1996-01-23T00:00:02"))
