@@ -70,7 +70,14 @@ public class Converter {
                 })
                 .addTypeConverter(String.class, LocalTime.class, LocalTime::parse)
                 .addTypeConverter(String.class, LocalDate.class, LocalDate::parse)
-                .addTypeConverter(String.class, LocalDateTime.class, LocalDateTime::parse);
+                .addTypeConverter(String.class, LocalDateTime.class, LocalDateTime::parse)
+                .addTypeConverter(Long.class, BigDecimal.class, BigDecimal::new)
+                .addTypeConverter(Integer.class, BigDecimal.class, BigDecimal::new)
+                .addTypeConverter(Short.class, BigDecimal.class, BigDecimal::new)
+                .addTypeConverter(Byte.class, BigDecimal.class, BigDecimal::new)
+                .addTypeConverter(Float.class, BigDecimal.class, BigDecimal::new)
+                .addTypeConverter(Double.class, BigDecimal.class, BigDecimal::new)
+                ;
     }
 
     @SuppressWarnings("unchecked")

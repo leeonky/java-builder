@@ -4,7 +4,17 @@ import lombok.Getter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.UUID;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
@@ -122,6 +132,58 @@ class ConverterTest {
             converter.addEnumConverter(Integer.class, Enum.class, (c, i) -> ValueEnums.E2);
 
             assertThat(converter.tryConvert(ValueEnums.class, 1)).isEqualTo(ValueEnums.E2);
+        }
+    }
+
+    @Nested
+    class DefaultConvert {
+        Converter converter = Converter.createDefaultConverter();
+
+        @Test
+        void parse_string() throws ParseException {
+            assertConvert(long.class, "100", 100L);
+            assertConvert(int.class, "100", 100);
+            assertConvert(short.class, "100", (short) 100);
+            assertConvert(byte.class, "100", (byte) 100);
+            assertConvert(float.class, "100", (float) 100);
+            assertConvert(double.class, "100", (double) 100);
+            assertConvert(boolean.class, "true", true);
+
+            assertConvert(Long.class, "100", 100L);
+            assertConvert(Integer.class, "100", 100);
+            assertConvert(Short.class, "100", (short) 100);
+            assertConvert(Byte.class, "100", (byte) 100);
+            assertConvert(Float.class, "100", (float) 100);
+            assertConvert(Double.class, "100", (double) 100);
+            assertConvert(Boolean.class, "true", true);
+
+            assertConvert(BigDecimal.class, "100", BigDecimal.valueOf(100));
+            assertConvert(BigInteger.class, "100", BigInteger.valueOf(100));
+
+            assertConvert(UUID.class, "123e4567-e89b-12d3-a456-426655440000", UUID.fromString("123e4567-e89b-12d3-a456-426655440000"));
+            assertConvert(Instant.class, "2001-10-12T12:00:01.123Z", Instant.parse("2001-10-12T12:00:01.123Z"));
+            assertConvert(Date.class, "2001-10-12", new SimpleDateFormat("yyyy-MM-dd").parse("2001-10-12"));
+            assertConvert(LocalTime.class, "00:00:01", LocalTime.parse("00:00:01"));
+            assertConvert(LocalDate.class, "1996-01-24", LocalDate.parse("1996-01-24"));
+            assertConvert(LocalDateTime.class, "1996-01-23T00:00:01", LocalDateTime.parse("1996-01-23T00:00:01"));
+        }
+
+        private void assertConvert(Class<?> type, Object value, Object toValue) {
+            assertThat(converter.tryConvert(type, value)).isEqualTo(toValue);
+        }
+
+        @Nested
+        class NumberConvert {
+
+            @Test
+            void to_big_decimal() {
+                assertConvert(BigDecimal.class, 100L, BigDecimal.valueOf(100));
+                assertConvert(BigDecimal.class, 100, BigDecimal.valueOf(100));
+                assertConvert(BigDecimal.class, (short) 100, BigDecimal.valueOf(100));
+                assertConvert(BigDecimal.class, (byte) 100, BigDecimal.valueOf(100));
+                assertConvert(BigDecimal.class, (float) 100, BigDecimal.valueOf(100));
+                assertConvert(BigDecimal.class, (double) 100, BigDecimal.valueOf(100));
+            }
         }
     }
 }
