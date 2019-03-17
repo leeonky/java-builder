@@ -25,14 +25,14 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
-    public Builder<T> params(Map<String, Object> params) {
+    public Builder<T> params(Map<String, ?> params) {
         DefaultBuilder<T> builder = copy();
         builder.params.putAll(params);
         return builder;
     }
 
     @Override
-    public Builder<T> properties(Map<String, Object> properties) {
+    public Builder<T> properties(Map<String, ?> properties) {
         DefaultBuilder<T> builder = copy();
         builder.properties.putAll(properties);
         return builder;

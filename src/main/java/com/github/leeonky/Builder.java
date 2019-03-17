@@ -5,9 +5,9 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public interface Builder<T> {
-    Builder<T> params(Map<String, Object> params);
+    Builder<T> params(Map<String, ?> params);
 
-    Builder<T> properties(Map<String, Object> properties);
+    Builder<T> properties(Map<String, ?> properties);
 
     T build();
 
