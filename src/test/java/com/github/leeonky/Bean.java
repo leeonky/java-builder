@@ -47,6 +47,12 @@ class Bean {
 
     private Bean beanValue;
 
+    private Enums enumValue;
+
+    public enum Enums {
+        A, B
+    }
+
     static class SubBean extends Bean {
 
     }

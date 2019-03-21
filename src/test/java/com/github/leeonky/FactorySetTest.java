@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.Bean.Enums.A;
+import static com.github.leeonky.Bean.Enums.B;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -192,7 +194,7 @@ class FactorySetTest {
                 .hasFieldOrPropertyWithValue("localTimeValue", LocalTime.parse("00:00:01"))
                 .hasFieldOrPropertyWithValue("localDateValue", LocalDate.parse("1996-01-23"))
                 .hasFieldOrPropertyWithValue("localDateTimeValue", LocalDateTime.parse("1996-01-23T00:00:01"))
-        ;
+                .hasFieldOrPropertyWithValue("enumValue", A);
 
         assertThat(factorySet.type(Bean.class).build())
                 .hasFieldOrPropertyWithValue("stringValue", "stringValue2")
@@ -218,6 +220,6 @@ class FactorySetTest {
                 .hasFieldOrPropertyWithValue("localTimeValue", LocalTime.parse("00:00:02"))
                 .hasFieldOrPropertyWithValue("localDateValue", LocalDate.parse("1996-01-24"))
                 .hasFieldOrPropertyWithValue("localDateTimeValue", LocalDateTime.parse("1996-01-23T00:00:02"))
-        ;
+                .hasFieldOrPropertyWithValue("enumValue", B);
     }
 }

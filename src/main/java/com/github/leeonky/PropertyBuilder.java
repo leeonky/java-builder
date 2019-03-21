@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static java.util.stream.Stream.of;
 
@@ -48,7 +49,10 @@ public class PropertyBuilder {
                 .addPropertyBuilder(LocalTime.class, (c, p, i) -> LOCAL_TIME_START.plusSeconds(i))
                 .addPropertyBuilder(LocalDate.class, (c, p, i) -> LocalDate.parse("1996-01-23").plusDays(i - 1))
                 .addPropertyBuilder(LocalDateTime.class, (c, p, i) -> LocalDateTime.parse("1996-01-23T00:00:00").plusSeconds(i))
-                ;
+                .addPropertyBuilder(Enum.class, (c, p, i) -> {
+                    Enum[] enums = c.getEnumConstants();
+                    return enums[(i - 1) % enums.length];
+                });
     }
 
     public <T> PropertyBuilder addPropertyBuilder(Class<T> type, TriFunction<Class<T>, String, Integer, T> builder) {
@@ -69,8 +73,10 @@ public class PropertyBuilder {
 
     @SuppressWarnings("unchecked")
     private <T> void buildAndAssign(Method method, int sequence, T object) {
-        setters.stream()
-                .filter(s -> s.isPreciseType(method.getParameterTypes()[0]))
+        Stream.concat(setters.stream()
+                        .filter(s -> s.isPreciseType(method.getParameterTypes()[0])),
+                setters.stream()
+                        .filter(s -> s.isBaseType(method.getParameterTypes()[0])))
                 .findFirst()
                 .ifPresent(t -> {
                     Object value = t.getConverter().apply(method.getParameterTypes()[0], toPropertyName(method), sequence);
