@@ -1,4 +1,4 @@
-package com.github.leeonky;
+package com.github.leeonky.javabuilder;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,18 +11,20 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.stream.Stream.of;
 
 public class PropertyBuilder {
+    public static final LocalDate LOCAL_DATE_START = LocalDate.parse("1996-01-23");
+    public static final LocalDateTime LOCAL_DATE_TIME_START = LocalDateTime.parse("1996-01-23T00:00:00");
     private static final LocalTime LOCAL_TIME_START = LocalTime.parse("00:00:00");
     private static final Instant INSTANT_START = Instant.parse("1996-01-23T00:00:00Z");
     private List<TypeOperator<TriFunction>> setters = new ArrayList<>();
+    private Map<Predicate<Method>, TriFunction<Method, Object, Integer, Object>> methodBuilders = new LinkedHashMap<>();
+    private List<Predicate<Method>> skipper = new ArrayList<>();
 
     public static PropertyBuilder createDefaultPropertyBuilder() {
         return new PropertyBuilder()
@@ -47,8 +49,8 @@ public class PropertyBuilder {
                 .addPropertyBuilder(Instant.class, (c, p, i) -> INSTANT_START.plusSeconds(i))
                 .addPropertyBuilder(Date.class, (c, p, i) -> Date.from(INSTANT_START.plus(i - 1, ChronoUnit.DAYS)))
                 .addPropertyBuilder(LocalTime.class, (c, p, i) -> LOCAL_TIME_START.plusSeconds(i))
-                .addPropertyBuilder(LocalDate.class, (c, p, i) -> LocalDate.parse("1996-01-23").plusDays(i - 1))
-                .addPropertyBuilder(LocalDateTime.class, (c, p, i) -> LocalDateTime.parse("1996-01-23T00:00:00").plusSeconds(i))
+                .addPropertyBuilder(LocalDate.class, (c, p, i) -> LOCAL_DATE_START.plusDays(i - 1))
+                .addPropertyBuilder(LocalDateTime.class, (c, p, i) -> LOCAL_DATE_TIME_START.plusSeconds(i))
                 .addPropertyBuilder(Enum.class, (c, p, i) -> {
                     Enum[] enums = c.getEnumConstants();
                     return enums[(i - 1) % enums.length];
@@ -60,9 +62,20 @@ public class PropertyBuilder {
         return this;
     }
 
+    public PropertyBuilder addMethodBuilder(Predicate<Method> predicate, TriFunction<Method, Object, Integer, Object> builder) {
+        methodBuilders.put(predicate, builder);
+        return this;
+    }
+
+    public PropertyBuilder addSkipMethod(Predicate<Method> predicate) {
+        skipper.add(predicate);
+        return this;
+    }
+
     public <T> T apply(int sequence, T object) {
         of(object.getClass().getMethods())
                 .filter(this::isSetter)
+                .filter(method -> !skipper.stream().anyMatch(p -> p.test(method)))
                 .forEach(m -> buildAndAssign(m, sequence, object));
         return object;
     }
@@ -73,19 +86,27 @@ public class PropertyBuilder {
 
     @SuppressWarnings("unchecked")
     private <T> void buildAndAssign(Method method, int sequence, T object) {
-        Stream.concat(setters.stream()
-                        .filter(s -> s.isPreciseType(method.getParameterTypes()[0])),
-                setters.stream()
-                        .filter(s -> s.isBaseType(method.getParameterTypes()[0])))
-                .findFirst()
-                .ifPresent(t -> {
-                    Object value = t.getConverter().apply(method.getParameterTypes()[0], toPropertyName(method), sequence);
+        Stream.concat(buildValueFromMethodBuilder(method, sequence, object),
+                buildValueFromPropertyBuilder(method, sequence)).findFirst()
+                .ifPresent(value -> {
                     try {
                         method.invoke(object, value);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         e.printStackTrace();
                     }
                 });
+    }
+
+    private <T> Stream<Object> buildValueFromMethodBuilder(Method method, int sequence, T object) {
+        return methodBuilders.entrySet().stream()
+                .filter(e -> e.getKey().test(method))
+                .map(e -> e.getValue().apply(method, object, sequence));
+    }
+
+    private Stream<Object> buildValueFromPropertyBuilder(Method method, int sequence) {
+        return Stream.concat(setters.stream().filter(s -> s.isPreciseType(method.getParameterTypes()[0])),
+                setters.stream().filter(s -> s.isBaseType(method.getParameterTypes()[0])))
+                .map(t -> t.getConverter().apply(method.getParameterTypes()[0], toPropertyName(method), sequence));
     }
 
     private String toPropertyName(Method method) {

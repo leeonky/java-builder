@@ -1,4 +1,4 @@
-package com.github.leeonky;
+package com.github.leeonky.javabuilder;
 
 import lombok.Getter;
 import org.junit.jupiter.api.Nested;

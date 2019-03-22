@@ -1,4 +1,4 @@
-package com.github.leeonky;
+package com.github.leeonky.javabuilder;
 
 import java.util.Map;
 import java.util.function.BiFunction;

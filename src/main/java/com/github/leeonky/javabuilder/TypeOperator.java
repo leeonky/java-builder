@@ -1,4 +1,4 @@
-package com.github.leeonky;
+package com.github.leeonky.javabuilder;
 
 class TypeOperator<F> {
     private final Class<?> source;

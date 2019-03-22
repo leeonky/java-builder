@@ -1,4 +1,4 @@
-package com.github.leeonky;
+package com.github.leeonky.javabuilder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,25 +6,27 @@ import java.util.function.*;
 
 public class FactorySet {
     private Map<Class, Factory> factories = new HashMap<>();
-    private Consumer<Converter> register = c -> {
+    private Consumer<Converter> converterRegister = c -> {
+    };
+    private Consumer<PropertyBuilder> propertyRegister = c -> {
     };
 
     @SuppressWarnings("unchecked")
     public <T> Builder<T> type(Class<T> type) {
-        return new DefaultBuilder<T>(queryFactory(type), register);
+        return new DefaultBuilder<T>(queryFactory(type), converterRegister);
     }
 
-    public <T> Factory queryFactory(Class<T> type, String extend) {
+    private <T> Factory queryFactory(Class<T> type, String extend) {
         return queryFactory(type).query(extend);
     }
 
-    public <T> Factory queryFactory(Class<T> type) {
-        return factories.computeIfAbsent(type, k -> new DefaultBeanFactory<>(type));
+    private <T> Factory queryFactory(Class<T> type) {
+        return factories.computeIfAbsent(type, k -> new DefaultBeanFactory<>(type, propertyRegister));
     }
 
     @SuppressWarnings("unchecked")
     public <T> Builder<T> type(Class<T> type, String extend) {
-        return new DefaultBuilder<T>(queryFactory(type, extend), register);
+        return new DefaultBuilder<T>(queryFactory(type, extend), converterRegister);
     }
 
     public <T> Factory<T> onBuild(Class<T> type, Consumer<T> consumer) {
@@ -56,7 +58,12 @@ public class FactorySet {
     }
 
     public FactorySet registerConverter(Consumer<Converter> register) {
-        this.register = register;
+        converterRegister = register;
+        return this;
+    }
+
+    public FactorySet registerPropertyBuilder(Consumer<PropertyBuilder> register) {
+        propertyRegister = register;
         return this;
     }
 }

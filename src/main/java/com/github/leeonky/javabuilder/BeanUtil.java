@@ -1,4 +1,4 @@
-package com.github.leeonky;
+package com.github.leeonky.javabuilder;
 
 import org.apache.commons.lang3.StringUtils;
 

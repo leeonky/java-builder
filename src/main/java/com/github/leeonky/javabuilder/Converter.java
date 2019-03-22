@@ -1,4 +1,4 @@
-package com.github.leeonky;
+package com.github.leeonky.javabuilder;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

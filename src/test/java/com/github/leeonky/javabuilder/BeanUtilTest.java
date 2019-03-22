@@ -1,4 +1,4 @@
-package com.github.leeonky;
+package com.github.leeonky.javabuilder;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +26,7 @@ class BeanUtilTest {
                 () -> beanUtil.assignProperties(new BeanErrorSetter(), new HashMap<String, Object>() {{
                     put("value", "Hello");
                 }}));
-        assertThat(illegalStateException).hasMessage("Got exception in 'com.github.leeonky.BeanErrorSetter::setValue(java.lang.String)', value is java.lang.String[Hello]");
+        assertThat(illegalStateException).hasMessage("Got exception in 'com.github.leeonky.javabuilder.BeanErrorSetter::setValue(java.lang.String)', value is java.lang.String[Hello]");
     }
 
     @Test
@@ -35,7 +35,7 @@ class BeanUtilTest {
                 () -> beanUtil.assignProperties(new Bean(), new HashMap<String, Object>() {{
                     put("value", "Hello");
                 }}));
-        assertThat(illegalStateException).hasMessage("No setter was found in 'com.github.leeonky.Bean' for property 'value'");
+        assertThat(illegalStateException).hasMessage("No setter was found in 'com.github.leeonky.javabuilder.Bean' for property 'value'");
     }
 
     @Test

@@ -1,4 +1,4 @@
-package com.github.leeonky;
+package com.github.leeonky.javabuilder;
 
 @FunctionalInterface
 public interface TriConsumer<T1, T2, T3> {

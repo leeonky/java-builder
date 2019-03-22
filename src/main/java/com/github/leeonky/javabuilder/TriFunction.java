@@ -1,4 +1,4 @@
-package com.github.leeonky;
+package com.github.leeonky.javabuilder;
 
 @FunctionalInterface
 public interface TriFunction<T1, T2, T3, R> {

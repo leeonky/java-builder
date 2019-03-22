@@ -1,4 +1,4 @@
-package com.github.leeonky;
+package com.github.leeonky.javabuilder;
 
 import org.junit.jupiter.api.Test;
 
@@ -13,8 +13,8 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.Bean.Enums.A;
-import static com.github.leeonky.Bean.Enums.B;
+import static com.github.leeonky.javabuilder.Bean.Enums.A;
+import static com.github.leeonky.javabuilder.Bean.Enums.B;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -149,7 +149,7 @@ class FactorySetTest {
                     .extend("extend.non-exist",
                             b -> b.setStringValue(b.getStringValue() + " world"));
         });
-        assertThat(exception).hasMessage("Factory[extend] for com.github.leeonky.Bean dose not exist");
+        assertThat(exception).hasMessage("Factory[extend] for com.github.leeonky.javabuilder.Bean dose not exist");
     }
 
     @Test
@@ -159,13 +159,13 @@ class FactorySetTest {
         });
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> factorySet.type(Bean.class, "extend"));
-        assertThat(exception).hasMessage("Factory[extend] for com.github.leeonky.Bean dose not exist");
+        assertThat(exception).hasMessage("Factory[extend] for com.github.leeonky.javabuilder.Bean dose not exist");
 
         exception = assertThrows(RuntimeException.class, () -> factorySet.type(Bean.class, "a.b"));
-        assertThat(exception).hasMessage("Factory[a.b] for com.github.leeonky.Bean dose not exist");
+        assertThat(exception).hasMessage("Factory[a.b] for com.github.leeonky.javabuilder.Bean dose not exist");
 
         exception = assertThrows(RuntimeException.class, () -> factorySet.type(Bean.class, "extend.extend2"));
-        assertThat(exception).hasMessage("Factory[extend.extend2] for com.github.leeonky.Bean dose not exist");
+        assertThat(exception).hasMessage("Factory[extend.extend2] for com.github.leeonky.javabuilder.Bean dose not exist");
     }
 
     @Test
@@ -221,5 +221,27 @@ class FactorySetTest {
                 .hasFieldOrPropertyWithValue("localDateValue", LocalDate.parse("1996-01-24"))
                 .hasFieldOrPropertyWithValue("localDateTimeValue", LocalDateTime.parse("1996-01-23T00:00:02"))
                 .hasFieldOrPropertyWithValue("enumValue", B);
+    }
+
+    @Test
+    void default_build_for_special_method() {
+        factorySet.registerPropertyBuilder(pb ->
+                pb.addMethodBuilder(m -> m.getName().equals("setIntValue"),
+                        (m, o, i) -> i + 1));
+
+        assertThat(factorySet.type(Bean.class).build())
+                .hasFieldOrPropertyWithValue("intValue", 2);
+
+        assertThat(factorySet.type(Bean.class).build())
+                .hasFieldOrPropertyWithValue("intValue", 3);
+    }
+
+    @Test
+    void default_build_for_skip_special_method() {
+        factorySet.registerPropertyBuilder(pb ->
+                pb.addSkipMethod(m -> m.getName().equals("setIntValue")));
+
+        assertThat(factorySet.type(Bean.class).build())
+                .hasFieldOrPropertyWithValue("intValue", 0);
     }
 }
