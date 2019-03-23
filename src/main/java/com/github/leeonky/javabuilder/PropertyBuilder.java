@@ -92,7 +92,7 @@ public class PropertyBuilder {
                     try {
                         method.invoke(object, value);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        e.printStackTrace();
+                        throw new IllegalStateException("Got exception in " + method.getDeclaringClass().getName() + "." + method.getName(), e);
                     }
                 });
     }
