@@ -19,12 +19,12 @@ public abstract class AbstractFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Factory<T> extend(String name, TriConsumer<T, Integer, Map<String, Object>> consumer) {
+    public Factory<T> extend(String name, TriConsumer<T, Integer, Map<String, ?>> consumer) {
         extendInner(name, consumer);
         return this;
     }
 
-    private void extendInner(String name, TriConsumer<T, Integer, Map<String, Object>> consumer) {
+    private void extendInner(String name, TriConsumer<T, Integer, Map<String, ?>> consumer) {
         String[] names = name.split("\\.", 2);
         if (names.length == 1) {
             ExtendedFactory<T> extendedFactory = new ExtendedFactory<>(this, consumer);

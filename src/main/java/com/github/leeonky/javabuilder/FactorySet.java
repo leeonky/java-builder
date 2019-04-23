@@ -37,7 +37,7 @@ public class FactorySet {
         return onBuild(type, (obj, seq, params) -> consumer.accept(obj, seq));
     }
 
-    public <T> Factory<T> onBuild(Class<T> type, TriConsumer<T, Integer, Map<String, Object>> consumer) {
+    public <T> Factory<T> onBuild(Class<T> type, TriConsumer<T, Integer, Map<String, ?>> consumer) {
         BeanFactory<T> beanFactory = new BeanFactory<>(type, consumer);
         factories.put(type, beanFactory);
         return beanFactory;
@@ -51,7 +51,7 @@ public class FactorySet {
         return register(type, (seq, params) -> supplier.apply(seq));
     }
 
-    public <T> Factory<T> register(Class<T> type, BiFunction<Integer, Map<String, Object>, T> supplier) {
+    public <T> Factory<T> register(Class<T> type, BiFunction<Integer, Map<String, ?>, T> supplier) {
         ObjectFactory<T> objectFactory = new ObjectFactory<>(type, supplier);
         factories.put(type, objectFactory);
         return objectFactory;

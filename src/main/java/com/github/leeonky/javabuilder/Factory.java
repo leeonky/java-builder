@@ -9,9 +9,9 @@ public interface Factory<T> {
 
     int getSequence();
 
-    T createObject(int sequence, Map<String, Object> params);
+    T createObject(int sequence, Map<String, ?> params);
 
-    Factory<T> extend(String name, TriConsumer<T, Integer, Map<String, Object>> consumer);
+    Factory<T> extend(String name, TriConsumer<T, Integer, Map<String, ?>> consumer);
 
     Factory query(String extend);
 

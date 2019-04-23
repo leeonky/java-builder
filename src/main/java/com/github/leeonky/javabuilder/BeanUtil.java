@@ -15,14 +15,14 @@ public class BeanUtil {
         return converter;
     }
 
-    public <T> T assignProperties(T object, Map<String, Object> properties) {
+    public <T> T assignProperties(T object, Map<String, ?> properties) {
         properties.entrySet().stream()
                 .filter(e -> e.getValue() != null)
                 .forEach(e -> assignProperty(object, e));
         return object;
     }
 
-    private void assignProperty(Object object, Map.Entry<String, Object> e) {
+    private void assignProperty(Object object, Map.Entry<String, ?> e) {
         Method method = getMethod(object, e.getKey());
         Class<?> valueType = method.getParameterTypes()[0];
         Object value = e.getValue();

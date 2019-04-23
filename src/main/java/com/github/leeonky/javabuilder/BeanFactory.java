@@ -5,10 +5,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 class BeanFactory<T> extends AbstractFactory<T> {
-    private final TriConsumer<T, Integer, Map<String, Object>> consumer;
+    private final TriConsumer<T, Integer, Map<String, ?>> consumer;
     private final Constructor<T> constructor;
 
-    BeanFactory(Class<T> type, TriConsumer<T, Integer, Map<String, Object>> consumer) {
+    BeanFactory(Class<T> type, TriConsumer<T, Integer, Map<String, ?>> consumer) {
         super(type);
         try {
             constructor = type.getDeclaredConstructor();
@@ -19,7 +19,7 @@ class BeanFactory<T> extends AbstractFactory<T> {
     }
 
     @Override
-    public T createObject(int sequence, Map<String, Object> params) {
+    public T createObject(int sequence, Map<String, ?> params) {
         T instance;
         try {
             instance = constructor.newInstance();

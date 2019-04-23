@@ -4,9 +4,9 @@ import java.util.Map;
 
 class ExtendedFactory<T> extends AbstractFactory<T> {
     private final Factory<T> parent;
-    private final TriConsumer<T, Integer, Map<String, Object>> consumer;
+    private final TriConsumer<T, Integer, Map<String, ?>> consumer;
 
-    ExtendedFactory(Factory<T> parent, TriConsumer<T, Integer, Map<String, Object>> consumer) {
+    ExtendedFactory(Factory<T> parent, TriConsumer<T, Integer, Map<String, ?>> consumer) {
         super(null);
         this.parent = parent;
         this.consumer = consumer;
@@ -23,7 +23,7 @@ class ExtendedFactory<T> extends AbstractFactory<T> {
     }
 
     @Override
-    public T createObject(int sequence, Map<String, Object> params) {
+    public T createObject(int sequence, Map<String, ?> params) {
         T object = parent.createObject(sequence, params);
         consumer.accept(object, sequence, params);
         return object;
