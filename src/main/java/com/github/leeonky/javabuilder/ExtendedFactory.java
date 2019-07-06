@@ -7,7 +7,7 @@ class ExtendedFactory<T> extends AbstractFactory<T> {
     private final TriConsumer<T, Integer, Map<String, ?>> consumer;
 
     ExtendedFactory(Factory<T> parent, TriConsumer<T, Integer, Map<String, ?>> consumer) {
-        super(null);
+        super(parent.getType());
         this.parent = parent;
         this.consumer = consumer;
     }
@@ -27,5 +27,10 @@ class ExtendedFactory<T> extends AbstractFactory<T> {
         T object = parent.createObject(sequence, params);
         consumer.accept(object, sequence, params);
         return object;
+    }
+
+    @Override
+    public Factory<T> getRoot() {
+        return parent.getRoot();
     }
 }

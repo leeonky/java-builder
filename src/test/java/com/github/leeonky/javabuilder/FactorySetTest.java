@@ -130,26 +130,26 @@ class FactorySetTest {
         factorySet.onBuild(Bean.class, b -> b.setStringValue("Hello"))
                 .extend("extend",
                         b -> b.setStringValue(b.getStringValue() + " world"))
-                .extend("extend.extend2",
+                .extend("extend2",
                         (b, i) -> b.setStringValue(b.getStringValue() + " again " + i))
-                .extend("extend.extend2.extend3",
+                .extend("extend3",
                         (b, i, p) -> b.setStringValue(b.getStringValue() + " and again " + p.get("name")));
 
         assertThat(factorySet.type(Bean.class, "extend").build().getStringValue()).isEqualTo("Hello world");
-        assertThat(factorySet.type(Bean.class, "extend.extend2").build().getStringValue()).isEqualTo("Hello world again 2");
-        assertThat(factorySet.type(Bean.class, "extend.extend2.extend3").params(new HashMap<String, Object>() {{
+        assertThat(factorySet.type(Bean.class, "extend2").build().getStringValue()).isEqualTo("Hello world again 2");
+        assertThat(factorySet.type(Bean.class, "extend3").params(new HashMap<String, Object>() {{
             put("name", "tom");
         }}).build().getStringValue()).isEqualTo("Hello world again 3 and again tom");
     }
 
     @Test
-    void extend_from_non_exist_factory() {
+    void should_raise_error_when_duplicated_extend() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            factorySet.onBuild(Bean.class, b -> b.setStringValue("Hello"))
-                    .extend("extend.non-exist",
-                            b -> b.setStringValue(b.getStringValue() + " world"));
+            factorySet.factory(Bean.class)
+                    .extend("extend", b -> b.setStringValue(b.getStringValue() + " world"))
+                    .extend("extend", b -> b.setStringValue(b.getStringValue() + " world"));
         });
-        assertThat(exception).hasMessage("Factory[extend] for com.github.leeonky.javabuilder.Bean dose not exist");
+        assertThat(exception).hasMessage("Duplicated factory name[extend] for com.github.leeonky.javabuilder.Bean");
     }
 
     @Test

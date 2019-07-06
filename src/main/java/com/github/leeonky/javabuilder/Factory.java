@@ -13,7 +13,7 @@ public interface Factory<T> {
 
     Factory<T> extend(String name, TriConsumer<T, Integer, Map<String, ?>> consumer);
 
-    Factory query(String extend);
+    Factory<T> query(String extend);
 
     default Factory<T> extend(String name, BiConsumer<T, Integer> consumer) {
         return extend(name, (o, i, p) -> consumer.accept(o, i));
@@ -21,5 +21,9 @@ public interface Factory<T> {
 
     default Factory<T> extend(String name, Consumer<T> consumer) {
         return extend(name, (o, i, p) -> consumer.accept(o));
+    }
+
+    default Factory<T> getRoot() {
+        return this;
     }
 }
