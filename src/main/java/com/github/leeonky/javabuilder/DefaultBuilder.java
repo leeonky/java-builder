@@ -39,6 +39,13 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
+    public Builder<T> property(String name, Object value) {
+        Map<String, Object> map = new HashMap<>();
+        map.put(name, value);
+        return properties(map);
+    }
+
+    @Override
     public T build() {
         return beanUtil.assignProperties(factory.createObject(factory.getSequence(), params), properties);
     }

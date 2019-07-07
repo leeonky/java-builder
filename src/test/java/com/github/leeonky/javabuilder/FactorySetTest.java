@@ -31,6 +31,12 @@ class FactorySetTest {
     }
 
     @Test
+    void support_simple_property_build() {
+        assertThat(factorySet.type(Bean.class).property("stringValue", "Hello").build())
+                .hasFieldOrPropertyWithValue("stringValue", "Hello");
+    }
+
+    @Test
     void should_raise_error_when_no_default_constructor() {
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> factorySet.onBuild(BeanWithNoDefaultConstructor.class, bean -> {
         }));
