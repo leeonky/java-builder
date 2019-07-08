@@ -42,7 +42,7 @@ public abstract class AbstractFactory<T> implements Factory<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public void queryAll(String extend, List<Factory<T>> result) {
+    private void queryAll(String extend, List<Factory<T>> result) {
         Factory factory = subFactories.get(extend);
         if (factory != null)
             result.add(factory);

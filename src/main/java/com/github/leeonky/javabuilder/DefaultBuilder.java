@@ -1,13 +1,12 @@
 package com.github.leeonky.javabuilder;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 class DefaultBuilder<T> implements Builder<T> {
     private final Factory<T> factory;
     private final Consumer<Converter> register;
+    private List<T> dataRepo = new ArrayList<>();
     private Map<String, Object> params = new HashMap<>();
     private Map<String, Object> properties = new HashMap<>();
     private BeanUtil beanUtil = new BeanUtil();
@@ -20,6 +19,7 @@ class DefaultBuilder<T> implements Builder<T> {
 
     private DefaultBuilder<T> copy() {
         DefaultBuilder<T> newBuilder = new DefaultBuilder<>(factory, register);
+        newBuilder.dataRepo = dataRepo;
         newBuilder.params.putAll(params);
         return newBuilder;
     }
@@ -46,7 +46,34 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
+    public void clearRepository() {
+        dataRepo.clear();
+    }
+
+    @Override
     public T build() {
-        return beanUtil.assignProperties(factory.createObject(factory.getSequence(), params), properties);
+        T object = factory.createObject(factory.getSequence(), params);
+        dataRepo.add(object);
+        return beanUtil.assignProperties(object, properties);
+    }
+
+    @Override
+    public T query() {
+        return dataRepo.stream()
+                .filter(this::isCandidate)
+                .findFirst().orElse(null);
+    }
+
+    private boolean isCandidate(Object o) {
+        Class<?> type = o.getClass();
+        return !properties.entrySet().stream().anyMatch(e -> {
+            try {
+                return !Objects.equals(BeanUtil.getPropertyValue(o, e.getKey()),
+                        beanUtil.getConverter().tryConvert(
+                                BeanUtil.getGetter(type, e.getKey()).getReturnType(), e.getValue()));
+            } catch (Exception ex) {
+                throw new IllegalStateException(ex);
+            }
+        });
     }
 }

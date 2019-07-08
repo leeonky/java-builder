@@ -14,4 +14,10 @@ public interface Builder<T> {
     default Stream<T> build(int count) {
         return IntStream.range(0, count).mapToObj(i -> build());
     }
+
+    T query();
+
+    Builder<T> property(String name, Object value);
+
+    void clearRepository();
 }

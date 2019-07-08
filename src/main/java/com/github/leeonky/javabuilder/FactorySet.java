@@ -11,8 +11,12 @@ public class FactorySet {
     private Consumer<PropertyBuilder> propertyRegister = c -> {
     };
 
+    private Map<Class, Map<String, Builder>> cacheBuilders = new HashMap<>();
+
+    @SuppressWarnings("unchecked")
     public <T> Builder<T> type(Class<T> type) {
-        return new DefaultBuilder<>(factory(type), converterRegister);
+        return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
+                .computeIfAbsent(null, s -> new DefaultBuilder<>(factory(type), converterRegister));
     }
 
     public <T> Factory<T> factory(Class<T> type, String extend) {
@@ -24,8 +28,10 @@ public class FactorySet {
         return factories.computeIfAbsent(type, k -> new DefaultBeanFactory<>(type, propertyRegister));
     }
 
+    @SuppressWarnings("unchecked")
     public <T> Builder<T> type(Class<T> type, String extend) {
-        return new DefaultBuilder<>(factory(type, extend), converterRegister);
+        return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
+                .computeIfAbsent(extend, s -> new DefaultBuilder<>(factory(type, extend), converterRegister));
     }
 
     public <T> Factory<T> onBuild(Class<T> type, Consumer<T> consumer) {
@@ -64,5 +70,9 @@ public class FactorySet {
     public FactorySet registerPropertyBuilder(Consumer<PropertyBuilder> register) {
         propertyRegister = register;
         return this;
+    }
+
+    public void clearRepository() {
+        cacheBuilders.values().forEach(m -> m.values().forEach(Builder::clearRepository));
     }
 }
