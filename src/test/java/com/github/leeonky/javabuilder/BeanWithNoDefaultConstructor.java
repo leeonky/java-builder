@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain = true)
-class BeanWithNoDefaultConstructor {
+public class BeanWithNoDefaultConstructor {
     private final int intValue;
     private String stringValue;
 

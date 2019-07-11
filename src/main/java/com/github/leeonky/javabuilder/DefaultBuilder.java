@@ -1,20 +1,26 @@
 package com.github.leeonky.javabuilder;
 
+import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.PropertyReader;
+import com.github.leeonky.util.PropertyWriter;
+
 import java.util.*;
 import java.util.function.Consumer;
 
 class DefaultBuilder<T> implements Builder<T> {
     private final Factory<T> factory;
     private final Consumer<Converter> register;
+    private final BeanClass<T> beanClass;
+    private final Converter converter = Converter.createDefaultConverter();
     private List<T> dataRepo = new ArrayList<>();
     private Map<String, Object> params = new HashMap<>();
     private Map<String, Object> properties = new HashMap<>();
-    private BeanUtil beanUtil = new BeanUtil();
 
-    public DefaultBuilder(Factory<T> factory, Consumer<Converter> register) {
+    DefaultBuilder(Factory<T> factory, Consumer<Converter> register) {
         this.factory = Objects.requireNonNull(factory);
         this.register = register;
-        register.accept(beanUtil.getConverter());
+        beanClass = new BeanClass<>(factory.getType());
+        register.accept(converter);
     }
 
     private DefaultBuilder<T> copy() {
@@ -54,7 +60,11 @@ class DefaultBuilder<T> implements Builder<T> {
     public T build() {
         T object = factory.createObject(factory.getSequence(), params);
         dataRepo.add(object);
-        return beanUtil.assignProperties(object, properties);
+        properties.forEach((k, v) -> {
+            PropertyWriter<T> propertyWriter = beanClass.getPropertyWriter(k);
+            propertyWriter.setValue(object, converter.tryConvert(propertyWriter.getPropertyType(), v));
+        });
+        return object;
     }
 
     @Override
@@ -64,16 +74,11 @@ class DefaultBuilder<T> implements Builder<T> {
                 .findFirst().orElse(null);
     }
 
-    private boolean isCandidate(Object o) {
-        Class<?> type = o.getClass();
-        return !properties.entrySet().stream().anyMatch(e -> {
-            try {
-                return !Objects.equals(BeanUtil.getPropertyValue(o, e.getKey()),
-                        beanUtil.getConverter().tryConvert(
-                                BeanUtil.getGetter(type, e.getKey()).getReturnType(), e.getValue()));
-            } catch (Exception ex) {
-                throw new IllegalStateException(ex);
-            }
+    private boolean isCandidate(T o) {
+        return properties.entrySet().stream().noneMatch(e -> {
+            PropertyReader<T> propertyReader = beanClass.getPropertyReader(e.getKey());
+            return !Objects.equals(propertyReader.getValue(o),
+                    converter.tryConvert(propertyReader.getPropertyType(), e.getValue()));
         });
     }
 }

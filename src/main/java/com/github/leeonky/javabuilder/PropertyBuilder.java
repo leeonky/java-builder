@@ -84,7 +84,6 @@ public class PropertyBuilder {
         return m.getName().startsWith("set") && m.getParameterTypes().length == 1;
     }
 
-    @SuppressWarnings("unchecked")
     private <T> void buildAndAssign(Method method, int sequence, T object) {
         Stream.concat(buildValueFromMethodBuilder(method, sequence, object),
                 buildValueFromPropertyBuilder(method, sequence)).findFirst()
@@ -103,6 +102,7 @@ public class PropertyBuilder {
                 .map(e -> e.getValue().apply(method, object, sequence));
     }
 
+    @SuppressWarnings("unchecked")
     private Stream<Object> buildValueFromPropertyBuilder(Method method, int sequence) {
         return Stream.concat(setters.stream().filter(s -> s.isPreciseType(method.getParameterTypes()[0])),
                 setters.stream().filter(s -> s.isBaseType(method.getParameterTypes()[0])))

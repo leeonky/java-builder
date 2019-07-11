@@ -16,7 +16,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Accessors(chain = true)
-class Bean {
+public class Bean {
     private String stringValue;
     private long longValue;
     private int intValue;

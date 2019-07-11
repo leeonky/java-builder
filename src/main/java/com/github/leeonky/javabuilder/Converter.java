@@ -80,7 +80,6 @@ public class Converter {
                 ;
     }
 
-    @SuppressWarnings("unchecked")
     public <T, R> Converter addTypeConverter(Class<T> source, Class<R> target, Function<T, R> converter) {
         typeConverters.computeIfAbsent(target, k -> new ArrayList<>())
                 .add(new TypeOperator<>(boxedClass(source), converter));
@@ -115,7 +114,6 @@ public class Converter {
                 .findFirst().orElse(emptyList());
     }
 
-    @SuppressWarnings("unchecked")
     public <E, V> Converter addEnumConverter(Class<V> source, Class<E> target, BiFunction<Class<E>, V, E> converter) {
         enumConverters.computeIfAbsent(target, k -> new ArrayList<>())
                 .add(new TypeOperator<>(boxedClass(source), converter));

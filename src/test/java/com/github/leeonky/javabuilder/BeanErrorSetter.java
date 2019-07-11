@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain = true)
-class BeanErrorSetter {
+public class BeanErrorSetter {
     private String value;
 
     public void setValue(String v) {

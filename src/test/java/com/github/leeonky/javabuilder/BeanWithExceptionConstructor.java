@@ -1,6 +1,6 @@
 package com.github.leeonky.javabuilder;
 
-class BeanWithExceptionConstructor {
+public class BeanWithExceptionConstructor {
     BeanWithExceptionConstructor() throws Exception {
         throw new Exception("");
     }
