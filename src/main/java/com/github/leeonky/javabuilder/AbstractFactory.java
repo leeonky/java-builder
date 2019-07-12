@@ -1,18 +1,20 @@
 package com.github.leeonky.javabuilder;
 
+import com.github.leeonky.util.BeanClass;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractFactory<T> implements Factory<T> {
-    private final Class<T> type;
+    private final BeanClass<T> beanClass;
     private Map<String, Factory> subFactories = new HashMap<>();
 
     private int sequence = 0;
 
     public AbstractFactory(Class<T> type) {
-        this.type = type;
+        beanClass = new BeanClass<>(type);
     }
 
     @Override
@@ -24,7 +26,7 @@ public abstract class AbstractFactory<T> implements Factory<T> {
     public Factory<T> extend(String name, TriConsumer<T, Integer, Map<String, ?>> consumer) {
         try {
             getRoot().query(name);
-            throw new IllegalArgumentException("Duplicated factory name[" + name + "] for " + type.getName());
+            throw new IllegalArgumentException("Duplicated factory name[" + name + "] for " + beanClass.getName());
         } catch (NoFactoryException ignore) {
             ExtendedFactory<T> extendedFactory = new ExtendedFactory<>(this, consumer);
             subFactories.put(name, extendedFactory);
@@ -37,7 +39,7 @@ public abstract class AbstractFactory<T> implements Factory<T> {
         List<Factory<T>> result = new ArrayList<>();
         queryAll(extend, result);
         if (result.size() == 0)
-            throw new NoFactoryException(extend, type);
+            throw new NoFactoryException(extend, beanClass.getType());
         return result.get(0);
     }
 
@@ -50,8 +52,8 @@ public abstract class AbstractFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Class<T> getType() {
-        return type;
+    public BeanClass<T> getBeanClass() {
+        return beanClass;
     }
 
     static class NoFactoryException extends RuntimeException {

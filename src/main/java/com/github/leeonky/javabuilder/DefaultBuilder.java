@@ -1,8 +1,7 @@
 package com.github.leeonky.javabuilder;
 
-import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Converter;
 import com.github.leeonky.util.PropertyReader;
-import com.github.leeonky.util.PropertyWriter;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -10,8 +9,6 @@ import java.util.function.Consumer;
 class DefaultBuilder<T> implements Builder<T> {
     private final Factory<T> factory;
     private final Consumer<Converter> register;
-    private final BeanClass<T> beanClass;
-    private final Converter converter = Converter.createDefaultConverter();
     private List<T> dataRepo = new ArrayList<>();
     private Map<String, Object> params = new HashMap<>();
     private Map<String, Object> properties = new HashMap<>();
@@ -19,8 +16,7 @@ class DefaultBuilder<T> implements Builder<T> {
     DefaultBuilder(Factory<T> factory, Consumer<Converter> register) {
         this.factory = Objects.requireNonNull(factory);
         this.register = register;
-        beanClass = new BeanClass<>(factory.getType());
-        register.accept(converter);
+        register.accept(factory.getBeanClass().getConverter());
     }
 
     private DefaultBuilder<T> copy() {
@@ -60,10 +56,7 @@ class DefaultBuilder<T> implements Builder<T> {
     public T build() {
         T object = factory.createObject(factory.getSequence(), params);
         dataRepo.add(object);
-        properties.forEach((k, v) -> {
-            PropertyWriter<T> propertyWriter = beanClass.getPropertyWriter(k);
-            propertyWriter.setValue(object, converter.tryConvert(propertyWriter.getPropertyType(), v));
-        });
+        properties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(object, k, v));
         return object;
     }
 
@@ -76,9 +69,8 @@ class DefaultBuilder<T> implements Builder<T> {
 
     private boolean isCandidate(T o) {
         return properties.entrySet().stream().noneMatch(e -> {
-            PropertyReader<T> propertyReader = beanClass.getPropertyReader(e.getKey());
-            return !Objects.equals(propertyReader.getValue(o),
-                    converter.tryConvert(propertyReader.getPropertyType(), e.getValue()));
+            PropertyReader<T> propertyReader = factory.getBeanClass().getPropertyReader(e.getKey());
+            return !Objects.equals(propertyReader.getValue(o), propertyReader.tryConvert(e.getValue()));
         });
     }
 }

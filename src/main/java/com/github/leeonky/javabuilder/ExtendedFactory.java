@@ -7,7 +7,7 @@ class ExtendedFactory<T> extends AbstractFactory<T> {
     private final TriConsumer<T, Integer, Map<String, ?>> consumer;
 
     ExtendedFactory(Factory<T> parent, TriConsumer<T, Integer, Map<String, ?>> consumer) {
-        super(parent.getType());
+        super(parent.getBeanClass().getType());
         this.parent = parent;
         this.consumer = consumer;
     }
@@ -15,11 +15,6 @@ class ExtendedFactory<T> extends AbstractFactory<T> {
     @Override
     public int getSequence() {
         return parent.getSequence();
-    }
-
-    @Override
-    public Class<T> getType() {
-        return parent.getType();
     }
 
     @Override

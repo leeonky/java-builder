@@ -234,7 +234,7 @@ class FactorySetTest {
     @Test
     void default_build_for_special_method() {
         factorySet.registerPropertyBuilder(pb ->
-                pb.addMethodBuilder(m -> m.getName().equals("setIntValue"),
+                pb.registerFromProperty(m -> m.getName().equals("intValue"),
                         (m, o, i) -> i + 1));
 
         assertThat(factorySet.type(Bean.class).build())
@@ -247,7 +247,7 @@ class FactorySetTest {
     @Test
     void default_build_for_skip_special_method() {
         factorySet.registerPropertyBuilder(pb ->
-                pb.addSkipMethod(m -> m.getName().equals("setIntValue")));
+                pb.skipProperty(m -> m.getName().equals("intValue")));
 
         assertThat(factorySet.type(Bean.class).build())
                 .hasFieldOrPropertyWithValue("intValue", 0);

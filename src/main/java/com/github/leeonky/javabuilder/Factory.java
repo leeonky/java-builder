@@ -1,11 +1,13 @@
 package com.github.leeonky.javabuilder;
 
+import com.github.leeonky.util.BeanClass;
+
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public interface Factory<T> {
-    Class<T> getType();
+    BeanClass<T> getBeanClass();
 
     int getSequence();
 
