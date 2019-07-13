@@ -9,12 +9,14 @@ import java.util.Map;
 
 public abstract class AbstractFactory<T> implements Factory<T> {
     private final BeanClass<T> beanClass;
+    private final FactoryConfiguration factoryConfiguration;
     private Map<String, Factory> subFactories = new HashMap<>();
 
     private int sequence = 0;
 
-    public AbstractFactory(Class<T> type) {
-        beanClass = new BeanClass<>(type);
+    public AbstractFactory(Class<T> type, FactoryConfiguration factoryConfiguration) {
+        this.factoryConfiguration = factoryConfiguration;
+        beanClass = new BeanClass<>(type, factoryConfiguration.getConverter());
     }
 
     @Override
@@ -28,7 +30,7 @@ public abstract class AbstractFactory<T> implements Factory<T> {
             getRoot().query(name);
             throw new IllegalArgumentException("Duplicated factory name[" + name + "] for " + beanClass.getName());
         } catch (NoFactoryException ignore) {
-            ExtendedFactory<T> extendedFactory = new ExtendedFactory<>(this, consumer);
+            ExtendedFactory<T> extendedFactory = new ExtendedFactory<>(this, consumer, factoryConfiguration);
             subFactories.put(name, extendedFactory);
             return extendedFactory;
         }

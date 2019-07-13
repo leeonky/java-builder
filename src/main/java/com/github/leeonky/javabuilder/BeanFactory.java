@@ -8,8 +8,8 @@ class BeanFactory<T> extends AbstractFactory<T> {
     private final TriConsumer<T, Integer, Map<String, ?>> consumer;
     private final Constructor<T> constructor;
 
-    BeanFactory(Class<T> type, TriConsumer<T, Integer, Map<String, ?>> consumer) {
-        super(type);
+    BeanFactory(Class<T> type, TriConsumer<T, Integer, Map<String, ?>> consumer, FactoryConfiguration factoryConfiguration) {
+        super(type, factoryConfiguration);
         try {
             constructor = type.getDeclaredConstructor();
         } catch (NoSuchMethodException e) {

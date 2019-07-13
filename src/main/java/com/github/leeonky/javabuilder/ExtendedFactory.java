@@ -6,8 +6,8 @@ class ExtendedFactory<T> extends AbstractFactory<T> {
     private final Factory<T> parent;
     private final TriConsumer<T, Integer, Map<String, ?>> consumer;
 
-    ExtendedFactory(Factory<T> parent, TriConsumer<T, Integer, Map<String, ?>> consumer) {
-        super(parent.getBeanClass().getType());
+    ExtendedFactory(Factory<T> parent, TriConsumer<T, Integer, Map<String, ?>> consumer, FactoryConfiguration factoryConfiguration) {
+        super(parent.getBeanClass().getType(), factoryConfiguration);
         this.parent = parent;
         this.consumer = consumer;
     }

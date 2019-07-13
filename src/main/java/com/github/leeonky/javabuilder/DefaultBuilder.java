@@ -1,26 +1,21 @@
 package com.github.leeonky.javabuilder;
 
-import com.github.leeonky.util.Converter;
 import com.github.leeonky.util.PropertyReader;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 class DefaultBuilder<T> implements Builder<T> {
     private final Factory<T> factory;
-    private final Consumer<Converter> register;
     private List<T> dataRepo = new ArrayList<>();
     private Map<String, Object> params = new HashMap<>();
     private Map<String, Object> properties = new HashMap<>();
 
-    DefaultBuilder(Factory<T> factory, Consumer<Converter> register) {
+    DefaultBuilder(Factory<T> factory) {
         this.factory = Objects.requireNonNull(factory);
-        this.register = register;
-        register.accept(factory.getBeanClass().getConverter());
     }
 
     private DefaultBuilder<T> copy() {
-        DefaultBuilder<T> newBuilder = new DefaultBuilder<>(factory, register);
+        DefaultBuilder<T> newBuilder = new DefaultBuilder<>(factory);
         newBuilder.dataRepo = dataRepo;
         newBuilder.params.putAll(params);
         return newBuilder;

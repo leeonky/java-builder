@@ -126,7 +126,7 @@ class FactorySetTest {
         factorySet.onBuild(Bean.class, b -> {
         });
 
-        factorySet.registerConverter(converter -> converter.addTypeConverter(Long.class, int.class, Long::intValue));
+        factorySet.getConverter().addTypeConverter(Long.class, int.class, Long::intValue);
 
         assertThat(factorySet.type(Bean.class).properties(new HashMap<String, Object>() {{
             put("intValue", 1L);
@@ -233,9 +233,9 @@ class FactorySetTest {
 
     @Test
     void default_build_for_special_method() {
-        factorySet.registerPropertyBuilder(pb ->
-                pb.registerFromProperty(m -> m.getName().equals("intValue"),
-                        (m, o, i) -> i + 1));
+        factorySet.getPropertyBuilder()
+                .registerFromProperty(m -> m.getName().equals("intValue"),
+                        (m, o, i) -> i + 1);
 
         assertThat(factorySet.type(Bean.class).build())
                 .hasFieldOrPropertyWithValue("intValue", 2);
@@ -246,8 +246,8 @@ class FactorySetTest {
 
     @Test
     void default_build_for_skip_special_method() {
-        factorySet.registerPropertyBuilder(pb ->
-                pb.skipProperty(m -> m.getName().equals("intValue")));
+        factorySet.getPropertyBuilder()
+                .skipProperty(m -> m.getName().equals("intValue"));
 
         assertThat(factorySet.type(Bean.class).build())
                 .hasFieldOrPropertyWithValue("intValue", 0);

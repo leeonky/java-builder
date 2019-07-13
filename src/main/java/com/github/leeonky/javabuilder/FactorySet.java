@@ -7,19 +7,9 @@ import java.util.Map;
 import java.util.function.*;
 
 public class FactorySet {
+    protected FactoryConfiguration factoryConfiguration = new FactoryConfiguration();
     private Map<Class, Factory> factories = new HashMap<>();
-    private Consumer<Converter> converterRegister = c -> {
-    };
-    private Consumer<PropertyBuilder> propertyRegister = c -> {
-    };
-
     private Map<Class, Map<String, Builder>> cacheBuilders = new HashMap<>();
-
-    @SuppressWarnings("unchecked")
-    public <T> Builder<T> type(Class<T> type) {
-        return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
-                .computeIfAbsent(null, s -> new DefaultBuilder<>(factory(type), converterRegister));
-    }
 
     public <T> Factory<T> factory(Class<T> type, String extend) {
         return factory(type).query(extend);
@@ -27,13 +17,19 @@ public class FactorySet {
 
     @SuppressWarnings("unchecked")
     public <T> Factory<T> factory(Class<T> type) {
-        return factories.computeIfAbsent(type, k -> new DefaultBeanFactory<>(type, propertyRegister));
+        return factories.computeIfAbsent(type, k -> new DefaultBeanFactory<>(type, factoryConfiguration));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Builder<T> type(Class<T> type) {
+        return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
+                .computeIfAbsent(null, s -> new DefaultBuilder<>(factory(type)));
     }
 
     @SuppressWarnings("unchecked")
     public <T> Builder<T> type(Class<T> type, String extend) {
         return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
-                .computeIfAbsent(extend, s -> new DefaultBuilder<>(factory(type, extend), converterRegister));
+                .computeIfAbsent(extend, s -> new DefaultBuilder<>(factory(type, extend)));
     }
 
     public <T> Factory<T> onBuild(Class<T> type, Consumer<T> consumer) {
@@ -45,7 +41,7 @@ public class FactorySet {
     }
 
     public <T> Factory<T> onBuild(Class<T> type, TriConsumer<T, Integer, Map<String, ?>> consumer) {
-        BeanFactory<T> beanFactory = new BeanFactory<>(type, consumer);
+        BeanFactory<T> beanFactory = new BeanFactory<>(type, consumer, factoryConfiguration);
         factories.put(type, beanFactory);
         return beanFactory;
     }
@@ -59,19 +55,17 @@ public class FactorySet {
     }
 
     public <T> Factory<T> register(Class<T> type, BiFunction<Integer, Map<String, ?>, T> supplier) {
-        ObjectFactory<T> objectFactory = new ObjectFactory<>(type, supplier);
+        ObjectFactory<T> objectFactory = new ObjectFactory<>(type, supplier, factoryConfiguration);
         factories.put(type, objectFactory);
         return objectFactory;
     }
 
-    public FactorySet registerConverter(Consumer<Converter> register) {
-        converterRegister = register;
-        return this;
+    public Converter getConverter() {
+        return factoryConfiguration.getConverter();
     }
 
-    public FactorySet registerPropertyBuilder(Consumer<PropertyBuilder> register) {
-        propertyRegister = register;
-        return this;
+    public PropertyBuilder getPropertyBuilder() {
+        return factoryConfiguration.getPropertyBuilder();
     }
 
     public void clearRepository() {

@@ -6,8 +6,8 @@ import java.util.function.BiFunction;
 class ObjectFactory<T> extends AbstractFactory<T> {
     private BiFunction<Integer, Map<String, ?>, T> supplier;
 
-    ObjectFactory(Class<T> type, BiFunction<Integer, Map<String, ?>, T> supplier) {
-        super(type);
+    ObjectFactory(Class<T> type, BiFunction<Integer, Map<String, ?>, T> supplier, FactoryConfiguration factoryConfiguration) {
+        super(type, factoryConfiguration);
         this.supplier = supplier;
     }
 
