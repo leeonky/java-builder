@@ -1,6 +1,7 @@
 package com.github.leeonky.javabuilder;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -15,9 +16,7 @@ public interface Builder<T> {
         return IntStream.range(0, count).mapToObj(i -> build());
     }
 
-    T query();
+    Optional<T> query();
 
     Builder<T> property(String name, Object value);
-
-    void clearRepository();
 }

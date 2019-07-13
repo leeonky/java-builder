@@ -12,18 +12,18 @@ public class FactorySetRepoTest {
     void should_cache_object() {
         Bean bean = factorySet.type(Bean.class).property("stringValue", "hello").build();
 
-        Bean queriedBean = factorySet.type(Bean.class).property("stringValue", "hello").query();
+        Bean queriedBean = factorySet.type(Bean.class).property("stringValue", "hello").query().get();
 
         assertTrue(bean == queriedBean);
 
-        factorySet.clearRepository();
-        assertThat(factorySet.type(Bean.class).property("stringValue", "hello").query()).isNull();
+        factorySet.getDataRepository().clear();
+        assertThat(factorySet.type(Bean.class).property("stringValue", "hello").query()).isEmpty();
     }
 
     @Test
     void should_support_auto_convert_in_query() {
         Bean bean = factorySet.type(Bean.class).property("intValue", 1).build();
 
-        assertTrue(bean == factorySet.type(Bean.class).property("intValue", "1").query());
+        assertTrue(bean == factorySet.type(Bean.class).property("intValue", "1").query().get());
     }
 }

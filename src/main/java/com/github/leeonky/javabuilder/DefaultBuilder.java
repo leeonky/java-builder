@@ -1,22 +1,25 @@
 package com.github.leeonky.javabuilder;
 
-import com.github.leeonky.util.PropertyReader;
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 class DefaultBuilder<T> implements Builder<T> {
     private final Factory<T> factory;
-    private List<T> dataRepo = new ArrayList<>();
+    private final FactoryConfiguration factoryConfiguration;
+    private final DataRepository dataRepository;
     private Map<String, Object> params = new HashMap<>();
     private Map<String, Object> properties = new HashMap<>();
 
-    DefaultBuilder(Factory<T> factory) {
+    DefaultBuilder(Factory<T> factory, FactoryConfiguration factoryConfiguration) {
         this.factory = Objects.requireNonNull(factory);
+        this.factoryConfiguration = factoryConfiguration;
+        dataRepository = factoryConfiguration.getDataRepository();
     }
 
     private DefaultBuilder<T> copy() {
-        DefaultBuilder<T> newBuilder = new DefaultBuilder<>(factory);
-        newBuilder.dataRepo = dataRepo;
+        DefaultBuilder<T> newBuilder = new DefaultBuilder<>(factory, factoryConfiguration);
         newBuilder.params.putAll(params);
         return newBuilder;
     }
@@ -43,29 +46,15 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
-    public void clearRepository() {
-        dataRepo.clear();
-    }
-
-    @Override
     public T build() {
         T object = factory.createObject(factory.getSequence(), params);
-        dataRepo.add(object);
         properties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(object, k, v));
+        dataRepository.save(object);
         return object;
     }
 
     @Override
-    public T query() {
-        return dataRepo.stream()
-                .filter(this::isCandidate)
-                .findFirst().orElse(null);
-    }
-
-    private boolean isCandidate(T o) {
-        return properties.entrySet().stream().noneMatch(e -> {
-            PropertyReader<T> propertyReader = factory.getBeanClass().getPropertyReader(e.getKey());
-            return !Objects.equals(propertyReader.getValue(o), propertyReader.tryConvert(e.getValue()));
-        });
+    public Optional<T> query() {
+        return dataRepository.query(factory.getBeanClass(), properties);
     }
 }

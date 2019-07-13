@@ -23,13 +23,13 @@ public class FactorySet {
     @SuppressWarnings("unchecked")
     public <T> Builder<T> type(Class<T> type) {
         return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
-                .computeIfAbsent(null, s -> new DefaultBuilder<>(factory(type)));
+                .computeIfAbsent(null, s -> new DefaultBuilder<>(factory(type), factoryConfiguration));
     }
 
     @SuppressWarnings("unchecked")
     public <T> Builder<T> type(Class<T> type, String extend) {
         return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
-                .computeIfAbsent(extend, s -> new DefaultBuilder<>(factory(type, extend)));
+                .computeIfAbsent(extend, s -> new DefaultBuilder<>(factory(type, extend), factoryConfiguration));
     }
 
     public <T> Factory<T> onBuild(Class<T> type, Consumer<T> consumer) {
@@ -68,7 +68,7 @@ public class FactorySet {
         return factoryConfiguration.getPropertyBuilder();
     }
 
-    public void clearRepository() {
-        cacheBuilders.values().forEach(m -> m.values().forEach(Builder::clearRepository));
+    public DataRepository getDataRepository() {
+        return factoryConfiguration.getDataRepository();
     }
 }
