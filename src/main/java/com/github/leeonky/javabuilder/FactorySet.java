@@ -7,29 +7,28 @@ import java.util.Map;
 import java.util.function.*;
 
 public class FactorySet {
-    protected FactoryConfiguration factoryConfiguration = new FactoryConfiguration();
+    private final FactoryConfiguration factoryConfiguration;
     private Map<Class, Factory> factories = new HashMap<>();
     private Map<Class, Map<String, Builder>> cacheBuilders = new HashMap<>();
 
-    public <T> Factory<T> factory(Class<T> type, String extend) {
-        return factory(type).query(extend);
+    public FactorySet(FactoryConfiguration factoryConfiguration) {
+        this.factoryConfiguration = factoryConfiguration;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> Factory<T> factory(Class<T> type) {
-        return factories.computeIfAbsent(type, k -> new DefaultBeanFactory<>(type, factoryConfiguration));
+    public FactorySet() {
+        this(new FactoryConfiguration());
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> Builder<T> type(Class<T> type) {
-        return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
-                .computeIfAbsent(null, s -> new DefaultBuilder<>(factory(type), factoryConfiguration));
+    public Converter getConverter() {
+        return factoryConfiguration.getConverter();
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> Builder<T> type(Class<T> type, String extend) {
-        return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
-                .computeIfAbsent(extend, s -> new DefaultBuilder<>(factory(type, extend), factoryConfiguration));
+    public PropertyBuilder getPropertyBuilder() {
+        return factoryConfiguration.getPropertyBuilder();
+    }
+
+    public DataRepository getDataRepository() {
+        return factoryConfiguration.getDataRepository();
     }
 
     public <T> Factory<T> onBuild(Class<T> type, Consumer<T> consumer) {
@@ -60,15 +59,24 @@ public class FactorySet {
         return objectFactory;
     }
 
-    public Converter getConverter() {
-        return factoryConfiguration.getConverter();
+    public <T> Factory<T> factory(Class<T> type, String extend) {
+        return factory(type).query(extend);
     }
 
-    public PropertyBuilder getPropertyBuilder() {
-        return factoryConfiguration.getPropertyBuilder();
+    @SuppressWarnings("unchecked")
+    public <T> Factory<T> factory(Class<T> type) {
+        return factories.computeIfAbsent(type, k -> new DefaultBeanFactory<>(type, factoryConfiguration));
     }
 
-    public DataRepository getDataRepository() {
-        return factoryConfiguration.getDataRepository();
+    @SuppressWarnings("unchecked")
+    public <T> Builder<T> type(Class<T> type) {
+        return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
+                .computeIfAbsent(null, s -> new DefaultBuilder<>(factory(type), factoryConfiguration));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Builder<T> type(Class<T> type, String extend) {
+        return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
+                .computeIfAbsent(extend, s -> new DefaultBuilder<>(factory(type, extend), factoryConfiguration));
     }
 }

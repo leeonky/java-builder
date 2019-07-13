@@ -2,10 +2,20 @@ package com.github.leeonky.javabuilder;
 
 import com.github.leeonky.util.Converter;
 
-class FactoryConfiguration {
-    private final Converter converter = Converter.createDefaultConverter();
-    private final PropertyBuilder propertyBuilder = PropertyBuilder.createDefaultPropertyBuilder();
-    private final DataRepository dataRepository = new DefaultDataRepository();
+public class FactoryConfiguration {
+    private final Converter converter;
+    private final PropertyBuilder propertyBuilder;
+    private final DataRepository dataRepository;
+
+    public FactoryConfiguration(Converter converter, PropertyBuilder propertyBuilder, DataRepository dataRepository) {
+        this.converter = converter;
+        this.propertyBuilder = propertyBuilder;
+        this.dataRepository = dataRepository;
+    }
+
+    public FactoryConfiguration() {
+        this(Converter.createDefaultConverter(), PropertyBuilder.createDefaultPropertyBuilder(), new DefaultDataRepository());
+    }
 
     public Converter getConverter() {
         return converter;

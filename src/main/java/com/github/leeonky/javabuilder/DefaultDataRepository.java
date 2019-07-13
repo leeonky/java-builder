@@ -1,8 +1,5 @@
 package com.github.leeonky.javabuilder;
 
-import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.PropertyReader;
-
 import java.util.*;
 
 public class DefaultDataRepository implements DataRepository {
@@ -16,19 +13,9 @@ public class DefaultDataRepository implements DataRepository {
     }
 
     @Override
-    public <T> Optional<T> query(BeanClass<T> beanClass, Map<String, Object> properties) {
-        return repo.getOrDefault(beanClass.getType(), EMPTY_SET)
-                .stream()
-                .map(o -> (T) o)
-                .filter(o -> isCandidate(beanClass, o, properties))
-                .findFirst();
-    }
-
-    private <T> boolean isCandidate(BeanClass<T> beanClass, T o, Map<String, Object> properties) {
-        return properties.entrySet().stream().noneMatch(e -> {
-            PropertyReader<T> propertyReader = beanClass.getPropertyReader(e.getKey());
-            return !Objects.equals(propertyReader.getValue(o), propertyReader.tryConvert(e.getValue()));
-        });
+    @SuppressWarnings("unchecked")
+    public <T> Collection<T> queryAll(Class<T> type) {
+        return (Collection<T>) repo.getOrDefault(type, EMPTY_SET);
     }
 
     @Override
