@@ -14,20 +14,20 @@ public abstract class AbstractDataRepository implements DataRepository {
 
     @Override
     public <T> Optional<T> query(BeanClass<T> beanClass, Map<String, Object> properties) {
-        return queryAll(beanClass.getType())
-                .stream()
-                .filter(o -> properties.entrySet().stream().noneMatch(e -> {
-                    return notEquals(beanClass, o, e.getKey(), e.getValue());
-                })).findFirst();
+        return queryAll(beanClass.getType()).stream()
+                .filter(o -> properties.entrySet().stream().noneMatch(e ->
+                        notEquals(beanClass, o, e.getKey(), e.getValue()))).findFirst();
     }
 
+    @SuppressWarnings("unchecked")
     private boolean notEquals(BeanClass<?> beanClass, Object o, String key, Object target) {
         if (key.contains(".")) {
             String[] propertyList = key.split("\\.", 2);
-            String property = propertyList[0];
-            String condition = propertyList[1];
-            PropertyReader propertyReader = beanClass.getPropertyReader(property);
-            return notEquals(propertyReader.getPropertyTypeWrapper(), propertyReader.getValue(o), condition, target);
+            String propertyName = propertyList[0];
+            if (propertyName.contains("("))
+                propertyName = propertyName.split("\\(", 2)[0];
+            PropertyReader propertyReader = beanClass.getPropertyReader(propertyName);
+            return notEquals(propertyReader.getPropertyTypeWrapper(), propertyReader.getValue(o), propertyList[1], target);
         }
         PropertyReader propertyReader = beanClass.getPropertyReader(key);
         return !Objects.equals(propertyReader.getValue(o), propertyReader.tryConvert(target));

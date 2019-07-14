@@ -60,7 +60,10 @@ public class FactorySet {
     }
 
     public <T> Factory<T> factory(Class<T> type, String extend) {
-        return factory(type).query(extend);
+        Factory<T> factory = factory(type);
+        if (extend != null)
+            factory = factory.query(extend);
+        return factory;
     }
 
     @SuppressWarnings("unchecked")

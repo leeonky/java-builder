@@ -54,14 +54,21 @@ class DefaultBuilder<T> implements Builder<T> {
         return object;
     }
 
+    @SuppressWarnings("unchecked")
     private void assignProperty(BeanClass<T> beanClass, T object, String name, Object value) {
         if (name.contains(".")) {
             String[] propertyList = name.split("\\.", 2);
-            String property = propertyList[0];
+            String propertyName = propertyList[0];
             String condition = propertyList[1];
-            PropertyWriter<T> propertyWriter = beanClass.getPropertyWriter(property);
-            Object propertyValue = factorySet.type(propertyWriter.getPropertyType()).property(condition, value).query().get();
-            beanClass.setPropertyValue(object, property, propertyValue);
+            String factoryName = null;
+            if (propertyName.contains("(")) {
+                String[] propertyFactory = propertyName.split("\\(");
+                propertyName = propertyFactory[0];
+                factoryName = propertyFactory[1].split("\\)")[0];
+            }
+            PropertyWriter<T> propertyWriter = beanClass.getPropertyWriter(propertyName);
+            Builder builder = factorySet.type(propertyWriter.getPropertyType(), factoryName).property(condition, value);
+            propertyWriter.setValue(object, builder.query().orElseGet(builder::build));
         } else
             beanClass.setPropertyValue(object, name, value);
     }

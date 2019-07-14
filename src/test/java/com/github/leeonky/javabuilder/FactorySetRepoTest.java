@@ -12,7 +12,6 @@ class FactorySetRepoTest {
     @Nested
     class Query {
 
-
         @Test
         void should_cache_object() {
             Bean bean = factorySet.type(Bean.class).property("stringValue", "hello").build();
@@ -41,6 +40,16 @@ class FactorySetRepoTest {
             assertThat(factorySet.type(Order.class).property("product.category.name", "math").query())
                     .hasValue(order);
         }
+
+        @Test
+        void support_auto_skip_factory_name() {
+            Category category = factorySet.type(Category.class).property("name", "math").build();
+            Product product = factorySet.type(Product.class).property("category", category).build();
+            Order order = factorySet.type(Order.class).property("product", product).build();
+
+            assertThat(factorySet.type(Order.class).property("product(xxx).category(xxx).name", "math").query())
+                    .hasValue(order);
+        }
     }
 
     @Nested
@@ -63,6 +72,22 @@ class FactorySetRepoTest {
             Order order = factorySet.type(Order.class).property("product.category.name", "math").build();
 
             assertThat(order.getProduct()).isEqualTo(product);
+        }
+
+        @Test
+        void should_support_build_object_with_default_property_build() {
+            Order order = factorySet.type(Order.class).property("product.name", "book").build();
+
+            assertThat(order.getProduct().getName()).isEqualTo("book");
+        }
+
+        @Test
+        void support_build_property_with_factory_name() {
+            factorySet.factory(Product.class).extend("ProgrammeBook", p -> p.setName("Java"));
+
+            Order order = factorySet.type(Order.class).property("product(ProgrammeBook).category.name", "book").build();
+
+            assertThat(order.getProduct().getName()).isEqualTo("Java");
         }
     }
 }
