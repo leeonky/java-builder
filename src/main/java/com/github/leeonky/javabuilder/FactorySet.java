@@ -71,12 +71,12 @@ public class FactorySet {
     @SuppressWarnings("unchecked")
     public <T> Builder<T> type(Class<T> type) {
         return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
-                .computeIfAbsent(null, s -> new DefaultBuilder<>(factory(type), factoryConfiguration));
+                .computeIfAbsent(null, s -> new DefaultBuilder<>(this, factory(type)));
     }
 
     @SuppressWarnings("unchecked")
     public <T> Builder<T> type(Class<T> type, String extend) {
         return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
-                .computeIfAbsent(extend, s -> new DefaultBuilder<>(factory(type, extend), factoryConfiguration));
+                .computeIfAbsent(extend, s -> new DefaultBuilder<>(this, factory(type, extend)));
     }
 }

@@ -2,6 +2,8 @@ package com.github.leeonky.javabuilder;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -25,5 +27,16 @@ public class FactorySetRepoTest {
         Bean bean = factorySet.type(Bean.class).property("intValue", 1).build();
 
         assertTrue(bean == factorySet.type(Bean.class).property("intValue", "1").query().get());
+    }
+
+    @Test
+    void should_support_build_object_with_object_reference() {
+        Product product = factorySet.type(Product.class).property("name", "book").build();
+
+        Order order = factorySet.type(Order.class).properties(new HashMap<String, Object>() {{
+            put("product.name", "book");
+        }}).build();
+
+        assertThat(order.getProduct()).isEqualTo(product);
     }
 }
