@@ -7,7 +7,6 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class Product {
+public class Category {
     private String name;
-    private Category category;
 }

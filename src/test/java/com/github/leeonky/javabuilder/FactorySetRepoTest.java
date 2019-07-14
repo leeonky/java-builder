@@ -1,42 +1,68 @@
 package com.github.leeonky.javabuilder;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class FactorySetRepoTest {
+class FactorySetRepoTest {
     private FactorySet factorySet = new FactorySet();
 
-    @Test
-    void should_cache_object() {
-        Bean bean = factorySet.type(Bean.class).property("stringValue", "hello").build();
+    @Nested
+    class Query {
 
-        Bean queriedBean = factorySet.type(Bean.class).property("stringValue", "hello").query().get();
 
-        assertTrue(bean == queriedBean);
+        @Test
+        void should_cache_object() {
+            Bean bean = factorySet.type(Bean.class).property("stringValue", "hello").build();
 
-        factorySet.getDataRepository().clear();
-        assertThat(factorySet.type(Bean.class).property("stringValue", "hello").query()).isEmpty();
+            Bean queriedBean = factorySet.type(Bean.class).property("stringValue", "hello").query().get();
+
+            assertTrue(bean == queriedBean);
+
+            factorySet.getDataRepository().clear();
+            assertThat(factorySet.type(Bean.class).property("stringValue", "hello").query()).isEmpty();
+        }
+
+        @Test
+        void should_support_auto_convert_in_query() {
+            Bean bean = factorySet.type(Bean.class).property("intValue", 1).build();
+
+            assertTrue(bean == factorySet.type(Bean.class).property("intValue", "1").query().get());
+        }
+
+        @Test
+        void should_support_query_with_property_chain() {
+            Category category = factorySet.type(Category.class).property("name", "math").build();
+            Product product = factorySet.type(Product.class).property("category", category).build();
+            Order order = factorySet.type(Order.class).property("product", product).build();
+
+            assertThat(factorySet.type(Order.class).property("product.category.name", "math").query())
+                    .hasValue(order);
+        }
     }
 
-    @Test
-    void should_support_auto_convert_in_query() {
-        Bean bean = factorySet.type(Bean.class).property("intValue", 1).build();
+    @Nested
+    class BuildWithRepo {
 
-        assertTrue(bean == factorySet.type(Bean.class).property("intValue", "1").query().get());
-    }
+        @Test
+        void should_support_build_object_with_object_reference() {
+            Product product = factorySet.type(Product.class).property("name", "book").build();
 
-    @Test
-    void should_support_build_object_with_object_reference() {
-        Product product = factorySet.type(Product.class).property("name", "book").build();
+            Order order = factorySet.type(Order.class).property("product.name", "book").build();
 
-        Order order = factorySet.type(Order.class).properties(new HashMap<String, Object>() {{
-            put("product.name", "book");
-        }}).build();
+            assertThat(order.getProduct()).isEqualTo(product);
+        }
 
-        assertThat(order.getProduct()).isEqualTo(product);
+        @Test
+        void should_support_build_object_with_more_nested_object_reference() {
+            Category category = factorySet.type(Category.class).property("name", "math").build();
+            Product product = factorySet.type(Product.class).property("category", category).build();
+
+            Order order = factorySet.type(Order.class).property("product.category.name", "math").build();
+
+            assertThat(order.getProduct()).isEqualTo(product);
+        }
     }
 }

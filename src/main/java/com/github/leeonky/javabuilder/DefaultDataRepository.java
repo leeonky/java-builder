@@ -2,7 +2,7 @@ package com.github.leeonky.javabuilder;
 
 import java.util.*;
 
-public class DefaultDataRepository implements DataRepository {
+class DefaultDataRepository extends AbstractDataRepository {
     private static final HashSet<Object> EMPTY_SET = new HashSet<>();
     private Map<Class<?>, Set<Object>> repo = new HashMap<>();
 
