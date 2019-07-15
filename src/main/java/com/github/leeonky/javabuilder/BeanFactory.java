@@ -2,13 +2,13 @@ package com.github.leeonky.javabuilder;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
+import java.util.function.BiConsumer;
 
 class BeanFactory<T> extends AbstractFactory<T> {
-    private final TriConsumer<T, Integer, Map<String, ?>> consumer;
+    private final BiConsumer<T, BuildContext> consumer;
     private final Constructor<T> constructor;
 
-    BeanFactory(Class<T> type, TriConsumer<T, Integer, Map<String, ?>> consumer, FactoryConfiguration factoryConfiguration) {
+    BeanFactory(Class<T> type, BiConsumer<T, BuildContext> consumer, FactoryConfiguration factoryConfiguration) {
         super(type, factoryConfiguration);
         try {
             constructor = type.getDeclaredConstructor();
@@ -19,14 +19,14 @@ class BeanFactory<T> extends AbstractFactory<T> {
     }
 
     @Override
-    public T createObject(int sequence, Map<String, ?> params) {
+    public T createObject(BuildContext buildContext) {
         T instance;
         try {
             instance = constructor.newInstance();
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(e);
         }
-        consumer.accept(instance, sequence, params);
+        consumer.accept(instance, buildContext);
         return instance;
     }
 }

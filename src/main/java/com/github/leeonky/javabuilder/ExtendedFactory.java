@@ -1,12 +1,12 @@
 package com.github.leeonky.javabuilder;
 
-import java.util.Map;
+import java.util.function.BiConsumer;
 
 class ExtendedFactory<T> extends AbstractFactory<T> {
     private final Factory<T> parent;
-    private final TriConsumer<T, Integer, Map<String, ?>> consumer;
+    private final BiConsumer<T, BuildContext> consumer;
 
-    ExtendedFactory(Factory<T> parent, TriConsumer<T, Integer, Map<String, ?>> consumer, FactoryConfiguration factoryConfiguration) {
+    ExtendedFactory(Factory<T> parent, BiConsumer<T, BuildContext> consumer, FactoryConfiguration factoryConfiguration) {
         super(parent.getBeanClass().getType(), factoryConfiguration);
         this.parent = parent;
         this.consumer = consumer;
@@ -18,9 +18,9 @@ class ExtendedFactory<T> extends AbstractFactory<T> {
     }
 
     @Override
-    public T createObject(int sequence, Map<String, ?> params) {
-        T object = parent.createObject(sequence, params);
-        consumer.accept(object, sequence, params);
+    public T createObject(BuildContext buildContext) {
+        T object = parent.createObject(buildContext);
+        consumer.accept(object, buildContext);
         return object;
     }
 

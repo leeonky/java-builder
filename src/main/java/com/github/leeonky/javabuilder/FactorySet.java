@@ -4,7 +4,10 @@ import com.github.leeonky.util.Converter;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class FactorySet {
     private final FactoryConfiguration factoryConfiguration;
@@ -32,28 +35,20 @@ public class FactorySet {
     }
 
     public <T> Factory<T> onBuild(Class<T> type, Consumer<T> consumer) {
-        return onBuild(type, (obj, seq) -> consumer.accept(obj));
+        return onBuild(type, (obj, buildContext) -> consumer.accept(obj));
     }
 
-    public <T> Factory<T> onBuild(Class<T> type, BiConsumer<T, Integer> consumer) {
-        return onBuild(type, (obj, seq, params) -> consumer.accept(obj, seq));
-    }
-
-    public <T> Factory<T> onBuild(Class<T> type, TriConsumer<T, Integer, Map<String, ?>> consumer) {
+    public <T> Factory<T> onBuild(Class<T> type, BiConsumer<T, BuildContext> consumer) {
         BeanFactory<T> beanFactory = new BeanFactory<>(type, consumer, factoryConfiguration);
         factories.put(type, beanFactory);
         return beanFactory;
     }
 
     public <T> Factory<T> register(Class<T> type, Supplier<T> supplier) {
-        return register(type, (seq, params) -> supplier.get());
+        return register(type, (buildContext) -> supplier.get());
     }
 
-    public <T> Factory<T> register(Class<T> type, Function<Integer, T> supplier) {
-        return register(type, (seq, params) -> supplier.apply(seq));
-    }
-
-    public <T> Factory<T> register(Class<T> type, BiFunction<Integer, Map<String, ?>, T> supplier) {
+    public <T> Factory<T> register(Class<T> type, Function<BuildContext, T> supplier) {
         ObjectFactory<T> objectFactory = new ObjectFactory<>(type, supplier, factoryConfiguration);
         factories.put(type, objectFactory);
         return objectFactory;

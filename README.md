@@ -50,11 +50,11 @@ println(bean.getStrValue());
 
 ### Register
 
-- With sequence
+- With build context
 
 ```java
-factorySet.onBuild(Bean.class, (bean, sequence) -> {
-    bean.setStrValue("hello " + sequence);
+factorySet.onBuild(Bean.class, (bean, buildContext) -> {
+    bean.setStrValue("hello " + buildContext.getSequence());
 });
 Builder<Bean> builder = factorySet.type(Bean.class);
 
@@ -63,20 +63,6 @@ Builder<Bean> builder = factorySet.type(Bean.class);
 // hello 2
 println(builder.build().getStrValue());
 println(builder.build().getStrValue());
-```
-
-- With sequence and params
-
-```java
-factorySet.onBuild(Bean.class, (bean, sequence, params) -> {
-    bean.setStrValue("hello " + params.get("message"));
-});
-
-// Output is:
-// hello world
-println(factorySet.type(Bean.class).params(new HashMap<String, Object>{{
-    put("message", "world");
-}}).build().getStrValue());
 ```
 
 - with no default constructor

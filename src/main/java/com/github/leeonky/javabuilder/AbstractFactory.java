@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 public abstract class AbstractFactory<T> implements Factory<T> {
     private final BeanClass<T> beanClass;
@@ -25,7 +26,7 @@ public abstract class AbstractFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Factory<T> extend(String name, TriConsumer<T, Integer, Map<String, ?>> consumer) {
+    public Factory<T> extend(String name, BiConsumer<T, BuildContext> consumer) {
         try {
             getRoot().query(name);
             throw new IllegalArgumentException("Duplicated factory name[" + name + "] for " + beanClass.getName());

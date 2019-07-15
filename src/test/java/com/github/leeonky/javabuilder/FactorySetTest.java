@@ -56,7 +56,7 @@ class FactorySetTest {
 
     @Test
     void register_with_sequence() {
-        factorySet.onBuild(Bean.class, (bean, seq) -> bean.setStringValue("Hello" + seq));
+        factorySet.onBuild(Bean.class, (bean, buildContext) -> bean.setStringValue("Hello" + buildContext.getSequence()));
         Builder<Bean> builder = factorySet.type(Bean.class);
 
         assertThat(builder.build().getStringValue()).isEqualTo("Hello1");
@@ -65,7 +65,7 @@ class FactorySetTest {
 
     @Test
     void register_with_sequence_and_params() {
-        factorySet.onBuild(Bean.class, (bean, seq, params) -> bean.setStringValue("Hello " + params.get("message")));
+        factorySet.onBuild(Bean.class, (bean, builderContext) -> bean.setStringValue("Hello " + builderContext.getParams().get("message")));
 
         assertThat(factorySet.type(Bean.class).params(new HashMap<String, Object>() {{
             put("message", "world");
@@ -74,7 +74,7 @@ class FactorySetTest {
 
     @Test
     void build_object_list() {
-        factorySet.onBuild(Bean.class, (bean, seq) -> bean.setStringValue("Hello" + seq));
+        factorySet.onBuild(Bean.class, (bean, buildContext) -> bean.setStringValue("Hello" + buildContext.getSequence()));
 
         assertThat(factorySet.type(Bean.class).build(2).map(Bean::getStringValue).collect(Collectors.toList()))
                 .isEqualTo(asList("Hello1", "Hello2"));
@@ -103,20 +103,10 @@ class FactorySetTest {
     }
 
     @Test
-    void register_and_build_with_no_default_constructor_and_sequence() {
-        factorySet.register(BeanWithNoDefaultConstructor.class, BeanWithNoDefaultConstructor::new);
-
-        assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).build())
-                .hasFieldOrPropertyWithValue("intValue", 1);
-        assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).build())
-                .hasFieldOrPropertyWithValue("intValue", 2);
-    }
-
-    @Test
     void register_and_build_with_no_default_constructor_and_sequence_and_params() {
-        factorySet.register(BeanWithNoDefaultConstructor.class, (seq, params) -> {
-            BeanWithNoDefaultConstructor bean = new BeanWithNoDefaultConstructor(seq);
-            bean.setStringValue(params.get("stringValue").toString());
+        factorySet.register(BeanWithNoDefaultConstructor.class, (buildContext) -> {
+            BeanWithNoDefaultConstructor bean = new BeanWithNoDefaultConstructor(buildContext.getSequence());
+            bean.setStringValue(buildContext.getParams().get("stringValue").toString());
             return bean;
         });
     }
@@ -139,9 +129,9 @@ class FactorySetTest {
                 .extend("extend",
                         b -> b.setStringValue(b.getStringValue() + " world"))
                 .extend("extend2",
-                        (b, i) -> b.setStringValue(b.getStringValue() + " again " + i))
+                        (b, buildContext) -> b.setStringValue(b.getStringValue() + " again " + buildContext.getSequence()))
                 .extend("extend3",
-                        (b, i, p) -> b.setStringValue(b.getStringValue() + " and again " + p.get("name")));
+                        (b, buildContext) -> b.setStringValue(b.getStringValue() + " and again " + buildContext.getParams().get("name")));
 
         assertThat(factorySet.type(Bean.class, "extend").build().getStringValue()).isEqualTo("Hello world");
         assertThat(factorySet.type(Bean.class, "extend2").build().getStringValue()).isEqualTo("Hello world again 2");
@@ -235,7 +225,7 @@ class FactorySetTest {
     void default_build_for_special_method() {
         factorySet.getPropertyBuilder()
                 .registerFromProperty(m -> m.getName().equals("intValue"),
-                        (m, o, i) -> i + 1);
+                        (m, o, buildContext) -> buildContext.getSequence() + 1);
 
         assertThat(factorySet.type(Bean.class).build())
                 .hasFieldOrPropertyWithValue("intValue", 2);
