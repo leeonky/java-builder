@@ -48,7 +48,8 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T build() {
-        T object = factory.createObject(new BuildContext(factory.getSequence(), properties, params));
+        T object = factory.createObject(new BuildContext<>(factory.getSequence(),
+                properties, params, factory.getBeanClass(), factorySet));
         properties.forEach((k, v) -> assignProperty(factory.getBeanClass(), object, k, v));
         factorySet.getDataRepository().save(object);
         return object;

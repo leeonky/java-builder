@@ -5,10 +5,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.function.BiConsumer;
 
 class BeanFactory<T> extends AbstractFactory<T> {
-    private final BiConsumer<T, BuildContext> consumer;
+    private final BiConsumer<T, BuildContext<T>> consumer;
     private final Constructor<T> constructor;
 
-    BeanFactory(Class<T> type, BiConsumer<T, BuildContext> consumer, FactoryConfiguration factoryConfiguration) {
+    BeanFactory(Class<T> type, BiConsumer<T, BuildContext<T>> consumer, FactoryConfiguration factoryConfiguration) {
         super(type, factoryConfiguration);
         try {
             constructor = type.getDeclaredConstructor();
@@ -19,7 +19,7 @@ class BeanFactory<T> extends AbstractFactory<T> {
     }
 
     @Override
-    public T createObject(BuildContext buildContext) {
+    public T createObject(BuildContext<T> buildContext) {
         T instance;
         try {
             instance = constructor.newInstance();

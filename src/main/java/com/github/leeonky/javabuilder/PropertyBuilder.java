@@ -1,6 +1,5 @@
 package com.github.leeonky.javabuilder;
 
-import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
 import java.math.BigDecimal;
@@ -55,13 +54,13 @@ public class PropertyBuilder {
     }
 
     public <T, B> PropertyBuilder registerFromType(Class<T> propertyType,
-                                                   TriFunction<Class<T>, PropertyWriter<B>, BuildContext, T> builder) {
+                                                   TriFunction<Class<T>, PropertyWriter<B>, BuildContext<B>, T> builder) {
         setters.add(new TypeHandler<>(propertyType, builder));
         return this;
     }
 
     public <B> PropertyBuilder registerFromProperty(Predicate<PropertyWriter<B>> predicate,
-                                                    TriFunction<PropertyWriter<B>, Object, BuildContext, Object> builder) {
+                                                    TriFunction<PropertyWriter<B>, Object, BuildContext<B>, Object> builder) {
         propertyBuilders.put(predicate, builder);
         return this;
     }
@@ -72,30 +71,31 @@ public class PropertyBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T apply(T object, BuildContext buildContext) {
-        new BeanClass<>(object.getClass()).getPropertyWriters()
+    public <T> T buildDefaultProperty(T object, BuildContext<T> buildContext) {
+        buildContext.getBeanClass().getPropertyWriters()
                 .values().stream()
                 .filter(propertyWriter -> skipper.stream().noneMatch(p -> p.test(propertyWriter)))
-                .forEach(propertyWriter -> buildAndAssign(propertyWriter, object, buildContext));
+                .filter(propertyWriter -> buildContext.notSpecified(propertyWriter.getName()))
+                .forEach(propertyWriter -> buildDefaultProperty(object, propertyWriter, buildContext));
         return object;
     }
 
     @SuppressWarnings("unchecked")
-    private void buildAndAssign(PropertyWriter method, Object object, BuildContext buildContext) {
-        Stream.concat(buildValueFromMethodBuilder(method, object, buildContext),
-                buildValueFromPropertyBuilder(method, buildContext)).findFirst()
-                .ifPresent(value -> method.setValue(object, value));
+    private void buildDefaultProperty(Object object, PropertyWriter propertyWriter, BuildContext<?> buildContext) {
+        Stream.concat(buildValueFromMethodBuilder(propertyWriter, object, buildContext),
+                buildValueFromPropertyBuilder(propertyWriter, buildContext)).findFirst()
+                .ifPresent(value -> propertyWriter.setValue(object, value));
     }
 
     @SuppressWarnings("unchecked")
-    private Stream<Object> buildValueFromMethodBuilder(PropertyWriter propertyWriter, Object object, BuildContext buildContext) {
+    private Stream<Object> buildValueFromMethodBuilder(PropertyWriter propertyWriter, Object object, BuildContext<?> buildContext) {
         return propertyBuilders.entrySet().stream()
                 .filter(e -> e.getKey().test(propertyWriter))
                 .map(e -> e.getValue().apply(propertyWriter, object, buildContext));
     }
 
     @SuppressWarnings("unchecked")
-    private Stream<Object> buildValueFromPropertyBuilder(PropertyWriter propertyWriter, BuildContext buildContext) {
+    private Stream<Object> buildValueFromPropertyBuilder(PropertyWriter propertyWriter, BuildContext<?> buildContext) {
         return Stream.concat(setters.stream().filter(s -> s.isPreciseType(propertyWriter.getPropertyType())),
                 setters.stream().filter(s -> s.isBaseType(propertyWriter.getPropertyType())))
                 .map(t -> t.getHandler().apply(propertyWriter.getPropertyType(), propertyWriter, buildContext));

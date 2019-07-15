@@ -26,7 +26,7 @@ public abstract class AbstractFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Factory<T> extend(String name, BiConsumer<T, BuildContext> consumer) {
+    public Factory<T> extend(String name, BiConsumer<T, BuildContext<T>> consumer) {
         try {
             getRoot().query(name);
             throw new IllegalArgumentException("Duplicated factory name[" + name + "] for " + beanClass.getName());

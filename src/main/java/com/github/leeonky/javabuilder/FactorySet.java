@@ -38,7 +38,7 @@ public class FactorySet {
         return onBuild(type, (obj, buildContext) -> consumer.accept(obj));
     }
 
-    public <T> Factory<T> onBuild(Class<T> type, BiConsumer<T, BuildContext> consumer) {
+    public <T> Factory<T> onBuild(Class<T> type, BiConsumer<T, BuildContext<T>> consumer) {
         BeanFactory<T> beanFactory = new BeanFactory<>(type, consumer, factoryConfiguration);
         factories.put(type, beanFactory);
         return beanFactory;
@@ -48,7 +48,7 @@ public class FactorySet {
         return register(type, (buildContext) -> supplier.get());
     }
 
-    public <T> Factory<T> register(Class<T> type, Function<BuildContext, T> supplier) {
+    public <T> Factory<T> register(Class<T> type, Function<BuildContext<T>, T> supplier) {
         ObjectFactory<T> objectFactory = new ObjectFactory<>(type, supplier, factoryConfiguration);
         factories.put(type, objectFactory);
         return objectFactory;

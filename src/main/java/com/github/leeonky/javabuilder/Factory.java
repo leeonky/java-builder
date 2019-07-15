@@ -10,9 +10,9 @@ public interface Factory<T> {
 
     int getSequence();
 
-    T createObject(BuildContext buildContext);
+    T createObject(BuildContext<T> buildContext);
 
-    Factory<T> extend(String name, BiConsumer<T, BuildContext> consumer);
+    Factory<T> extend(String name, BiConsumer<T, BuildContext<T>> consumer);
 
     default Factory<T> extend(String name, Consumer<T> consumer) {
         return extend(name, (o, buildContext) -> consumer.accept(o));

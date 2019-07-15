@@ -304,4 +304,14 @@ class FactorySetTest {
                 .hasFieldOrPropertyWithValue("localDateTimeValue", LocalDateTime.parse("1996-01-23T00:00:01"))
         ;
     }
+
+    @Test
+    void should_skip_default_property_build_when_specify_value_in_properties() {
+        Category category = new Category().setName("original name");
+        factorySet.getPropertyBuilder().registerFromType(Category.class, (cl, pw, bc) -> category.setName("changed name"));
+
+        factorySet.type(Product.class).property("category", new Category().setName("specified name")).build();
+
+        assertThat(category.getName()).isEqualTo("original name");
+    }
 }

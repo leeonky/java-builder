@@ -17,6 +17,10 @@ public class FactoryConfiguration {
         this(Converter.createDefaultConverter(), PropertyBuilder.createDefaultPropertyBuilder(), new DefaultDataRepository());
     }
 
+    public FactoryConfiguration(DataRepository dataRepository) {
+        this(Converter.createDefaultConverter(), PropertyBuilder.createDefaultPropertyBuilder(), dataRepository);
+    }
+
     public Converter getConverter() {
         return converter;
     }
