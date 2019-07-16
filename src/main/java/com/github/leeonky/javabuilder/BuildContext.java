@@ -65,6 +65,10 @@ public class BuildContext<T> {
             return this;
         }
 
+        public BeanAssigner setPropertyInDefaultFactory(String property) {
+            return setPropertyInFactory(property, null);
+        }
+
         public BeanAssigner setPropertyInSupplier(String property, Supplier<?> supplier) {
             if (notSpecified(property))
                 beanClass.setPropertyValue(object, property, supplier.get());

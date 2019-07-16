@@ -8,8 +8,8 @@ class BeanFactory<T> extends AbstractFactory<T> {
     private final BiConsumer<T, BuildContext<T>> consumer;
     private final Constructor<T> constructor;
 
-    BeanFactory(Class<T> type, BiConsumer<T, BuildContext<T>> consumer, FactoryConfiguration factoryConfiguration) {
-        super(type, factoryConfiguration);
+    BeanFactory(FactorySet factorySet, Class<T> type, BiConsumer<T, BuildContext<T>> consumer) {
+        super(factorySet, type);
         try {
             constructor = type.getDeclaredConstructor();
         } catch (NoSuchMethodException e) {

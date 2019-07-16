@@ -23,4 +23,8 @@ public interface Factory<T> {
     default Factory<T> getRoot() {
         return this;
     }
+
+    Factory<T> useAlias();
+
+    Factory<T> useAlias(String alias);
 }

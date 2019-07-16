@@ -9,15 +9,15 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 public abstract class AbstractFactory<T> implements Factory<T> {
+    protected final FactorySet factorySet;
     private final BeanClass<T> beanClass;
-    private final FactoryConfiguration factoryConfiguration;
     private Map<String, Factory> subFactories = new HashMap<>();
 
     private int sequence = 0;
 
-    public AbstractFactory(Class<T> type, FactoryConfiguration factoryConfiguration) {
-        this.factoryConfiguration = factoryConfiguration;
-        beanClass = new BeanClass<>(type, factoryConfiguration.getConverter());
+    public AbstractFactory(FactorySet factorySet, Class<T> type) {
+        this.factorySet = factorySet;
+        beanClass = new BeanClass<>(type, factorySet.getConverter());
     }
 
     @Override
@@ -31,7 +31,7 @@ public abstract class AbstractFactory<T> implements Factory<T> {
             getRoot().query(name);
             throw new IllegalArgumentException("Duplicated factory name[" + name + "] for " + beanClass.getName());
         } catch (NoFactoryException ignore) {
-            ExtendedFactory<T> extendedFactory = new ExtendedFactory<>(this, consumer, factoryConfiguration);
+            ExtendedFactory<T> extendedFactory = new ExtendedFactory<>(factorySet, this, name, consumer);
             subFactories.put(name, extendedFactory);
             return extendedFactory;
         }
@@ -57,6 +57,17 @@ public abstract class AbstractFactory<T> implements Factory<T> {
     @Override
     public BeanClass<T> getBeanClass() {
         return beanClass;
+    }
+
+    @Override
+    public Factory<T> useAlias() {
+        return useAlias(getBeanClass().getSimpleName());
+    }
+
+    @Override
+    public Factory<T> useAlias(String alias) {
+        factorySet.aliasFactory(alias, this);
+        return this;
     }
 
     static class NoFactoryException extends RuntimeException {

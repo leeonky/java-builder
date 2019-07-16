@@ -1,5 +1,6 @@
 package com.github.leeonky.javabuilder;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -313,5 +314,48 @@ class FactorySetTest {
         factorySet.type(Product.class).property("category", new Category().setName("specified name")).build();
 
         assertThat(category.getName()).isEqualTo("original name");
+    }
+
+    @Nested
+    class Alias {
+        @Test
+        void should_support_save_extend_factory_alias() {
+            factorySet.factory(Bean.class).extend("Extend1", b -> b.setIntValue(1001)).useAlias();
+
+            assertThat(factorySet.toBuild("Extend1").build())
+                    .hasFieldOrPropertyWithValue("intValue", 1001);
+        }
+
+        @Test
+        void should_support_save_type_simple_name_as_alias() {
+            factorySet.onBuild(Bean.class, b -> b.setIntValue(1001)).useAlias();
+
+            assertThat(factorySet.toBuild("Bean").build())
+                    .hasFieldOrPropertyWithValue("intValue", 1001);
+        }
+
+        @Test
+        void should_raise_error_when_alias_exist() {
+            factorySet.onBuild(Bean.class, b -> b.setIntValue(1001)).useAlias();
+
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> factorySet.factory(Bean.class).extend("Bean", b -> b.setIntValue(1001)).useAlias());
+
+            assertThat(exception).hasMessage("Factory alias 'Bean' already exists");
+        }
+
+        @Test
+        void should_support_specify_alias_name() {
+            factorySet.onBuild(Bean.class, b -> b.setIntValue(1001)).useAlias("ABean");
+
+            assertThat(factorySet.toBuild("ABean").build())
+                    .hasFieldOrPropertyWithValue("intValue", 1001);
+        }
+
+        @Test
+        void should_raise_error_when_alias_not_exist() {
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> factorySet.toBuild("Bean"));
+
+            assertThat(exception).hasMessage("Factory alias 'Bean' does not exist");
+        }
     }
 }

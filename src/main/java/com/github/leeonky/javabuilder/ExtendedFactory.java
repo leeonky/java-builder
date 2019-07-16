@@ -5,11 +5,13 @@ import java.util.function.BiConsumer;
 class ExtendedFactory<T> extends AbstractFactory<T> {
     private final Factory<T> parent;
     private final BiConsumer<T, BuildContext<T>> consumer;
+    private final String name;
 
-    ExtendedFactory(Factory<T> parent, BiConsumer<T, BuildContext<T>> consumer, FactoryConfiguration factoryConfiguration) {
-        super(parent.getBeanClass().getType(), factoryConfiguration);
+    ExtendedFactory(FactorySet factorySet, Factory<T> parent, String name, BiConsumer<T, BuildContext<T>> consumer) {
+        super(factorySet, parent.getBeanClass().getType());
         this.parent = parent;
         this.consumer = consumer;
+        this.name = name;
     }
 
     @Override
@@ -27,5 +29,10 @@ class ExtendedFactory<T> extends AbstractFactory<T> {
     @Override
     public Factory<T> getRoot() {
         return parent.getRoot();
+    }
+
+    @Override
+    public Factory<T> useAlias() {
+        return useAlias(name);
     }
 }

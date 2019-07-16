@@ -10,28 +10,31 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class FactorySet {
-    private final FactoryConfiguration factoryConfiguration;
-    private Map<Class, Factory> factories = new HashMap<>();
-    private Map<Class, Map<String, Builder>> cacheBuilders = new HashMap<>();
+    private final Converter converter = Converter.createDefaultConverter();
+    private final PropertyBuilder propertyBuilder = PropertyBuilder.createDefaultPropertyBuilder();
+    private final DataRepository dataRepository;
+    private final Map<Class, Factory> factories = new HashMap<>();
+    private final Map<Class, Map<String, Builder>> cacheBuilders = new HashMap<>();
+    private final Map<String, Factory> aliases = new HashMap<>();
 
-    public FactorySet(FactoryConfiguration factoryConfiguration) {
-        this.factoryConfiguration = factoryConfiguration;
+    public FactorySet(DataRepository dataRepository) {
+        this.dataRepository = dataRepository;
     }
 
     public FactorySet() {
-        this(new FactoryConfiguration());
+        this(new DefaultDataRepository());
     }
 
     public Converter getConverter() {
-        return factoryConfiguration.getConverter();
+        return converter;
     }
 
     public PropertyBuilder getPropertyBuilder() {
-        return factoryConfiguration.getPropertyBuilder();
+        return propertyBuilder;
     }
 
     public DataRepository getDataRepository() {
-        return factoryConfiguration.getDataRepository();
+        return dataRepository;
     }
 
     public <T> Factory<T> onBuild(Class<T> type, Consumer<T> consumer) {
@@ -39,7 +42,7 @@ public class FactorySet {
     }
 
     public <T> Factory<T> onBuild(Class<T> type, BiConsumer<T, BuildContext<T>> consumer) {
-        BeanFactory<T> beanFactory = new BeanFactory<>(type, consumer, factoryConfiguration);
+        BeanFactory<T> beanFactory = new BeanFactory<>(this, type, consumer);
         factories.put(type, beanFactory);
         return beanFactory;
     }
@@ -49,7 +52,7 @@ public class FactorySet {
     }
 
     public <T> Factory<T> register(Class<T> type, Function<BuildContext<T>, T> supplier) {
-        ObjectFactory<T> objectFactory = new ObjectFactory<>(type, supplier, factoryConfiguration);
+        ObjectFactory<T> objectFactory = new ObjectFactory<>(this, type, supplier);
         factories.put(type, objectFactory);
         return objectFactory;
     }
@@ -63,7 +66,7 @@ public class FactorySet {
 
     @SuppressWarnings("unchecked")
     public <T> Factory<T> factory(Class<T> type) {
-        return factories.computeIfAbsent(type, k -> new DefaultBeanFactory<>(type, factoryConfiguration));
+        return factories.computeIfAbsent(type, k -> new DefaultBeanFactory<>(type, this));
     }
 
     @SuppressWarnings("unchecked")
@@ -76,5 +79,20 @@ public class FactorySet {
     public <T> Builder<T> type(Class<T> type, String extend) {
         return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
                 .computeIfAbsent(extend, s -> new DefaultBuilder<>(this, factory(type, extend)));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Builder<T> toBuild(String alias) {
+        Factory factory = aliases.get(alias);
+        if (factory == null)
+            throw new IllegalArgumentException("Factory alias '" + alias + "' does not exist");
+        return cacheBuilders.computeIfAbsent(factory.getBeanClass().getType(), t -> new HashMap<>())
+                .computeIfAbsent(null, s -> new DefaultBuilder<>(this, factory));
+    }
+
+    public <T> void aliasFactory(String alias, Factory<T> factory) {
+        if (aliases.containsKey(alias))
+            throw new IllegalArgumentException("Factory alias '" + alias + "' already exists");
+        aliases.put(alias, factory);
     }
 }
