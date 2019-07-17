@@ -19,9 +19,22 @@ class BuildContextTest {
         Product product = new Product();
 
         beanContext.assignTo(product)
-                .setPropertyInFactory("category", null);
+                .setPropertyDefaultInFactory("category", null);
 
         assertThat(product.getCategory()).isInstanceOf(Category.class);
+    }
+
+    @Test
+    void alias_has_higher_priority() {
+        factorySet.factory(Category.class).extend("object", c -> c.setName("fruit"));
+        factorySet.factory(Category.class).extend("animal", c -> c.setName("animal")).registerAlias("object");
+
+        Product product = new Product();
+
+        beanContext.assignTo(product)
+                .setPropertyDefaultInFactory("category", "object");
+
+        assertThat(product.getCategory().getName()).isEqualTo("animal");
     }
 
     @Test
@@ -30,7 +43,7 @@ class BuildContextTest {
         Product product = new Product();
 
         beanContext.assignTo(product)
-                .setPropertyInFactory("category", null);
+                .setPropertyDefaultInFactory("category", null);
 
         assertThat(product.getCategory()).isNull();
     }
@@ -39,7 +52,7 @@ class BuildContextTest {
     void should_support_set_object_supplier() {
         Product product = new Product();
         beanContext.assignTo(product)
-                .setPropertyInSupplier("name", () -> "book");
+                .setPropertyDefaultInSupplier("name", () -> "book");
 
         assertThat(product.getName()).isEqualTo("book");
     }
@@ -55,7 +68,7 @@ class BuildContextTest {
         properties.put("name", "milk");
 
         beanContext.assignTo(product)
-                .setPropertyInSupplier("name", this::getString);
+                .setPropertyDefaultInSupplier("name", this::getString);
 
         assertFalse(called);
         assertThat(product.getName()).isNull();

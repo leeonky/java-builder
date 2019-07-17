@@ -32,7 +32,7 @@ class ExtendedFactory<T> extends AbstractFactory<T> {
     }
 
     @Override
-    public Factory<T> useAlias() {
-        return useAlias(name);
+    public Factory<T> registerAlias() {
+        return registerAlias(name);
     }
 }

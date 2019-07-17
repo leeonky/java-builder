@@ -90,6 +90,10 @@ public class FactorySet {
                 .computeIfAbsent(null, s -> new DefaultBuilder<>(this, factory));
     }
 
+    public boolean hasAlias(String alias) {
+        return aliases.containsKey(alias);
+    }
+
     public <T> void aliasFactory(String alias, Factory<T> factory) {
         if (aliases.containsKey(alias))
             throw new IllegalArgumentException("Factory alias '" + alias + "' already exists");

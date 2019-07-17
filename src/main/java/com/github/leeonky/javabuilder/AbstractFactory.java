@@ -60,12 +60,12 @@ public abstract class AbstractFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Factory<T> useAlias() {
-        return useAlias(getBeanClass().getSimpleName());
+    public Factory<T> registerAlias() {
+        return registerAlias(getBeanClass().getSimpleName());
     }
 
     @Override
-    public Factory<T> useAlias(String alias) {
+    public Factory<T> registerAlias(String alias) {
         factorySet.aliasFactory(alias, this);
         return this;
     }

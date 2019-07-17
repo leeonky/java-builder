@@ -57,19 +57,21 @@ public class BuildContext<T> {
             return this;
         }
 
-        public BeanAssigner setPropertyInFactory(String property, String factory) {
+        public BeanAssigner setPropertyDefaultInFactory(String property, String factory) {
             if (notSpecified(property)) {
                 PropertyWriter<T> propertyWriter = beanClass.getPropertyWriter(property);
-                propertyWriter.setValue(object, factorySet.type(propertyWriter.getPropertyType(), factory).build());
+                Builder<?> builder = factorySet.hasAlias(factory) ?
+                        factorySet.toBuild(factory) : factorySet.type(propertyWriter.getPropertyType(), factory);
+                propertyWriter.setValue(object, builder.build());
             }
             return this;
         }
 
-        public BeanAssigner setPropertyInDefaultFactory(String property) {
-            return setPropertyInFactory(property, null);
+        public BeanAssigner setPropertyDefaultInDefaultFactory(String property) {
+            return setPropertyDefaultInFactory(property, null);
         }
 
-        public BeanAssigner setPropertyInSupplier(String property, Supplier<?> supplier) {
+        public BeanAssigner setPropertyDefaultInSupplier(String property, Supplier<?> supplier) {
             if (notSpecified(property))
                 beanClass.setPropertyValue(object, property, supplier.get());
             return this;

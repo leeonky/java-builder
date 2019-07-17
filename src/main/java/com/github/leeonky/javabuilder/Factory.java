@@ -24,7 +24,7 @@ public interface Factory<T> {
         return this;
     }
 
-    Factory<T> useAlias();
+    Factory<T> registerAlias();
 
-    Factory<T> useAlias(String alias);
+    Factory<T> registerAlias(String alias);
 }

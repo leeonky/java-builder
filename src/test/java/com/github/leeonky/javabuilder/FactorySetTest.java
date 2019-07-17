@@ -316,11 +316,23 @@ class FactorySetTest {
         assertThat(category.getName()).isEqualTo("original name");
     }
 
+    @Test
+    void should_skip_default_property_build_when_specify_value_in_properties_support_factory_name_in_property() {
+        Category category = new Category().setName("original name");
+
+        factorySet.factory(Category.class).extend("fruit", c -> c.setName("fruit"));
+        factorySet.getPropertyBuilder().registerFromType(Category.class, (cl, pw, bc) -> category.setName("changed name"));
+
+        factorySet.type(Product.class).property("category(fruit).name", "fruit").build();
+
+        assertThat(category.getName()).isEqualTo("original name");
+    }
+
     @Nested
     class Alias {
         @Test
         void should_support_save_extend_factory_alias() {
-            factorySet.factory(Bean.class).extend("Extend1", b -> b.setIntValue(1001)).useAlias();
+            factorySet.factory(Bean.class).extend("Extend1", b -> b.setIntValue(1001)).registerAlias();
 
             assertThat(factorySet.toBuild("Extend1").build())
                     .hasFieldOrPropertyWithValue("intValue", 1001);
@@ -328,7 +340,7 @@ class FactorySetTest {
 
         @Test
         void should_support_save_type_simple_name_as_alias() {
-            factorySet.onBuild(Bean.class, b -> b.setIntValue(1001)).useAlias();
+            factorySet.onBuild(Bean.class, b -> b.setIntValue(1001)).registerAlias();
 
             assertThat(factorySet.toBuild("Bean").build())
                     .hasFieldOrPropertyWithValue("intValue", 1001);
@@ -336,16 +348,16 @@ class FactorySetTest {
 
         @Test
         void should_raise_error_when_alias_exist() {
-            factorySet.onBuild(Bean.class, b -> b.setIntValue(1001)).useAlias();
+            factorySet.onBuild(Bean.class, b -> b.setIntValue(1001)).registerAlias();
 
-            RuntimeException exception = assertThrows(RuntimeException.class, () -> factorySet.factory(Bean.class).extend("Bean", b -> b.setIntValue(1001)).useAlias());
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> factorySet.factory(Bean.class).extend("Bean", b -> b.setIntValue(1001)).registerAlias());
 
             assertThat(exception).hasMessage("Factory alias 'Bean' already exists");
         }
 
         @Test
         void should_support_specify_alias_name() {
-            factorySet.onBuild(Bean.class, b -> b.setIntValue(1001)).useAlias("ABean");
+            factorySet.onBuild(Bean.class, b -> b.setIntValue(1001)).registerAlias("ABean");
 
             assertThat(factorySet.toBuild("ABean").build())
                     .hasFieldOrPropertyWithValue("intValue", 1001);
@@ -356,6 +368,16 @@ class FactorySetTest {
             RuntimeException exception = assertThrows(RuntimeException.class, () -> factorySet.toBuild("Bean"));
 
             assertThat(exception).hasMessage("Factory alias 'Bean' does not exist");
+        }
+
+        @Test
+        void alias_in_factory_name_in_property_should_has_higher_priority() {
+            factorySet.factory(Category.class).extend("object", c -> c.setName("fruit"));
+            factorySet.factory(Category.class).extend("animal", c -> c.setName("animal")).registerAlias("object");
+
+            Product product = factorySet.type(Product.class).property("category(object).level", 1).build();
+
+            assertThat(product.getCategory().getName()).isEqualTo("animal");
         }
     }
 }

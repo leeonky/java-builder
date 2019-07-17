@@ -48,15 +48,18 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T build() {
+        Map<String, Object> processed = new HashMap<>();
+        properties.forEach((k, v) -> processProperties(factory.getBeanClass(), processed, k, v));
+
         T object = factory.createObject(new BuildContext<>(factory.getSequence(),
-                properties, params, factory.getBeanClass(), factorySet));
-        properties.forEach((k, v) -> assignProperty(factory.getBeanClass(), object, k, v));
+                processed, params, factory.getBeanClass(), factorySet));
+        processed.forEach((k, v) -> factory.getBeanClass().setPropertyValue(object, k, v));
         factorySet.getDataRepository().save(object);
         return object;
     }
 
     @SuppressWarnings("unchecked")
-    private void assignProperty(BeanClass<T> beanClass, T object, String name, Object value) {
+    private void processProperties(BeanClass<T> beanClass, Map<String, Object> processed, String name, Object value) {
         if (name.contains(".")) {
             String[] propertyList = name.split("\\.", 2);
             String propertyName = propertyList[0];
@@ -68,10 +71,13 @@ class DefaultBuilder<T> implements Builder<T> {
                 factoryName = propertyFactory[1].split("\\)")[0];
             }
             PropertyWriter<T> propertyWriter = beanClass.getPropertyWriter(propertyName);
-            Builder builder = factorySet.type(propertyWriter.getPropertyType(), factoryName).property(condition, value);
-            propertyWriter.setValue(object, builder.query().orElseGet(builder::build));
+            Builder builder = ((factorySet.hasAlias(factoryName)
+                    ? factorySet.toBuild(factoryName)
+                    : factorySet.type(propertyWriter.getPropertyType(), factoryName))
+            ).property(condition, value);
+            processed.put(propertyWriter.getName(), builder.query().orElseGet(builder::build));
         } else
-            beanClass.setPropertyValue(object, name, value);
+            processed.put(name, value);
     }
 
     @Override
