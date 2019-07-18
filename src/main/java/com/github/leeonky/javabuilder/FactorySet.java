@@ -14,6 +14,7 @@ public class FactorySet {
     private final PropertyBuilder propertyBuilder = PropertyBuilder.createDefaultPropertyBuilder();
     private final DataRepository dataRepository;
     private final Map<Class, Factory> factories = new HashMap<>();
+    private final Map<Class, Factory> factoryDefinitions = new HashMap<>();
     private final Map<Class, Map<String, Builder>> cacheBuilders = new HashMap<>();
     private final Map<String, Factory> aliases = new HashMap<>();
 
@@ -98,5 +99,19 @@ public class FactorySet {
         if (aliases.containsKey(alias))
             throw new IllegalArgumentException("Factory alias '" + alias + "' already exists");
         aliases.put(alias, factory);
+    }
+
+    public <T> Factory<T> onBuild(FactoryDefinition<T> factoryDefinition) {
+        Factory<T> definitionFactory = new DefinitionFactory<>(this, factoryDefinition);
+        factoryDefinitions.put(factoryDefinition.getClass(), definitionFactory);
+        return definitionFactory;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Builder<T> toBuild(Class<? extends FactoryDefinition<T>> factoryDefinitionClass) {
+        Factory factory = factoryDefinitions.get(factoryDefinitionClass);
+        if (factory == null)
+            throw new IllegalArgumentException("FactoryDefinition '" + factoryDefinitionClass.getName() + "' does not exist");
+        return new DefaultBuilder<>(this, factory);
     }
 }
