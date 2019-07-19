@@ -29,6 +29,14 @@ class DefineFactoryInClass {
         assertThat(exception).hasMessage("Invalid FactoryDefinition 'com.github.leeonky.javabuilder.DefineFactoryInClass$InvalidFactoryDefinition' should specify generic type or override getType() method");
     }
 
+    @Test
+    void support_alias() {
+        factorySet.onBuild(new BeanFactory()).registerAlias();
+
+        assertThat(factorySet.toBuild("BeanFactory").build())
+                .hasFieldOrPropertyWithValue("intValue", 100);
+    }
+
     public static class BeanFactory extends FactoryDefinition<Bean> {
 
         @Override

@@ -18,4 +18,8 @@ public class FactoryDefinition<T> {
         throw new IllegalStateException("Invalid FactoryDefinition '" + getClass().getName() +
                 "' should specify generic type or override getType() method");
     }
+
+    public String getAlias() {
+        return getClass().getSimpleName();
+    }
 }

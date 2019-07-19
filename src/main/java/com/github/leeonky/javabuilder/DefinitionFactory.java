@@ -1,8 +1,16 @@
 package com.github.leeonky.javabuilder;
 
-public class DefinitionFactory<T> extends BeanFactory<T> {
+class DefinitionFactory<T> extends BeanFactory<T> {
 
-    public DefinitionFactory(FactorySet factorySet, FactoryDefinition<T> factoryDefinition) {
+    private final FactoryDefinition<T> factoryDefinition;
+
+    DefinitionFactory(FactorySet factorySet, FactoryDefinition<T> factoryDefinition) {
         super(factorySet, factoryDefinition.getType(), factoryDefinition::onBuild);
+        this.factoryDefinition = factoryDefinition;
+    }
+
+    @Override
+    public Factory<T> registerAlias() {
+        return registerAlias(factoryDefinition.getAlias());
     }
 }
