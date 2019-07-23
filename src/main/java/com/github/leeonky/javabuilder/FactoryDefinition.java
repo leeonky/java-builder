@@ -1,7 +1,6 @@
 package com.github.leeonky.javabuilder;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import com.github.leeonky.util.GenericType;
 
 public class FactoryDefinition<T> {
     public void onBuild(T object, BuildContext<T> beanBuildContext) {
@@ -10,13 +9,10 @@ public class FactoryDefinition<T> {
 
     @SuppressWarnings("unchecked")
     public Class<T> getType() {
-        if (getClass().getGenericSuperclass() instanceof ParameterizedType) {
-            Type type = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-            if (type instanceof Class)
-                return (Class<T>) type;
-        }
-        throw new IllegalStateException("Invalid FactoryDefinition '" + getClass().getName() +
-                "' should specify generic type or override getType() method");
+        return (Class<T>) GenericType.createGenericType(getClass().getGenericSuperclass()).getGenericTypeParameter(0)
+                .orElseThrow(() -> new IllegalStateException("Invalid FactoryDefinition '" + getClass().getName() +
+                        "' should specify generic type or override getType() method"))
+                .getRawType();
     }
 
     public String getAlias() {
