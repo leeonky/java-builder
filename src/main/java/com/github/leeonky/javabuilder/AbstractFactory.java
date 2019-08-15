@@ -17,7 +17,7 @@ public abstract class AbstractFactory<T> implements Factory<T> {
 
     public AbstractFactory(FactorySet factorySet, Class<T> type) {
         this.factorySet = factorySet;
-        beanClass = new BeanClass<>(type, factorySet.getConverter());
+        beanClass = BeanClass.create(type);
     }
 
     @Override

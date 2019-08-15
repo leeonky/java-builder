@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 class BuildContextTest {
     private final FactorySet factorySet = new FactorySet();
     private HashMap<String, Object> properties = new HashMap<>();
-    private BuildContext<Product> beanContext = new BuildContext<>(0, properties, null, new BeanClass<>(Product.class), factorySet);
+    private BuildContext<Product> beanContext = new BuildContext<>(0, properties, null, BeanClass.create(Product.class), factorySet);
     private boolean called = false;
 
     @Test

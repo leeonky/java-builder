@@ -1,5 +1,6 @@
 package com.github.leeonky.javabuilder;
 
+import com.github.leeonky.util.BeanClass;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -114,7 +115,7 @@ class FactorySetTest {
         factorySet.onBuild(Bean.class, b -> {
         });
 
-        factorySet.getConverter().addTypeConverter(Long.class, int.class, Long::intValue);
+        BeanClass.create(Bean.class).getConverter().addTypeConverter(Long.class, int.class, Long::intValue);
 
         assertThat(factorySet.type(Bean.class).properties(new HashMap<String, Object>() {{
             put("intValue", 1L);

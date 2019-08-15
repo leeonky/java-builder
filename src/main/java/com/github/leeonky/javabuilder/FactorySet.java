@@ -1,7 +1,5 @@
 package com.github.leeonky.javabuilder;
 
-import com.github.leeonky.util.Converter;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -10,7 +8,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class FactorySet {
-    private final Converter converter = Converter.createDefaultConverter();
     private final PropertyBuilder propertyBuilder = PropertyBuilder.createDefaultPropertyBuilder();
     private final DataRepository dataRepository;
     private final Map<Class, Factory> factories = new HashMap<>();
@@ -24,10 +21,6 @@ public class FactorySet {
 
     public FactorySet() {
         this(new DefaultDataRepository());
-    }
-
-    public Converter getConverter() {
-        return converter;
     }
 
     public PropertyBuilder getPropertyBuilder() {
