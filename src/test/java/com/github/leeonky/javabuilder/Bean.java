@@ -6,10 +6,7 @@ import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.Date;
 import java.util.UUID;
 
@@ -44,6 +41,8 @@ public class Bean {
     private LocalTime localTimeValue;
     private LocalDate localDateValue;
     private LocalDateTime localDateTimeValue;
+    private OffsetDateTime offsetDateTimeValue;
+    private ZonedDateTime zonedDateTimeValue;
 
     private Bean beanValue;
 

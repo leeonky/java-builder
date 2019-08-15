@@ -8,10 +8,7 @@ import java.math.BigInteger;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -189,10 +186,12 @@ class FactorySetTest {
                 .hasFieldOrPropertyWithValue("bigDecimalValue", new BigDecimal("1"))
                 .hasFieldOrPropertyWithValue("uuidValue", UUID.fromString("00000000-0000-0000-0000-000000000001"))
                 .hasFieldOrPropertyWithValue("instantValue", Instant.parse("1996-01-23T00:00:01Z"))
-                .hasFieldOrPropertyWithValue("dateValue", Date.from(Instant.parse("1996-01-23T00:00:00Z")))
+                .hasFieldOrPropertyWithValue("dateValue", Date.from(Instant.parse("1996-01-24T00:00:00Z")))
                 .hasFieldOrPropertyWithValue("localTimeValue", LocalTime.parse("00:00:01"))
-                .hasFieldOrPropertyWithValue("localDateValue", LocalDate.parse("1996-01-23"))
+                .hasFieldOrPropertyWithValue("localDateValue", LocalDate.parse("1996-01-24"))
                 .hasFieldOrPropertyWithValue("localDateTimeValue", LocalDateTime.parse("1996-01-23T00:00:01"))
+                .hasFieldOrPropertyWithValue("offsetDateTimeValue", Instant.parse("1996-01-23T00:00:01Z").atZone(ZoneId.systemDefault()).toOffsetDateTime())
+                .hasFieldOrPropertyWithValue("zonedDateTimeValue", Instant.parse("1996-01-23T00:00:01Z").atZone(ZoneId.systemDefault()))
                 .hasFieldOrPropertyWithValue("enumValue", A);
 
         assertThat(factorySet.type(Bean.class).build())
@@ -215,10 +214,12 @@ class FactorySetTest {
                 .hasFieldOrPropertyWithValue("bigDecimalValue", new BigDecimal("2"))
                 .hasFieldOrPropertyWithValue("uuidValue", UUID.fromString("00000000-0000-0000-0000-000000000002"))
                 .hasFieldOrPropertyWithValue("instantValue", Instant.parse("1996-01-23T00:00:02Z"))
-                .hasFieldOrPropertyWithValue("dateValue", Date.from(Instant.parse("1996-01-24T00:00:00Z")))
+                .hasFieldOrPropertyWithValue("dateValue", Date.from(Instant.parse("1996-01-25T00:00:00Z")))
                 .hasFieldOrPropertyWithValue("localTimeValue", LocalTime.parse("00:00:02"))
-                .hasFieldOrPropertyWithValue("localDateValue", LocalDate.parse("1996-01-24"))
+                .hasFieldOrPropertyWithValue("localDateValue", LocalDate.parse("1996-01-25"))
                 .hasFieldOrPropertyWithValue("localDateTimeValue", LocalDateTime.parse("1996-01-23T00:00:02"))
+                .hasFieldOrPropertyWithValue("offsetDateTimeValue", Instant.parse("1996-01-23T00:00:02Z").atZone(ZoneId.systemDefault()).toOffsetDateTime())
+                .hasFieldOrPropertyWithValue("zonedDateTimeValue", Instant.parse("1996-01-23T00:00:02Z").atZone(ZoneId.systemDefault()))
                 .hasFieldOrPropertyWithValue("enumValue", B);
     }
 

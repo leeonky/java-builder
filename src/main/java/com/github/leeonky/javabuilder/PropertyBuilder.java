@@ -4,10 +4,7 @@ import com.github.leeonky.util.PropertyWriter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Predicate;
@@ -43,10 +40,12 @@ public class PropertyBuilder {
                 .registerFromType(BigDecimal.class, (c, p, buildContext) -> BigDecimal.valueOf(buildContext.getSequence()))
                 .registerFromType(UUID.class, (c, p, buildContext) -> UUID.fromString(String.format("00000000-0000-0000-0000-%012d", buildContext.getSequence())))
                 .registerFromType(Instant.class, (c, p, buildContext) -> INSTANT_START.plusSeconds(buildContext.getSequence()))
-                .registerFromType(Date.class, (c, p, buildContext) -> Date.from(INSTANT_START.plus(buildContext.getSequence() - 1, ChronoUnit.DAYS)))
+                .registerFromType(Date.class, (c, p, buildContext) -> Date.from(INSTANT_START.plus(buildContext.getSequence(), ChronoUnit.DAYS)))
                 .registerFromType(LocalTime.class, (c, p, buildContext) -> LOCAL_TIME_START.plusSeconds(buildContext.getSequence()))
-                .registerFromType(LocalDate.class, (c, p, buildContext) -> LOCAL_DATE_START.plusDays(buildContext.getSequence() - 1))
+                .registerFromType(LocalDate.class, (c, p, buildContext) -> LOCAL_DATE_START.plusDays(buildContext.getSequence()))
                 .registerFromType(LocalDateTime.class, (c, p, buildContext) -> LOCAL_DATE_TIME_START.plusSeconds(buildContext.getSequence()))
+                .registerFromType(OffsetDateTime.class, (c, p, buildContext) -> INSTANT_START.plusSeconds(buildContext.getSequence()).atZone(ZoneId.systemDefault()).toOffsetDateTime())
+                .registerFromType(ZonedDateTime.class, (c, p, buildContext) -> INSTANT_START.plusSeconds(buildContext.getSequence()).atZone(ZoneId.systemDefault()))
                 .registerFromType(Enum.class, (c, p, buildContext) -> {
                     Enum[] enums = c.getEnumConstants();
                     return enums[(buildContext.getSequence() - 1) % enums.length];
