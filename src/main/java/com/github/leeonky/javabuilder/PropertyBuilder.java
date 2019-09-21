@@ -64,7 +64,7 @@ public class PropertyBuilder {
         return this;
     }
 
-    public <B> PropertyBuilder skipProperty(Predicate<PropertyWriter<B>> predicate) {
+    public PropertyBuilder skipProperty(Predicate<PropertyWriter<?>> predicate) {
         skipper.add(predicate);
         return this;
     }
