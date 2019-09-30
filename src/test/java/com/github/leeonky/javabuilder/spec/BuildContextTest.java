@@ -1,5 +1,9 @@
-package com.github.leeonky.javabuilder;
+package com.github.leeonky.javabuilder.spec;
 
+import com.github.leeonky.javabuilder.BuildContext;
+import com.github.leeonky.javabuilder.Category;
+import com.github.leeonky.javabuilder.FactorySet;
+import com.github.leeonky.javabuilder.Product;
 import com.github.leeonky.util.BeanClass;
 import org.junit.jupiter.api.Test;
 

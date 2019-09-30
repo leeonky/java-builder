@@ -37,27 +37,29 @@ public class BuildContext<T> {
         return beanClass;
     }
 
-    public BeanAssigner assignTo(T object) {
-        return new BeanAssigner(object);
+    public BeanAssigner<T> assignTo(T object) {
+        return new DefaultBeanAssigner(object);
     }
 
     public boolean notSpecified(String name) {
         return !properties.containsKey(name);
     }
 
-    class BeanAssigner {
+    class DefaultBeanAssigner implements BeanAssigner<T> {
         private final T object;
 
-        BeanAssigner(T object) {
+        DefaultBeanAssigner(T object) {
             this.object = object;
         }
 
-        BeanAssigner setDefault() {
+        @Override
+        public BeanAssigner<T> setDefault() {
             propertyBuilder.buildDefaultProperty(object, BuildContext.this);
             return this;
         }
 
-        public BeanAssigner setPropertyDefaultInFactory(String property, String factory) {
+        @Override
+        public BeanAssigner<T> setPropertyDefaultInFactory(String property, String factory) {
             if (notSpecified(property)) {
                 PropertyWriter<T> propertyWriter = beanClass.getPropertyWriter(property);
                 Builder<?> builder = factorySet.hasAlias(factory) ?
@@ -67,11 +69,13 @@ public class BuildContext<T> {
             return this;
         }
 
-        public BeanAssigner setPropertyDefaultInDefaultFactory(String property) {
+        @Override
+        public BeanAssigner<T> setPropertyDefaultInDefaultFactory(String property) {
             return setPropertyDefaultInFactory(property, null);
         }
 
-        public BeanAssigner setPropertyDefaultInSupplier(String property, Supplier<?> supplier) {
+        @Override
+        public BeanAssigner<T> setPropertyDefaultInSupplier(String property, Supplier<?> supplier) {
             if (notSpecified(property))
                 beanClass.setPropertyValue(object, property, supplier.get());
             return this;
