@@ -332,6 +332,20 @@ class FactorySetTest {
 
     @Nested
     class Alias {
+
+        @Test
+        void support_get_factory_via_alias() {
+            factorySet.factory(Bean.class).registerAlias();
+
+            assertThat(factorySet.factory("Bean")).isEqualTo(factorySet.factory(Bean.class));
+        }
+
+        @Test
+        void should_raise_error_when_no_factory_found_for_given_alias() {
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> factorySet.factory("NotExistAlias"));
+            assertThat(exception).hasMessage("There is no factory for alias [NotExistAlias]");
+        }
+
         @Test
         void should_support_save_extend_factory_alias() {
             factorySet.factory(Bean.class).extend("Extend1", b -> b.setIntValue(1001)).registerAlias();

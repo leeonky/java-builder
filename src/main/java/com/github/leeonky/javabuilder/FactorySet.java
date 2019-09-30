@@ -64,6 +64,14 @@ public class FactorySet {
     }
 
     @SuppressWarnings("unchecked")
+    public <T> Factory<T> factory(String alias) {
+        Factory factory = aliases.get(alias);
+        if (factory == null)
+            throw new IllegalArgumentException(String.format("There is no factory for alias [%s]", alias));
+        return factory;
+    }
+
+    @SuppressWarnings("unchecked")
     public <T> Builder<T> type(Class<T> type) {
         return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
                 .computeIfAbsent(null, s -> new DefaultBuilder<>(this, factory(type)));
