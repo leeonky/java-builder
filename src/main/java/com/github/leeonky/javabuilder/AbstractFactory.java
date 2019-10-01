@@ -12,6 +12,7 @@ public abstract class AbstractFactory<T> implements Factory<T> {
     protected final FactorySet factorySet;
     private final BeanClass<T> beanClass;
     private Map<String, Factory> subFactories = new HashMap<>();
+    private Map<String, BiConsumer<T, BuildContext<T>>> combinations = new HashMap<>();
 
     private int sequence = 0;
 
@@ -70,9 +71,18 @@ public abstract class AbstractFactory<T> implements Factory<T> {
         return this;
     }
 
-    static class NoFactoryException extends RuntimeException {
-        NoFactoryException(String extend, Class<?> type) {
-            super("Factory[" + extend + "] for " + type.getName() + " dose not exist");
-        }
+    @Override
+    public Factory<T> canCombine(String name, BiConsumer<T, BuildContext<T>> combination) {
+        if (combinations.containsKey(name))
+            throw new IllegalArgumentException(String.format("Combination [%s] exists", name));
+        combinations.put(name, combination);
+        return this;
+    }
+
+    @Override
+    public void combineBuild(T object, String name, BuildContext<T> buildContext) {
+        combinations.getOrDefault(name, (o, b) -> {
+            throw new IllegalArgumentException(String.format("Combination [%s] does not exist", name));
+        }).accept(object, buildContext);
     }
 }

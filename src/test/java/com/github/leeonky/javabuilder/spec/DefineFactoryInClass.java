@@ -24,6 +24,7 @@ class DefineFactoryInClass {
     @Test
     void should_raise_error_when_no_factory_definition() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> factorySet.toBuild(BeanFactory.class));
+
         assertThat(exception).hasMessage("FactoryDefinition 'com.github.leeonky.javabuilder.spec.DefineFactoryInClass$BeanFactory' does not exist");
     }
 

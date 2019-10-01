@@ -19,4 +19,6 @@ public interface Builder<T> {
     Optional<T> query();
 
     Builder<T> property(String name, Object value);
+
+    Builder<T> combine(String name);
 }

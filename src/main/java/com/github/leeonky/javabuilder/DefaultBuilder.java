@@ -3,16 +3,14 @@ package com.github.leeonky.javabuilder;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 class DefaultBuilder<T> implements Builder<T> {
     private final Factory<T> factory;
     private final FactorySet factorySet;
     private Map<String, Object> params = new HashMap<>();
     private Map<String, Object> properties = new HashMap<>();
+    private List<String> combinations = new ArrayList<>();
 
     DefaultBuilder(FactorySet factorySet, Factory<T> factory) {
         this.factory = Objects.requireNonNull(factory);
@@ -22,6 +20,8 @@ class DefaultBuilder<T> implements Builder<T> {
     private DefaultBuilder<T> copy() {
         DefaultBuilder<T> newBuilder = new DefaultBuilder<>(factorySet, factory);
         newBuilder.params.putAll(params);
+        newBuilder.properties.putAll(properties);
+        newBuilder.combinations.addAll(combinations);
         return newBuilder;
     }
 
@@ -47,12 +47,21 @@ class DefaultBuilder<T> implements Builder<T> {
     }
 
     @Override
+    public Builder<T> combine(String name) {
+        DefaultBuilder<T> builder = copy();
+        builder.combinations.add(name);
+        return builder;
+    }
+
+    @Override
     public T build() {
         Map<String, Object> processed = new HashMap<>();
         properties.forEach((k, v) -> processProperties(factory.getBeanClass(), processed, k, v));
 
-        T object = factory.createObject(new BuildContext<>(factory.getSequence(),
-                processed, params, factory.getBeanClass(), factorySet));
+        BuildContext<T> buildContext = new BuildContext<>(factory.getSequence(),
+                processed, params, factory.getBeanClass(), factorySet);
+        T object = factory.createObject(buildContext);
+        combinations.forEach(combination -> factory.combineBuild(object, combination, buildContext));
         processed.forEach((k, v) -> factory.getBeanClass().setPropertyValue(object, k, v));
         return factorySet.getDataRepository().save(object);
     }

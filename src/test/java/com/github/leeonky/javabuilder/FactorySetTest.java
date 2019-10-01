@@ -396,4 +396,44 @@ class FactorySetTest {
             assertThat(product.getCategory().getName()).isEqualTo("animal");
         }
     }
+
+    @Nested
+    class Combination {
+
+        @Test
+        void support_combinations() {
+            factorySet.onBuild(Bean.class, b -> b.setIntValue(100))
+                    .canCombine("combine1", b -> b.setStringValue("cob1"))
+                    .canCombine("combine2", b -> b.setLongValue(200L));
+
+            assertThat(factorySet.type(Bean.class).combine("combine1").build())
+                    .hasFieldOrPropertyWithValue("intValue", 100)
+                    .hasFieldOrPropertyWithValue("stringValue", "cob1")
+            ;
+
+            assertThat(factorySet.type(Bean.class).combine("combine2").build())
+                    .hasFieldOrPropertyWithValue("intValue", 100)
+                    .hasFieldOrPropertyWithValue("longValue", 200L)
+            ;
+        }
+
+        @Test
+        void should_raise_error_when_duplicated_combination() {
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+                factorySet.onBuild(Bean.class, b -> b.setIntValue(100))
+                        .canCombine("combine1", b -> b.setStringValue("cob1"))
+                        .canCombine("combine1", b -> b.setStringValue("cob1"));
+            });
+
+            assertThat(exception).hasMessage("Combination [combine1] exists");
+        }
+
+        @Test
+        void should_raise_error_when_combination_not_exist_in_build() {
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> factorySet.type(Bean.class).combine("not exist").build());
+
+            assertThat(exception).hasMessage("Combination [not exist] does not exist");
+        }
+    }
 }

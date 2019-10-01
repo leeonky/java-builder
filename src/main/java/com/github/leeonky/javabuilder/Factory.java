@@ -27,4 +27,12 @@ public interface Factory<T> {
     Factory<T> registerAlias();
 
     Factory<T> registerAlias(String alias);
+
+    Factory<T> canCombine(String name, BiConsumer<T, BuildContext<T>> combination);
+
+    default Factory<T> canCombine(String name, Consumer<T> combination) {
+        return canCombine(name, (o, buildContext) -> combination.accept(o));
+    }
+
+    void combineBuild(T object, String name, BuildContext<T> buildContext);
 }
