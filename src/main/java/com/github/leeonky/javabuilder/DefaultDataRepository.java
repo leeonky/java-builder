@@ -7,9 +7,10 @@ class DefaultDataRepository extends AbstractDataRepository {
     private Map<Class<?>, Set<Object>> repo = new HashMap<>();
 
     @Override
-    public void save(Object object) {
+    public <T> T save(T object) {
         if (object != null)
             repo.computeIfAbsent(object.getClass(), c -> new HashSet<>()).add(object);
+        return object;
     }
 
     @Override

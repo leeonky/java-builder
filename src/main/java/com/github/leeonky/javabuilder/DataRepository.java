@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface DataRepository {
-    void save(Object object);
+    <T> T save(T object);
 
     <T> Optional<T> query(BeanClass<T> beanClass, Map<String, Object> properties);
 

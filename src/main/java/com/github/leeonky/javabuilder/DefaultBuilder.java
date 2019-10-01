@@ -54,8 +54,7 @@ class DefaultBuilder<T> implements Builder<T> {
         T object = factory.createObject(new BuildContext<>(factory.getSequence(),
                 processed, params, factory.getBeanClass(), factorySet));
         processed.forEach((k, v) -> factory.getBeanClass().setPropertyValue(object, k, v));
-        factorySet.getDataRepository().save(object);
-        return object;
+        return factorySet.getDataRepository().save(object);
     }
 
     @SuppressWarnings("unchecked")
