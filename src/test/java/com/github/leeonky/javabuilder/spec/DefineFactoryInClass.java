@@ -43,14 +43,28 @@ class DefineFactoryInClass {
                 .hasFieldOrPropertyWithValue("intValue", 100);
     }
 
+    @Test
+    void support_define_combination_in_definition_class() {
+        factorySet.onBuild(new BeanFactory());
+
+        assertThat(factorySet.toBuild(BeanFactory.class).combine("combine1").build())
+                .hasFieldOrPropertyWithValue("intValue", 100)
+                .hasFieldOrPropertyWithValue("stringValue", "cob1");
+    }
+
     public static class BeanFactory extends FactoryDefinition<Bean> {
 
         @Override
         public void onBuild(Bean object, BuildContext<Bean> beanBuildContext) {
             object.setIntValue(100);
         }
+
+        public void combine1(Bean object, BuildContext<Bean> beanBuildContext) {
+            object.setStringValue("cob1");
+        }
     }
 
     public static class InvalidFactoryDefinition<T> extends FactoryDefinition<T> {
     }
 }
+

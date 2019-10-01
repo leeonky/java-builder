@@ -1,5 +1,9 @@
 package com.github.leeonky.javabuilder;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.stream.Stream;
+
 class DefinitionFactory<T> extends BeanFactory<T> {
 
     private final FactoryDefinition<T> factoryDefinition;
@@ -7,6 +11,23 @@ class DefinitionFactory<T> extends BeanFactory<T> {
     DefinitionFactory(FactorySet factorySet, FactoryDefinition<T> factoryDefinition) {
         super(factorySet, factoryDefinition.getType(), factoryDefinition::onBuild);
         this.factoryDefinition = factoryDefinition;
+
+        Stream.of(factoryDefinition.getClass().getMethods())
+                .filter(m -> isCombination(factoryDefinition, m))
+                .forEach(m -> canCombine(m.getName(), (o, b) -> {
+                    try {
+                        m.invoke(factoryDefinition, o, b);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }));
+    }
+
+    private boolean isCombination(FactoryDefinition<T> factoryDefinition, Method m) {
+        return m.getParameters().length == 2
+                && m.getParameterTypes()[0].isAssignableFrom(factoryDefinition.getType())
+                && m.getParameterTypes()[1] == BuildContext.class
+                && !m.getName().equals("onBuild");
     }
 
     @Override
