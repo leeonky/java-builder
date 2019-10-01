@@ -12,7 +12,6 @@ public class FactorySet {
     private final DataRepository dataRepository;
     private final Map<Class, Factory> factories = new HashMap<>();
     private final Map<Class, Factory> factoryDefinitions = new HashMap<>();
-    private final Map<Class, Map<String, Builder>> cacheBuilders = new HashMap<>();
     private final Map<String, Factory> aliases = new HashMap<>();
 
     public FactorySet(DataRepository dataRepository) {
@@ -71,25 +70,20 @@ public class FactorySet {
         return factory;
     }
 
-    @SuppressWarnings("unchecked")
     public <T> Builder<T> type(Class<T> type) {
-        return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
-                .computeIfAbsent(null, s -> new DefaultBuilder<>(this, factory(type)));
+        return new DefaultBuilder<>(this, factory(type));
     }
 
-    @SuppressWarnings("unchecked")
     public <T> Builder<T> type(Class<T> type, String extend) {
-        return cacheBuilders.computeIfAbsent(type, t -> new HashMap<>())
-                .computeIfAbsent(extend, s -> new DefaultBuilder<>(this, factory(type, extend)));
+        return new DefaultBuilder<>(this, factory(type, extend));
     }
 
     @SuppressWarnings("unchecked")
     public <T> Builder<T> toBuild(String alias) {
-        Factory factory = aliases.get(alias);
+        Factory<T> factory = aliases.get(alias);
         if (factory == null)
             throw new IllegalArgumentException("Factory alias '" + alias + "' does not exist");
-        return cacheBuilders.computeIfAbsent(factory.getBeanClass().getType(), t -> new HashMap<>())
-                .computeIfAbsent(null, s -> new DefaultBuilder<>(this, factory));
+        return new DefaultBuilder<>(this, factory);
     }
 
     public boolean hasAlias(String alias) {

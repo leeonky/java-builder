@@ -119,3 +119,11 @@ println(factorySet.type(Bean.class).properties(new HashMap<String, Object>{{
     put("intValue", 100L);
 }}).build().getIntValue());
 ```
+
+### Data repository
+
+### Factory alias
+
+### Definition class
+
+### Combined build

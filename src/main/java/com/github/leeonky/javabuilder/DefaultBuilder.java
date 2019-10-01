@@ -55,6 +55,11 @@ class DefaultBuilder<T> implements Builder<T> {
 
     @Override
     public T build() {
+        return factorySet.getDataRepository().save(buildWithoutSave());
+    }
+
+    @Override
+    public T buildWithoutSave() {
         Map<String, Object> processed = new HashMap<>();
         properties.forEach((k, v) -> processProperties(factory.getBeanClass(), processed, k, v));
 
@@ -63,7 +68,7 @@ class DefaultBuilder<T> implements Builder<T> {
         T object = factory.createObject(buildContext);
         combinations.forEach(combination -> factory.combineBuild(object, combination, buildContext));
         processed.forEach((k, v) -> factory.getBeanClass().setPropertyValue(object, k, v));
-        return factorySet.getDataRepository().save(object);
+        return object;
     }
 
     @SuppressWarnings("unchecked")

@@ -22,6 +22,15 @@ class DefineFactoryInClass {
     }
 
     @Test
+    void should_call_default_factory_builder_first() {
+        factorySet.onBuild(Bean.class, b -> b.setStringValue("default"));
+        factorySet.onBuild(new BeanFactory());
+
+        assertThat(factorySet.toBuild(BeanFactory.class).build())
+                .hasFieldOrPropertyWithValue("stringValue", "default");
+    }
+
+    @Test
     void should_raise_error_when_no_factory_definition() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> factorySet.toBuild(BeanFactory.class));
 

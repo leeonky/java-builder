@@ -2,14 +2,16 @@ package com.github.leeonky.javabuilder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
-class DefinitionFactory<T> extends BeanFactory<T> {
-
+class DefinitionFactory<T> extends AbstractFactory<T> {
     private final FactoryDefinition<T> factoryDefinition;
+    private final BiConsumer<T, BuildContext<T>> consumer;
 
     DefinitionFactory(FactorySet factorySet, FactoryDefinition<T> factoryDefinition) {
-        super(factorySet, factoryDefinition.getType(), factoryDefinition::onBuild);
+        super(factorySet, factoryDefinition.getType());
+        consumer = factoryDefinition::onBuild;
         this.factoryDefinition = factoryDefinition;
 
         Stream.of(factoryDefinition.getClass().getMethods())
@@ -28,6 +30,13 @@ class DefinitionFactory<T> extends BeanFactory<T> {
                 && m.getParameterTypes()[0].isAssignableFrom(factoryDefinition.getType())
                 && m.getParameterTypes()[1] == BuildContext.class
                 && !m.getName().equals("onBuild");
+    }
+
+    @Override
+    public T createObject(BuildContext<T> buildContext) {
+        T instance = factorySet.type(factoryDefinition.getType()).buildWithoutSave();
+        consumer.accept(instance, buildContext);
+        return instance;
     }
 
     @Override

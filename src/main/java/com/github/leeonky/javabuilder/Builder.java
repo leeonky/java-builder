@@ -12,6 +12,8 @@ public interface Builder<T> {
 
     T build();
 
+    T buildWithoutSave();
+
     default Stream<T> build(int count) {
         return IntStream.range(0, count).mapToObj(i -> build());
     }
