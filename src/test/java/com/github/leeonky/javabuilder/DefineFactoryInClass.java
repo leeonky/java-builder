@@ -85,6 +85,9 @@ class DefineFactoryInClass {
     }
 
     public static class InvalidFactoryDefinition<T> extends FactoryDefinition<T> {
+        @Override
+        public void onBuild(T object, BuildContext<T> beanBuildContext) {
+        }
     }
 
     public static class BeanFactoryWithSeq extends FactoryDefinition<Bean> {
