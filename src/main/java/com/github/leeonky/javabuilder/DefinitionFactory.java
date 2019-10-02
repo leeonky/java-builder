@@ -34,7 +34,7 @@ class DefinitionFactory<T> extends AbstractFactory<T> {
 
     @Override
     public T createObject(BuildContext<T> buildContext) {
-        T instance = factorySet.type(factoryDefinition.getType()).buildWithoutSave();
+        T instance = factorySet.factory(factoryDefinition.getType()).createObject(buildContext);
         consumer.accept(instance, buildContext);
         return instance;
     }

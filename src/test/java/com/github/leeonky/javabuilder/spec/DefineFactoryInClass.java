@@ -61,6 +61,21 @@ class DefineFactoryInClass {
                 .hasFieldOrPropertyWithValue("stringValue", "cob1");
     }
 
+    @Test
+    void should_use_same_sequence_references_for_same_type() {
+        factorySet.onBuild(new BeanFactoryWithSeq());
+        factorySet.onBuild(new BeanFactoryWithSeq2());
+
+        assertThat(factorySet.toBuild(BeanFactoryWithSeq.class).build())
+                .hasFieldOrPropertyWithValue("intValue", 1);
+
+        assertThat(factorySet.toBuild(BeanFactoryWithSeq2.class).build())
+                .hasFieldOrPropertyWithValue("intValue", 2);
+
+        assertThat(factorySet.type(Bean.class).build())
+                .hasFieldOrPropertyWithValue("intValue", 3);
+    }
+
     public static class BeanFactory extends FactoryDefinition<Bean> {
 
         @Override
@@ -74,6 +89,22 @@ class DefineFactoryInClass {
     }
 
     public static class InvalidFactoryDefinition<T> extends FactoryDefinition<T> {
+    }
+
+    public static class BeanFactoryWithSeq extends FactoryDefinition<Bean> {
+
+        @Override
+        public void onBuild(Bean object, BuildContext<Bean> beanBuildContext) {
+            object.setIntValue(beanBuildContext.getSequence());
+        }
+    }
+
+    public static class BeanFactoryWithSeq2 extends FactoryDefinition<Bean> {
+
+        @Override
+        public void onBuild(Bean object, BuildContext<Bean> beanBuildContext) {
+            object.setIntValue(beanBuildContext.getSequence());
+        }
     }
 }
 

@@ -14,8 +14,6 @@ public abstract class AbstractFactory<T> implements Factory<T> {
     private Map<String, Factory> subFactories = new HashMap<>();
     private Map<String, BiConsumer<T, BuildContext<T>>> combinations = new HashMap<>();
 
-    private int sequence = 0;
-
     public AbstractFactory(FactorySet factorySet, Class<T> type) {
         this.factorySet = factorySet;
         beanClass = BeanClass.create(type);
@@ -23,7 +21,7 @@ public abstract class AbstractFactory<T> implements Factory<T> {
 
     @Override
     public int getSequence() {
-        return ++sequence;
+        return factorySet.getTypeSequence(beanClass.getType());
     }
 
     @Override

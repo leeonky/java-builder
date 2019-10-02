@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class FactorySet {
+    private final Map<Class<?>, Integer> sequences = new HashMap<>();
     private final PropertyBuilder propertyBuilder = PropertyBuilder.createDefaultPropertyBuilder();
     private final DataRepository dataRepository;
     private final Map<Class, Factory> factories = new HashMap<>();
@@ -20,6 +21,14 @@ public class FactorySet {
 
     public FactorySet() {
         this(new DefaultDataRepository());
+    }
+
+    public int getTypeSequence(Class<?> type) {
+        synchronized (Factory.class) {
+            int sequence = sequences.getOrDefault(type, 0) + 1;
+            sequences.put(type, sequence);
+            return sequence;
+        }
     }
 
     public PropertyBuilder getPropertyBuilder() {
