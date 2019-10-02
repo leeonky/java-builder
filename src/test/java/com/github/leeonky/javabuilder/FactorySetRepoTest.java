@@ -1,6 +1,5 @@
-package com.github.leeonky.javabuilder.spec;
+package com.github.leeonky.javabuilder;
 
-import com.github.leeonky.javabuilder.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
