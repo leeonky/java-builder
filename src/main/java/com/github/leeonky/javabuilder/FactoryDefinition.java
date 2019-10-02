@@ -2,10 +2,8 @@ package com.github.leeonky.javabuilder;
 
 import com.github.leeonky.util.GenericType;
 
-public class FactoryDefinition<T> {
-    public void onBuild(T object, BuildContext<T> beanBuildContext) {
-        beanBuildContext.assignTo(object).setDefault();
-    }
+public abstract class FactoryDefinition<T> {
+    public abstract void onBuild(T object, BuildContext<T> beanBuildContext);
 
     @SuppressWarnings("unchecked")
     public Class<T> getType() {
