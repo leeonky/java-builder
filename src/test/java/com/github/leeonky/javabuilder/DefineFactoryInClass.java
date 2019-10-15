@@ -42,7 +42,7 @@ class DefineFactoryInClass {
 
     @Test
     void support_alias() {
-        factorySet.onBuild(new BeanFactory()).registerAlias();
+        factorySet.onBuild(new BeanFactory());
 
         assertThat(factorySet.toBuild("BeanFactory").build())
                 .hasFieldOrPropertyWithValue("intValue", 100);

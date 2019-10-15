@@ -106,8 +106,10 @@ public class FactorySet {
     }
 
     public <T> Factory<T> onBuild(FactoryDefinition<T> factoryDefinition) {
-        Factory<T> definitionFactory = new DefinitionFactory<>(this, factoryDefinition);
+        DefinitionFactory<T> definitionFactory = new DefinitionFactory<>(this, factoryDefinition);
         factoryDefinitions.put(factoryDefinition.getClass(), definitionFactory);
+        if (factoryDefinition.getAlias() != null && !factoryDefinition.getAlias().isEmpty())
+            definitionFactory.registerAlias(factoryDefinition.getAlias());
         return definitionFactory;
     }
 
