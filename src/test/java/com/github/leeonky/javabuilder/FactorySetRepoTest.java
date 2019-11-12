@@ -89,5 +89,14 @@ class FactorySetRepoTest {
 
             assertThat(order.getProduct().getName()).isEqualTo("Java");
         }
+
+        @Test
+        void support_build_reference_object_first() {
+            Product product = factorySet.type(Product.class).build();//NullPointerException issue
+            Order order = factorySet.type(Order.class).property("product.category.name", "book").build();
+
+            assertThat(order).isInstanceOf(Order.class);
+            assertThat(order.getProduct()).isNotEqualTo(product);
+        }
     }
 }

@@ -21,6 +21,8 @@ public abstract class AbstractDataRepository implements DataRepository {
 
     @SuppressWarnings("unchecked")
     private boolean notEquals(BeanClass<?> beanClass, Object o, String key, Object target) {
+        if (o == null)
+            return true;
         if (key.contains(".")) {
             String[] propertyList = key.split("\\.", 2);
             String propertyName = propertyList[0];
