@@ -1,123 +1,43 @@
 package com.github.leeonky.javabuilder;
 
+import com.github.leeonky.util.BeanClass;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class FactorySet {
-    private final Map<Class<?>, Integer> sequences = new HashMap<>();
-    private final PropertyBuilder propertyBuilder = PropertyBuilder.createDefaultPropertyBuilder();
-    private final DataRepository dataRepository;
-    private final Map<Class, Factory> factories = new HashMap<>();
-    private final Map<Class, Factory> factoryDefinitions = new HashMap<>();
-    private final Map<String, Factory> aliases = new HashMap<>();
+    private final Map<Class<?>, Factory<?>> factories = new HashMap<>();
+    private final Map<Class<?>, Factory<?>> beanSpecificationMap = new HashMap<>();
 
-    public FactorySet(DataRepository dataRepository) {
-        this.dataRepository = dataRepository;
-    }
-
-    public FactorySet() {
-        this(new DefaultDataRepository());
-    }
-
-    public int getTypeSequence(Class<?> type) {
-        synchronized (Factory.class) {
-            int sequence = sequences.getOrDefault(type, 0) + 1;
-            sequences.put(type, sequence);
-            return sequence;
+    public <T> FactorySet onBuild(Class<T> type, Consumer<T> build) {
+        try {
+            type.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException("No default constructor of class: " + type.getName());
         }
-    }
-
-    public PropertyBuilder getPropertyBuilder() {
-        return propertyBuilder;
-    }
-
-    public DataRepository getDataRepository() {
-        return dataRepository;
-    }
-
-    public <T> Factory<T> onBuild(Class<T> type, Consumer<T> consumer) {
-        return onBuild(type, (obj, buildContext) -> consumer.accept(obj));
-    }
-
-    public <T> Factory<T> onBuild(Class<T> type, BiConsumer<T, BuildContext<T>> consumer) {
-        BeanFactory<T> beanFactory = new BeanFactory<>(this, type, consumer);
-        factories.put(type, beanFactory);
-        return beanFactory;
-    }
-
-    public <T> Factory<T> register(Class<T> type, Supplier<T> supplier) {
-        return register(type, (buildContext) -> supplier.get());
-    }
-
-    public <T> Factory<T> register(Class<T> type, Function<BuildContext<T>, T> supplier) {
-        ObjectFactory<T> objectFactory = new ObjectFactory<>(this, type, supplier);
-        factories.put(type, objectFactory);
-        return objectFactory;
-    }
-
-    public <T> Factory<T> factory(Class<T> type, String extend) {
-        Factory<T> factory = factory(type);
-        if (extend != null)
-            factory = factory.query(extend);
-        return factory;
+        factories.put(type, new BeanFactory<>(type, build));
+        return this;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Factory<T> factory(Class<T> type) {
-        return factories.computeIfAbsent(type, k -> new DefaultBeanFactory<>(type, this));
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> Factory<T> factory(String alias) {
-        Factory factory = aliases.get(alias);
-        if (factory == null)
-            throw new IllegalArgumentException(String.format("There is no factory for alias [%s]", alias));
-        return factory;
-    }
-
     public <T> Builder<T> type(Class<T> type) {
-        return new DefaultBuilder<>(this, factory(type));
+        return new Builder<>((Factory<T>) factories.get(type));
     }
 
-    public <T> Builder<T> type(Class<T> type, String extend) {
-        return new DefaultBuilder<>(this, factory(type, extend));
+    public <T> FactorySet register(Class<T> type, Supplier<T> supplier) {
+        factories.put(type, new BeanWithNoDefaultConstructorFactory<>(supplier));
+        return this;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> Builder<T> toBuild(String alias) {
-        Factory<T> factory = aliases.get(alias);
-        if (factory == null)
-            throw new IllegalArgumentException("Factory alias '" + alias + "' does not exist");
-        return new DefaultBuilder<>(this, factory);
-    }
-
-    public boolean hasAlias(String alias) {
-        return aliases.containsKey(alias);
-    }
-
-    public <T> void aliasFactory(String alias, Factory<T> factory) {
-        if (aliases.containsKey(alias))
-            throw new IllegalArgumentException("Factory alias '" + alias + "' already exists");
-        aliases.put(alias, factory);
-    }
-
-    public <T> Factory<T> onBuild(FactoryDefinition<T> factoryDefinition) {
-        DefinitionFactory<T> definitionFactory = new DefinitionFactory<>(this, factoryDefinition);
-        factoryDefinitions.put(factoryDefinition.getClass(), definitionFactory);
-        if (factoryDefinition.getAlias() != null && !factoryDefinition.getAlias().isEmpty())
-            definitionFactory.registerAlias(factoryDefinition.getAlias());
-        return definitionFactory;
+    public <B extends BeanSpecification<T>, T> FactorySet onBuild(Class<B> definition) {
+        beanSpecificationMap.put(definition, new BeanSpecificationFactory<>(BeanClass.newInstance(definition)));
+        return this;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Builder<T> toBuild(Class<? extends FactoryDefinition<T>> factoryDefinitionClass) {
-        Factory factory = factoryDefinitions.get(factoryDefinitionClass);
-        if (factory == null)
-            throw new IllegalArgumentException("FactoryDefinition '" + factoryDefinitionClass.getName() + "' does not exist");
-        return new DefaultBuilder<>(this, factory);
+    public <B extends BeanSpecification<T>, T> Builder<T> toBuild(Class<B> definition) {
+        return new Builder<>((Factory<T>) beanSpecificationMap.get(definition));
     }
 }

@@ -2,8 +2,8 @@ package com.github.leeonky.javabuilder;
 
 import com.github.leeonky.util.GenericType;
 
-public abstract class FactoryDefinition<T> {
-    public void onBuild(T object, BuildContext<T> beanBuildContext) {
+public abstract class BeanSpecification<T> {
+    public void specifications(SpecificationBuilder<T> specificationBuilder) {
     }
 
     @SuppressWarnings("unchecked")
@@ -12,9 +12,5 @@ public abstract class FactoryDefinition<T> {
                 .orElseThrow(() -> new IllegalStateException("Invalid FactoryDefinition '" + getClass().getName() +
                         "' should specify generic type or override getType() method"))
                 .getRawType();
-    }
-
-    public String getAlias() {
-        return getClass().getSimpleName();
     }
 }

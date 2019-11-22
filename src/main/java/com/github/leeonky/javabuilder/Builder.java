@@ -1,26 +1,42 @@
 package com.github.leeonky.javabuilder;
 
+import com.github.leeonky.util.BeanClass;
+
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
-public interface Builder<T> {
-    Builder<T> params(Map<String, ?> params);
+public class Builder<T> {
+    private final Factory<T> factory;
+    private final Map<String, Object> properties = new HashMap<>();
 
-    Builder<T> properties(Map<String, ?> properties);
-
-    T build();
-
-    T buildWithoutSave();
-
-    default Stream<T> build(int count) {
-        return IntStream.range(0, count).mapToObj(i -> build());
+    public Builder(Factory<T> factory) {
+        this.factory = factory;
     }
 
-    Optional<T> query();
+    private Builder<T> copy() {
+        Builder<T> newBuilder = new Builder<>(factory);
+        newBuilder.properties.putAll(properties);
+        return newBuilder;
+    }
 
-    Builder<T> property(String name, Object value);
 
-    Builder<T> combine(String name);
+    public Builder<T> property(String property, Object value) {
+        Builder<T> builder = copy();
+        builder.properties.put(property, value);
+        return builder;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T build() {
+        T object = factory.newInstance();
+        BeanClass<T> beanClass = (BeanClass<T>) BeanClass.create(object.getClass());
+        properties.forEach((k, v) -> beanClass.setPropertyValue(object, k, v));
+        return object;
+    }
+
+    public Builder<T> properties(Map<String, Object> properties) {
+        Builder<T> builder = copy();
+        builder.properties.putAll(properties);
+        return builder;
+    }
 }

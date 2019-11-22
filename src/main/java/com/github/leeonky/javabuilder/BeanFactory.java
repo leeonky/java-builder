@@ -1,32 +1,22 @@
 package com.github.leeonky.javabuilder;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.function.BiConsumer;
+import com.github.leeonky.util.BeanClass;
 
-class BeanFactory<T> extends AbstractFactory<T> {
-    private final BiConsumer<T, BuildContext<T>> consumer;
-    private final Constructor<T> constructor;
+import java.util.function.Consumer;
 
-    BeanFactory(FactorySet factorySet, Class<T> type, BiConsumer<T, BuildContext<T>> consumer) {
-        super(factorySet, type);
-        try {
-            constructor = type.getDeclaredConstructor();
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException("No default constructor of class: " + type.getName(), e);
-        }
-        this.consumer = consumer;
+class BeanFactory<T> implements Factory<T> {
+    private final Class<T> type;
+    private final Consumer<T> build;
+
+    BeanFactory(Class<T> type, Consumer<T> build) {
+        this.type = type;
+        this.build = build;
     }
 
     @Override
-    public T createObject(BuildContext<T> buildContext) {
-        T instance;
-        try {
-            instance = constructor.newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException(e);
-        }
-        consumer.accept(instance, buildContext);
+    public T newInstance() {
+        T instance = BeanClass.newInstance(type);
+        build.accept(instance);
         return instance;
     }
 }
