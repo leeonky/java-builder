@@ -11,11 +11,16 @@ class BeanSpecificationFactory<T> implements Factory<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public T newInstance() {
+    public T newInstance(BuildContext<T> buildContext) {
         T instance = BeanClass.newInstance(beanSpecification.getType());
         SpecificationBuilder<T> specificationBuilder = new SpecificationBuilder<>((BeanClass<T>) BeanClass.create(instance.getClass()));
         beanSpecification.specifications(specificationBuilder);
         specificationBuilder.collectSpecifications().forEach(spec -> spec.apply(instance));
         return instance;
+    }
+
+    @Override
+    public BeanClass<T> getBeanClass() {
+        return BeanClass.create(beanSpecification.getType());
     }
 }

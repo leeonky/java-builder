@@ -7,14 +7,16 @@ import java.util.Map;
 
 public class Builder<T> {
     private final Factory<T> factory;
+    private final FactorySet factorySet;
     private final Map<String, Object> properties = new HashMap<>();
 
-    public Builder(Factory<T> factory) {
+    public Builder(Factory<T> factory, FactorySet factorySet) {
         this.factory = factory;
+        this.factorySet = factorySet;
     }
 
     private Builder<T> copy() {
-        Builder<T> newBuilder = new Builder<>(factory);
+        Builder<T> newBuilder = new Builder<>(factory, factorySet);
         newBuilder.properties.putAll(properties);
         return newBuilder;
     }
@@ -28,7 +30,7 @@ public class Builder<T> {
 
     @SuppressWarnings("unchecked")
     public T build() {
-        T object = factory.newInstance();
+        T object = factory.newInstance(new BuildContext<>(factorySet.getSequence(factory.getBeanClass().getType())));
         BeanClass<T> beanClass = (BeanClass<T>) BeanClass.create(object.getClass());
         properties.forEach((k, v) -> beanClass.setPropertyValue(object, k, v));
         return object;

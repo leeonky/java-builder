@@ -1,5 +1,6 @@
 package com.github.leeonky.javabuilder.spec;
 
+import com.github.leeonky.javabuilder.Builder;
 import com.github.leeonky.javabuilder.FactorySet;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,6 +30,15 @@ class BuildThroughBeanClass {
 
         assertThat(factorySet.type(Bean.class).property("stringValue", "new string value").build())
                 .hasFieldOrPropertyWithValue("stringValue", "new string value");
+    }
+
+    @Test
+    void register_with_sequence() {
+        factorySet.onBuild(Bean.class, (bean, buildContext) -> bean.setStringValue("Hello" + buildContext.getSequence()));
+        Builder<Bean> builder = factorySet.type(Bean.class);
+
+        assertThat(builder.build().getStringValue()).isEqualTo("Hello1");
+        assertThat(builder.build().getStringValue()).isEqualTo("Hello2");
     }
 
     @Test
