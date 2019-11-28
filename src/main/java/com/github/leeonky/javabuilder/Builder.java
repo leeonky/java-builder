@@ -31,7 +31,7 @@ public class Builder<T> {
 
     @SuppressWarnings("unchecked")
     public T build() {
-        T object = factory.newInstance(new BuildingContext<>(factorySet.getSequence(factory.getBeanClass().getType()), params));
+        T object = factory.newInstance(new BuildingContext<>(factorySet.getSequence(factory.getBeanClass().getType()), params, properties, factory.getBeanClass(), factorySet));
         BeanClass<T> beanClass = (BeanClass<T>) BeanClass.create(object.getClass());
         properties.forEach((k, v) -> beanClass.setPropertyValue(object, k, v));
         return object;

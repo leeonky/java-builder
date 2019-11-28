@@ -10,9 +10,14 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class FactorySet {
+    private final PropertyBuilder propertyBuilder = PropertyBuilder.createDefaultPropertyBuilder();
     private final Map<Class<?>, Factory<?>> factories = new HashMap<>();
     private final Map<Class<?>, Factory<?>> beanSpecificationMap = new HashMap<>();
     private final Map<Class<?>, Integer> sequences = new HashMap<>();
+
+    public PropertyBuilder getPropertyBuilder() {
+        return propertyBuilder;
+    }
 
     public <T> FactorySet onBuild(Class<T> type, Consumer<T> build) {
         return onBuild(type, (o, context) -> build.accept(o));
@@ -30,7 +35,8 @@ public class FactorySet {
 
     @SuppressWarnings("unchecked")
     public <T> Builder<T> type(Class<T> type) {
-        return new Builder<>((Factory<T>) factories.get(type), this);
+        Factory<T> factory = (Factory<T>) factories.getOrDefault(type, new DefaultBeanFactory<>(type));
+        return new Builder<>(factory, this);
     }
 
     public <T> FactorySet register(Class<T> type, Supplier<T> supplier) {
