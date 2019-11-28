@@ -12,7 +12,7 @@ class BeanSpecificationFactory<T> extends AbstractFactory<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public T newInstance(BuildContext<T> buildContext) {
+    public T newInstance(BuildingContext<T> buildingContext) {
         T instance = getBeanClass().newInstance();
         SpecificationBuilder<T> specificationBuilder = new SpecificationBuilder<>((BeanClass<T>) BeanClass.create(instance.getClass()));
         beanSpecification.specifications(specificationBuilder);

@@ -37,6 +37,19 @@ class BuildThroughBeanClass {
             assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).build())
                     .hasFieldOrPropertyWithValue("stringValue", "Hello");
         }
+
+        @Test
+        void with_sequence_and_params() {
+            factorySet.register(BeanWithNoDefaultConstructor.class, (buildingContext) -> {
+                BeanWithNoDefaultConstructor bean = new BeanWithNoDefaultConstructor(buildingContext.getSequence());
+                bean.setStringValue(buildingContext.param("stringValue"));
+                return bean;
+            });
+
+            assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).param("stringValue", "Hello").build())
+                    .hasFieldOrPropertyWithValue("intValue", 1)
+                    .hasFieldOrPropertyWithValue("stringValue", "Hello");
+        }
     }
 
     @Nested

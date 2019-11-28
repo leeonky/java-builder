@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class FactorySet {
@@ -17,7 +18,7 @@ public class FactorySet {
         return onBuild(type, (o, context) -> build.accept(o));
     }
 
-    public <T> FactorySet onBuild(Class<T> type, BiConsumer<T, BuildContext<T>> build) {
+    public <T> FactorySet onBuild(Class<T> type, BiConsumer<T, BuildingContext<T>> build) {
         try {
             type.getConstructor();
         } catch (NoSuchMethodException e) {
@@ -33,6 +34,11 @@ public class FactorySet {
     }
 
     public <T> FactorySet register(Class<T> type, Supplier<T> supplier) {
+        factories.put(type, new BeanWithNoDefaultConstructorFactory<>(type, (buildContext) -> supplier.get()));
+        return this;
+    }
+
+    public <T> FactorySet register(Class<T> type, Function<BuildingContext<T>, T> supplier) {
         factories.put(type, new BeanWithNoDefaultConstructorFactory<>(type, supplier));
         return this;
     }
