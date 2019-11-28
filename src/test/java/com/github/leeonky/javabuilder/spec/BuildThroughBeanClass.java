@@ -106,6 +106,15 @@ class BuildThroughBeanClass {
 
             assertThat(exception.getMessage()).isEqualTo("No default constructor of class: " + BeanWithNoDefaultConstructor.class.getName());
         }
+
+        @Test
+        void support_convert_property_value_to_target_type_in_build() {
+            factorySet.onBuild(Bean.class, bean -> {
+            });
+
+            assertThat(factorySet.type(Bean.class).property("stringValue", 1).build())
+                    .hasFieldOrPropertyWithValue("stringValue", "1");
+        }
     }
 
     @Getter
