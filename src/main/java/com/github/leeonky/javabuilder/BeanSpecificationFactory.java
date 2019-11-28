@@ -2,25 +2,21 @@ package com.github.leeonky.javabuilder;
 
 import com.github.leeonky.util.BeanClass;
 
-class BeanSpecificationFactory<T> implements Factory<T> {
+class BeanSpecificationFactory<T> extends AbstractFactory<T> {
     private final BeanSpecification<T> beanSpecification;
 
     <B extends BeanSpecification<T>> BeanSpecificationFactory(B beanSpecification) {
+        super(beanSpecification.getType());
         this.beanSpecification = beanSpecification;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public T newInstance(BuildContext<T> buildContext) {
-        T instance = BeanClass.newInstance(beanSpecification.getType());
+        T instance = getBeanClass().newInstance();
         SpecificationBuilder<T> specificationBuilder = new SpecificationBuilder<>((BeanClass<T>) BeanClass.create(instance.getClass()));
         beanSpecification.specifications(specificationBuilder);
         specificationBuilder.collectSpecifications().forEach(spec -> spec.apply(instance));
         return instance;
-    }
-
-    @Override
-    public BeanClass<T> getBeanClass() {
-        return BeanClass.create(beanSpecification.getType());
     }
 }

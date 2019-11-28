@@ -1,27 +1,19 @@
 package com.github.leeonky.javabuilder;
 
-import com.github.leeonky.util.BeanClass;
-
 import java.util.function.BiConsumer;
 
-class BeanFactory<T> implements Factory<T> {
-    private final Class<T> type;
+class BeanFactory<T> extends AbstractFactory<T> {
     private final BiConsumer<T, BuildContext<T>> build;
 
     BeanFactory(Class<T> type, BiConsumer<T, BuildContext<T>> build) {
-        this.type = type;
+        super(type);
         this.build = build;
     }
 
     @Override
     public T newInstance(BuildContext<T> buildContext) {
-        T instance = BeanClass.newInstance(type);
+        T instance = getBeanClass().newInstance();
         build.accept(instance, buildContext);
         return instance;
-    }
-
-    @Override
-    public BeanClass<T> getBeanClass() {
-        return BeanClass.create(type);
     }
 }
