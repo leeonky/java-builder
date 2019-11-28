@@ -9,6 +9,7 @@ public class Builder<T> {
     private final Factory<T> factory;
     private final FactorySet factorySet;
     private final Map<String, Object> properties = new HashMap<>();
+    private final Map<String, Object> params = new HashMap<>();
 
     public Builder(Factory<T> factory, FactorySet factorySet) {
         this.factory = factory;
@@ -30,7 +31,7 @@ public class Builder<T> {
 
     @SuppressWarnings("unchecked")
     public T build() {
-        T object = factory.newInstance(new BuildContext<>(factorySet.getSequence(factory.getBeanClass().getType())));
+        T object = factory.newInstance(new BuildContext<>(factorySet.getSequence(factory.getBeanClass().getType()), params));
         BeanClass<T> beanClass = (BeanClass<T>) BeanClass.create(object.getClass());
         properties.forEach((k, v) -> beanClass.setPropertyValue(object, k, v));
         return object;
@@ -39,6 +40,12 @@ public class Builder<T> {
     public Builder<T> properties(Map<String, Object> properties) {
         Builder<T> builder = copy();
         builder.properties.putAll(properties);
+        return builder;
+    }
+
+    public Builder<T> param(String paramName, Object value) {
+        Builder<T> builder = copy();
+        builder.params.put(paramName, value);
         return builder;
     }
 }
