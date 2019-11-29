@@ -14,12 +14,20 @@ class BuildThroughSpecificationBuilder {
     private final FactorySet factorySet = new FactorySet();
 
     @Test
-    void support_define_specification_in_class() {
+    void support_define_specification_with_value_in_class() {
         factorySet.define(Objects.USD.class);
 
         assertThat(factorySet.toBuild(Objects.USD.class).build())
-                .hasFieldOrPropertyWithValue("currency", "USD")
-        ;
+                .hasFieldOrPropertyWithValue("currency", "USD");
+    }
+
+    @Test
+    void support_define_specification_with_factory_in_class() {
+        factorySet.define(Objects.USD.class);
+        factorySet.define(Objects.ProductInUSD.class);
+
+        assertThat(factorySet.toBuild(Objects.ProductInUSD.class).build().getPrice())
+                .hasFieldOrPropertyWithValue("currency", "USD");
     }
 
     @Test
@@ -42,10 +50,26 @@ class BuildThroughSpecificationBuilder {
             private String currency;
         }
 
+        @Getter
+        @Setter
+        @Accessors(chain = true)
+        public static class Product {
+            private String name;
+            private Money price;
+            private Money discount;
+        }
+
         public static class USD extends BeanSpecification<Money> {
             @Override
             public void specifications(SpecificationBuilder<Money> specificationBuilder) {
                 specificationBuilder.propertyValue("currency", "USD");
+            }
+        }
+
+        public static class ProductInUSD extends BeanSpecification<Product> {
+            @Override
+            public void specifications(SpecificationBuilder<Product> specificationBuilder) {
+                specificationBuilder.propertyFactory("price", USD.class);
             }
         }
     }
