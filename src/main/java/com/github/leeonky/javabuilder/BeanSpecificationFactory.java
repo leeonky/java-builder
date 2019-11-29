@@ -10,11 +10,14 @@ class BeanSpecificationFactory<T> extends AbstractFactory<T> {
 
     @Override
     public T newInstance(BuildingContext<T> buildingContext) {
-        Class<T> type = getBeanClass().getType();
-        T instance = buildingContext.getFactorySet().type(type).build();
+        return buildingContext.getFactorySet().type(getBeanClass().getType()).build();
+    }
+
+    @Override
+    public T postProcess(BuildingContext<T> buildingContext, T object) {
         SpecificationBuilder<T> specificationBuilder = new SpecificationBuilder<>(buildingContext);
         beanSpecification.specifications(specificationBuilder);
-        specificationBuilder.collectSpecifications().forEach(spec -> spec.apply(instance));
-        return instance;
+        specificationBuilder.collectSpecifications().forEach(spec -> spec.apply(object));
+        return object;
     }
 }

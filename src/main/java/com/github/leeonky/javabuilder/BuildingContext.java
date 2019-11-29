@@ -7,14 +7,14 @@ import java.util.Map;
 public class BuildingContext<T> {
     private final int sequence;
     private final Map<String, Object> params, properties;
-    private final BeanClass<T> beanClass;
+    private final Factory<T> factory;
     private final FactorySet factorySet;
 
-    BuildingContext(int sequence, Map<String, Object> params, Map<String, Object> properties, BeanClass<T> beanClass, FactorySet factorySet) {
+    BuildingContext(int sequence, Map<String, Object> params, Map<String, Object> properties, Factory<T> factory, FactorySet factorySet) {
         this.sequence = sequence;
         this.params = params;
         this.properties = properties;
-        this.beanClass = beanClass;
+        this.factory = factory;
         this.factorySet = factorySet;
     }
 
@@ -28,7 +28,7 @@ public class BuildingContext<T> {
     }
 
     public BeanClass<T> getBeanClass() {
-        return beanClass;
+        return factory.getBeanClass();
     }
 
     public boolean notSpecified(String name) {

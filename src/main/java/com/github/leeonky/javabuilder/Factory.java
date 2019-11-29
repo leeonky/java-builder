@@ -6,4 +6,6 @@ public interface Factory<T> {
     T newInstance(BuildingContext<T> buildingContext);
 
     BeanClass<T> getBeanClass();
+
+    T postProcess(BuildingContext<T> buildingContext, T object);
 }

@@ -1,7 +1,5 @@
 package com.github.leeonky.javabuilder;
 
-import com.github.leeonky.util.BeanClass;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,7 +9,7 @@ public class Builder<T> {
     private final Map<String, Object> properties = new HashMap<>();
     private final Map<String, Object> params = new HashMap<>();
 
-    public Builder(Factory<T> factory, FactorySet factorySet) {
+    Builder(Factory<T> factory, FactorySet factorySet) {
         this.factory = factory;
         this.factorySet = factorySet;
     }
@@ -29,13 +27,12 @@ public class Builder<T> {
         return builder;
     }
 
-    @SuppressWarnings("unchecked")
     public T build() {
-        T object = factory.newInstance(new BuildingContext<>(factorySet.getSequence(factory.getBeanClass().getType()),
-                params, properties, factory.getBeanClass(), factorySet));
-        BeanClass<T> beanClass = (BeanClass<T>) BeanClass.create(object.getClass());
-        properties.forEach((k, v) -> beanClass.setPropertyValue(object, k, v));
-        return object;
+        BuildingContext<T> buildingContext = new BuildingContext<>(factorySet.getSequence(factory.getBeanClass().getType()),
+                params, properties, factory, factorySet);
+        T object = factory.newInstance(buildingContext);
+        properties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(object, k, v));
+        return factory.postProcess(buildingContext, object);
     }
 
     public Builder<T> properties(Map<String, Object> properties) {

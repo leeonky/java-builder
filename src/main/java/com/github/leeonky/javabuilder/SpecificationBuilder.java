@@ -11,16 +11,18 @@ public class SpecificationBuilder<T> {
         this.buildingContext = buildingContext;
     }
 
-    public void propertyValue(String property, Object value) {
+    public SpecificationBuilder<T> propertyValue(String property, Object value) {
         specifications.add(new PropertyValueSpecification(property, value));
+        return this;
     }
 
     public List<Specification<T>> collectSpecifications() {
         return specifications;
     }
 
-    public <PT> void propertyFactory(String property, Class<? extends BeanSpecification<PT>> specification) {
+    public <PT> SpecificationBuilder<T> propertyFactory(String property, Class<? extends BeanSpecification<PT>> specification) {
         specifications.add(new PropertyFactorySpecification<>(property, specification));
+        return this;
     }
 
     class PropertyValueSpecification implements Specification<T> {
