@@ -1,7 +1,5 @@
 package com.github.leeonky.javabuilder;
 
-import com.github.leeonky.util.BeanClass;
-
 class BeanSpecificationFactory<T> extends AbstractFactory<T> {
     private final BeanSpecification<T> beanSpecification;
 
@@ -11,10 +9,10 @@ class BeanSpecificationFactory<T> extends AbstractFactory<T> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public T newInstance(BuildingContext<T> buildingContext) {
-        T instance = getBeanClass().newInstance();
-        SpecificationBuilder<T> specificationBuilder = new SpecificationBuilder<>((BeanClass<T>) BeanClass.create(instance.getClass()));
+        Class<T> type = getBeanClass().getType();
+        T instance = buildingContext.getFactorySet().type(type).build();
+        SpecificationBuilder<T> specificationBuilder = new SpecificationBuilder<>(getBeanClass());
         beanSpecification.specifications(specificationBuilder);
         specificationBuilder.collectSpecifications().forEach(spec -> spec.apply(instance));
         return instance;

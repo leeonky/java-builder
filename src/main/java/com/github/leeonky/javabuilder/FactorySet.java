@@ -49,7 +49,7 @@ public class FactorySet {
         return this;
     }
 
-    public <B extends BeanSpecification<T>, T> FactorySet onBuild(Class<B> definition) {
+    public <B extends BeanSpecification<T>, T> FactorySet define(Class<B> definition) {
         beanSpecificationMap.put(definition, new BeanSpecificationFactory<>(BeanClass.newInstance(definition)));
         return this;
     }

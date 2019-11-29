@@ -15,11 +15,21 @@ class BuildThroughSpecificationBuilder {
 
     @Test
     void support_define_specification_in_class() {
-        factorySet.onBuild(Objects.USD.class);
+        factorySet.define(Objects.USD.class);
 
         assertThat(factorySet.toBuild(Objects.USD.class).build())
                 .hasFieldOrPropertyWithValue("currency", "USD")
         ;
+    }
+
+    @Test
+    void should_call_default_type_build_as_base_building() {
+        factorySet.onBuild(Objects.Money.class, (m -> m.setAmount(100)));
+
+        factorySet.define(Objects.USD.class);
+
+        assertThat(factorySet.toBuild(Objects.USD.class).build())
+                .hasFieldOrPropertyWithValue("amount", 100);
     }
 
     public static class Objects {

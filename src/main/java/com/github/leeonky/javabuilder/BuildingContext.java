@@ -38,4 +38,8 @@ public class BuildingContext<T> {
     public void setDefault(T object) {
         factorySet.getPropertyBuilder().buildDefaultProperty(object, this);
     }
+
+    public FactorySet getFactorySet() {
+        return factorySet;
+    }
 }
