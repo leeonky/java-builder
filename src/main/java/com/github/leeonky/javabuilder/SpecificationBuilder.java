@@ -2,6 +2,7 @@ package com.github.leeonky.javabuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SpecificationBuilder<T> {
     private final BuildingContext<T> buildingContext;
@@ -17,7 +18,9 @@ public class SpecificationBuilder<T> {
     }
 
     public List<Specification<T>> collectSpecifications() {
-        return specifications;
+        return specifications.stream()
+                .filter(specification -> buildingContext.notSpecified(specification.getProperty()))
+                .collect(Collectors.toList());
     }
 
     public <PT> SpecificationBuilder<T> propertyFactory(String property, Class<? extends BeanSpecification<PT>> specification) {
@@ -25,33 +28,44 @@ public class SpecificationBuilder<T> {
         return this;
     }
 
-    class PropertyValueSpecification implements Specification<T> {
+    abstract class AbstractSpecification<T> implements Specification<T> {
         private final String property;
+
+        protected AbstractSpecification(String property) {
+            this.property = property;
+        }
+
+        @Override
+        public String getProperty() {
+            return property;
+        }
+    }
+
+    class PropertyValueSpecification extends AbstractSpecification<T> {
         private final Object value;
 
         PropertyValueSpecification(String property, Object value) {
-            this.property = property;
+            super(property);
             this.value = value;
         }
 
         @Override
         public void apply(T instance) {
-            buildingContext.getBeanClass().setPropertyValue(instance, property, value);
+            buildingContext.getBeanClass().setPropertyValue(instance, getProperty(), value);
         }
     }
 
-    class PropertyFactorySpecification<PT> implements Specification<T> {
-        private final String property;
+    class PropertyFactorySpecification<PT> extends AbstractSpecification<T> {
         private final Class<? extends BeanSpecification<PT>> specification;
 
         PropertyFactorySpecification(String property, Class<? extends BeanSpecification<PT>> specification) {
-            this.property = property;
+            super(property);
             this.specification = specification;
         }
 
         @Override
         public void apply(T instance) {
-            buildingContext.getBeanClass().setPropertyValue(instance, property,
+            buildingContext.getBeanClass().setPropertyValue(instance, getProperty(),
                     buildingContext.getFactorySet().toBuild(specification).build());
         }
     }

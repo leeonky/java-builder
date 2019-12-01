@@ -40,6 +40,14 @@ class BuildThroughSpecificationBuilder {
                 .hasFieldOrPropertyWithValue("amount", 100);
     }
 
+    @Test
+    void should_skip_specification_when_given_property_value_in_build() {
+        factorySet.define(Objects.ProductInUSD.class);
+
+        assertThat(factorySet.toBuild(Objects.ProductInUSD.class).property("price", null).build().getPrice())
+                .isNull();
+    }
+
     public static class Objects {
 
         @Getter
