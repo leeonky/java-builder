@@ -9,6 +9,7 @@ public class BuildingContext<T> {
     private final Map<String, Object> params, properties;
     private final Factory<T> factory;
     private final FactorySet factorySet;
+    private final SpecificationBuilder<T> specificationBuilder = new SpecificationBuilder<>(this);
 
     BuildingContext(int sequence, Map<String, Object> params, Map<String, Object> properties, Factory<T> factory, FactorySet factorySet) {
         this.sequence = sequence;
@@ -41,5 +42,9 @@ public class BuildingContext<T> {
 
     public FactorySet getFactorySet() {
         return factorySet;
+    }
+
+    public SpecificationBuilder<T> getSpecificationBuilder() {
+        return specificationBuilder;
     }
 }

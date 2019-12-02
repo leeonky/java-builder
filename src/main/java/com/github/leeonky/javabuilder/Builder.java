@@ -2,12 +2,14 @@ package com.github.leeonky.javabuilder;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class Builder<T> {
     private final Factory<T> factory;
     private final FactorySet factorySet;
     private final Map<String, Object> properties = new HashMap<>();
     private final Map<String, Object> params = new HashMap<>();
+    private Consumer<SpecificationBuilder<T>> specifications = null;
 
     Builder(Factory<T> factory, FactorySet factorySet) {
         this.factory = factory;
@@ -32,7 +34,11 @@ public class Builder<T> {
                 params, properties, factory, factorySet);
         T object = factory.newInstance(buildingContext);
         properties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(object, k, v));
-        return factory.postProcess(buildingContext, object);
+        factory.postProcess(buildingContext, object);
+        if (specifications != null)
+            specifications.accept(buildingContext.getSpecificationBuilder());
+        buildingContext.getSpecificationBuilder().collectSpecifications().forEach(spec -> spec.apply(object));
+        return object;
     }
 
     public Builder<T> properties(Map<String, Object> properties) {
@@ -44,6 +50,12 @@ public class Builder<T> {
     public Builder<T> param(String paramName, Object value) {
         Builder<T> builder = copy();
         builder.params.put(paramName, value);
+        return builder;
+    }
+
+    public Builder<T> specifications(Consumer<SpecificationBuilder<T>> specifications) {
+        Builder<T> builder = copy();
+        builder.specifications = specifications;
         return builder;
     }
 }

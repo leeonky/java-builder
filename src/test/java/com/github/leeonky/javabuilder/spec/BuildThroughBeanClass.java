@@ -115,6 +115,14 @@ class BuildThroughBeanClass {
             assertThat(factorySet.type(Bean.class).property("stringValue", 1).build())
                     .hasFieldOrPropertyWithValue("stringValue", "1");
         }
+
+        @Test
+        void support_specify_specifications_in_build() {
+            assertThat(factorySet.type(Bean.class).specifications(specificationBuilder -> {
+                specificationBuilder.propertyValue("stringValue", "hello");
+            }).build()).hasFieldOrPropertyWithValue("stringValue", "hello");
+
+        }
     }
 
     @Getter

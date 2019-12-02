@@ -15,9 +15,7 @@ class BeanSpecificationFactory<T> extends AbstractFactory<T> {
 
     @Override
     public T postProcess(BuildingContext<T> buildingContext, T object) {
-        SpecificationBuilder<T> specificationBuilder = new SpecificationBuilder<>(buildingContext);
-        beanSpecification.specifications(specificationBuilder);
-        specificationBuilder.collectSpecifications().forEach(spec -> spec.apply(object));
+        beanSpecification.specifications(buildingContext.getSpecificationBuilder());
         return object;
     }
 }
