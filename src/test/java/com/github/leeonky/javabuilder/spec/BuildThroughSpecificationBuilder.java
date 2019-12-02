@@ -48,6 +48,15 @@ class BuildThroughSpecificationBuilder {
                 .isNull();
     }
 
+    @Test
+    void support_override_sub_build_in_specification() {
+        factorySet.define(Objects.USD.class);
+        factorySet.define(Objects.ProductOverrideSpecification.class);
+
+        assertThat(factorySet.toBuild(Objects.ProductOverrideSpecification.class).build().getPrice().getCurrency())
+                .isEqualTo("CNY");
+    }
+
     public static class Objects {
 
         @Getter
@@ -78,6 +87,16 @@ class BuildThroughSpecificationBuilder {
             @Override
             public void specifications(SpecificationBuilder<Product> specificationBuilder) {
                 specificationBuilder.propertyFactory("price", USD.class);
+            }
+        }
+
+        public static class ProductOverrideSpecification extends BeanSpecification<Product> {
+            @Override
+            public void specifications(SpecificationBuilder<Product> specificationBuilder) {
+                specificationBuilder.propertyFactory("price", USD.class, builder ->
+                        builder.specifications(specificationBuilder1 -> {
+                            specificationBuilder1.propertyValue("currency", "CNY");
+                        }));
             }
         }
     }
