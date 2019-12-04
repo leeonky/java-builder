@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class BuildThroughDefaultFactory {
     private final FactorySet factorySet = new FactorySet();
+    private boolean methodCalled = false;
 
     @Test
     void default_build() {
@@ -98,6 +99,19 @@ class BuildThroughDefaultFactory {
 
         assertThat(factorySet.type(Bean.class).build())
                 .hasFieldOrPropertyWithValue("intValue", 0);
+    }
+
+    @Test
+    void should_skip_default_property_build_when_specify_value_in_properties() {
+        factorySet.getPropertyBuilder().registerFromType(Bean.class, (cl, pw, bc) -> {
+            methodCalled = true;
+            return new Bean();
+        });
+        Bean newBean = new Bean();
+
+        assertThat(factorySet.type(Bean.class).property("beanValue", newBean).build().getBeanValue())
+                .isEqualTo(newBean);
+        assertThat(methodCalled).isFalse();
     }
 
     @Getter

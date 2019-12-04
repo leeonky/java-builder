@@ -14,6 +14,11 @@ public class FactorySet {
     private final Map<Class<?>, Factory<?>> factories = new HashMap<>();
     private final Map<Class<?>, Factory<?>> beanSpecificationMap = new HashMap<>();
     private final Map<Class<?>, Integer> sequences = new HashMap<>();
+    private final DataRepository dataRepository;
+
+    public FactorySet() {
+        dataRepository = new HashMapDataRepository();
+    }
 
     public PropertyBuilder getPropertyBuilder() {
         return propertyBuilder;
@@ -65,5 +70,9 @@ public class FactorySet {
             sequences.put(type, sequence);
             return sequence;
         }
+    }
+
+    public DataRepository getDataRepository() {
+        return dataRepository;
     }
 }

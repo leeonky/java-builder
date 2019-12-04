@@ -1,6 +1,10 @@
 package com.github.leeonky.javabuilder;
 
+import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.PropertyWriter;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -30,15 +34,42 @@ public class Builder<T> {
     }
 
     public T build() {
+        Map<String, Object> processedProperties = new HashMap<>();
         BuildingContext<T> buildingContext = new BuildingContext<>(factorySet.getSequence(factory.getBeanClass().getType()),
-                params, properties, factory, factorySet);
+                params, processedProperties, factory, factorySet);
+        properties.forEach((k, v) -> processProperties(factory.getBeanClass(), processedProperties, k, v));
         T object = factory.newInstance(buildingContext);
-        properties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(object, k, v));
+        processedProperties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(object, k, v));
         factory.postProcess(buildingContext, object);
         if (specifications != null)
             specifications.accept(buildingContext.getSpecificationBuilder());
         buildingContext.getSpecificationBuilder().collectSpecifications().forEach(spec -> spec.apply(object));
-        return object;
+        return factorySet.getDataRepository().save(object);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void processProperties(BeanClass<T> beanClass, Map<String, Object> processed, String name, Object value) {
+        if (name.contains(".")) {
+            String[] propertyList = name.split("\\.", 2);
+            String propertyName = propertyList[0];
+            String condition = propertyList[1];
+            String factoryName = null;
+            if (propertyName.contains("(")) {
+                String[] propertyFactory = propertyName.split("\\(");
+                propertyName = propertyFactory[0];
+                factoryName = propertyFactory[1].split("\\)")[0];
+            }
+            PropertyWriter<T> propertyWriter = beanClass.getPropertyWriter(propertyName);
+            Builder builder = (
+//                    (factorySet.hasAlias(factoryName)
+//                    ? factorySet.toBuild(factoryName)
+//                    :
+                    factorySet.type(propertyWriter.getPropertyType())
+//            )
+            ).property(condition, value);
+            processed.put(propertyWriter.getName(), builder.query().stream().findFirst().orElseGet(builder::build));
+        } else
+            processed.put(name, value);
     }
 
     public Builder<T> properties(Map<String, Object> properties) {
@@ -57,5 +88,9 @@ public class Builder<T> {
         Builder<T> builder = copy();
         builder.specifications = specifications;
         return builder;
+    }
+
+    public List<T> query() {
+        return factorySet.getDataRepository().query(factory.getBeanClass(), properties);
     }
 }
