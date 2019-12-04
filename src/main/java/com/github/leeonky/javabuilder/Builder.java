@@ -60,13 +60,8 @@ public class Builder<T> {
                 factoryName = propertyFactory[1].split("\\)")[0];
             }
             PropertyWriter<T> propertyWriter = beanClass.getPropertyWriter(propertyName);
-            Builder builder = (
-//                    (factorySet.hasAlias(factoryName)
-//                    ? factorySet.toBuild(factoryName)
-//                    :
-                    factorySet.type(propertyWriter.getPropertyType())
-//            )
-            ).property(condition, value);
+            Builder builder = ((factoryName != null ? factorySet.toBuild(factoryName) : factorySet.type(propertyWriter.getPropertyType())))
+                    .property(condition, value);
             processed.put(propertyWriter.getName(), builder.query().stream().findFirst().orElseGet(builder::build));
         } else
             processed.put(name, value);

@@ -1,6 +1,8 @@
 package com.github.leeonky.javabuilder.spec;
 
+import com.github.leeonky.javabuilder.BeanSpecification;
 import com.github.leeonky.javabuilder.FactorySet;
+import com.github.leeonky.javabuilder.SpecificationBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -43,6 +45,13 @@ class BuildWithRepository {
     public static class Product {
         private String name;
         private Category category;
+    }
+
+    public static class ProgrammeBook extends BeanSpecification<Product> {
+        @Override
+        public void specifications(SpecificationBuilder<Product> specificationBuilder) {
+            specificationBuilder.propertyValue("name", "Java");
+        }
     }
 
     @Nested
@@ -117,22 +126,23 @@ class BuildWithRepository {
             assertThat(order.getProduct().getName()).isEqualTo("book");
         }
 
-//        @Test
-//        void support_build_property_with_factory_name() {
-//            factorySet.factory(Product.class).extend("ProgrammeBook", p -> p.setName("Java"));
-//
-//            Order order = factorySet.type(Order.class).property("product(ProgrammeBook).category.name", "book").build();
-//
-//            assertThat(order.getProduct().getName()).isEqualTo("Java");
-//        }
-//
-//        @Test
-//        void support_build_reference_object_first() {
-//            Product product = factorySet.type(Product.class).build();//NullPointerException issue
-//            Order order = factorySet.type(Order.class).property("product.category.name", "book").build();
-//
-//            assertThat(order).isInstanceOf(Order.class);
-//            assertThat(order.getProduct()).isNotEqualTo(product);
-//        }
+        @Test
+        void support_build_property_with_factory_name() {
+            factorySet.define(ProgrammeBook.class);
+
+            Order order = factorySet.type(Order.class).property("product(ProgrammeBook).category.name", "book").build();
+
+            assertThat(order.getProduct().getName()).isEqualTo("Java");
+        }
+
+
+        @Test
+        void support_build_reference_object_first() {
+            Product product = factorySet.type(Product.class).build();
+            Order order = factorySet.type(Order.class).property("product.category.name", "book").build();
+
+            assertThat(order).isInstanceOf(Order.class);
+            assertThat(order.getProduct()).isNotEqualTo(product);
+        }
     }
 }
