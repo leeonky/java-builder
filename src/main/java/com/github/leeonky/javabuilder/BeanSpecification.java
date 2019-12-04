@@ -13,4 +13,8 @@ public abstract class BeanSpecification<T> {
                         "' should specify generic type or override getType() method"))
                 .getRawType();
     }
+
+    public String getName() {
+        return getClass().getSimpleName();
+    }
 }

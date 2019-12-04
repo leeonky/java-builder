@@ -13,6 +13,7 @@ public class FactorySet {
     private final PropertyBuilder propertyBuilder = PropertyBuilder.createDefaultPropertyBuilder();
     private final Map<Class<?>, Factory<?>> factories = new HashMap<>();
     private final Map<Class<?>, Factory<?>> beanSpecificationMap = new HashMap<>();
+    private final Map<String, Factory<?>> beanSpecificationNameMap = new HashMap<>();
     private final Map<Class<?>, Integer> sequences = new HashMap<>();
     private final DataRepository dataRepository;
 
@@ -55,13 +56,29 @@ public class FactorySet {
     }
 
     public <B extends BeanSpecification<T>, T> FactorySet define(Class<B> definition) {
-        beanSpecificationMap.put(definition, new BeanSpecificationFactory<>(BeanClass.newInstance(definition)));
+        B definitionInstance = BeanClass.newInstance(definition);
+        if (beanSpecificationNameMap.containsKey(definitionInstance.getName()))
+            throw new IllegalArgumentException(String.format("Specification '%s' already exists", definitionInstance.getName()));
+        BeanSpecificationFactory<T> beanSpecificationFactory = new BeanSpecificationFactory<>(definitionInstance);
+        beanSpecificationMap.put(definition, beanSpecificationFactory);
+        beanSpecificationNameMap.put(definitionInstance.getName(), beanSpecificationFactory);
         return this;
     }
 
     @SuppressWarnings("unchecked")
     public <B extends BeanSpecification<T>, T> Builder<T> toBuild(Class<B> definition) {
-        return new Builder<>((Factory<T>) beanSpecificationMap.get(definition), this);
+        Factory<T> factory = (Factory<T>) beanSpecificationMap.get(definition);
+        if (null == factory)
+            throw new IllegalArgumentException(String.format("Specification '%s' not exists", definition.getName()));
+        return new Builder<>(factory, this);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Builder<T> toBuild(String specification) {
+        Factory<T> factory = (Factory<T>) beanSpecificationNameMap.get(specification);
+        if (null == factory)
+            throw new IllegalArgumentException(String.format("Specification '%s' not exists", specification));
+        return new Builder<>(factory, this);
     }
 
     public int getSequence(Class<?> type) {

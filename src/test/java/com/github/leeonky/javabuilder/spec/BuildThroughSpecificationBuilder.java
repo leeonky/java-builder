@@ -9,6 +9,7 @@ import lombok.experimental.Accessors;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BuildThroughSpecificationBuilder {
     private final FactorySet factorySet = new FactorySet();
@@ -28,6 +29,34 @@ class BuildThroughSpecificationBuilder {
 
         assertThat(factorySet.toBuild(Objects.ProductInUSD.class).build().getPrice())
                 .hasFieldOrPropertyWithValue("currency", "USD");
+    }
+
+    @Test
+    void support_build_via_specification_name() {
+        factorySet.define(Objects.USD.class);
+
+        assertThat(factorySet.toBuild("USD").build())
+                .hasFieldOrPropertyWithValue("currency", "USD");
+    }
+
+    @Test
+    void should_raise_error_when_specification_not_exist() {
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> factorySet.toBuild(Objects.USD.class).build());
+        assertThat(runtimeException).hasMessageContaining("Specification 'com.github.leeonky.javabuilder.spec.BuildThroughSpecificationBuilder$Objects$USD' not exists");
+    }
+
+    @Test
+    void should_raise_error_when_specification_name_not_exist() {
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> factorySet.toBuild("USD").build());
+        assertThat(runtimeException).hasMessageContaining("Specification 'USD' not exists");
+    }
+
+    @Test
+    void should_raise_error_when_name_conflict() {
+        factorySet.define(Objects.USD.class);
+
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> factorySet.define(Objects.ConflictNameUSD.class));
+        assertThat(runtimeException).hasMessageContaining("Specification 'USD' already exists");
     }
 
     @Test
@@ -83,6 +112,13 @@ class BuildThroughSpecificationBuilder {
             }
         }
 
+        public static class ConflictNameUSD extends BeanSpecification<Money> {
+            @Override
+            public String getName() {
+                return "USD";
+            }
+        }
+
         public static class ProductInUSD extends BeanSpecification<Product> {
             @Override
             public void specifications(SpecificationBuilder<Product> specificationBuilder) {
@@ -98,6 +134,9 @@ class BuildThroughSpecificationBuilder {
                             specificationBuilder1.propertyValue("currency", "CNY");
                         }));
             }
+        }
+
+        public static class InvalidFactoryDefinition<T> extends BeanSpecification<T> {
         }
     }
 }
