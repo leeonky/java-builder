@@ -3,7 +3,6 @@ package com.github.leeonky.javabuilder;
 import java.util.*;
 
 public class HashMapDataRepository extends AbstractDataRepository {
-    private static final Set<Object> EMPTY_SET = new HashSet<>();
     private Map<Class<?>, Set<Object>> repo = new HashMap<>();
 
     @Override
@@ -16,7 +15,7 @@ public class HashMapDataRepository extends AbstractDataRepository {
     @Override
     @SuppressWarnings("unchecked")
     public <T> Collection<T> queryAll(Class<T> type) {
-        return (Collection<T>) repo.getOrDefault(type, EMPTY_SET);
+        return (Collection<T>) repo.getOrDefault(type, Collections.emptySet());
     }
 
     @Override

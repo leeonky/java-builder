@@ -3,17 +3,17 @@ package com.github.leeonky.javabuilder;
 import java.util.function.BiConsumer;
 
 class BeanFactory<T> extends AbstractFactory<T> {
-    private final BiConsumer<T, BuildingContext<T>> build;
+    private final BiConsumer<T, BuildingContext<T>> builder;
 
-    BeanFactory(Class<T> type, BiConsumer<T, BuildingContext<T>> build) {
+    BeanFactory(Class<T> type, BiConsumer<T, BuildingContext<T>> builder) {
         super(type);
-        this.build = build;
+        this.builder = builder;
     }
 
     @Override
     public T newInstance(BuildingContext<T> buildingContext) {
         T instance = getBeanClass().newInstance();
-        build.accept(instance, buildingContext);
+        builder.accept(instance, buildingContext);
         return instance;
     }
 }

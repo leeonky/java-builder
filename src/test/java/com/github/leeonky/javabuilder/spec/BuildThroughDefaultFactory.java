@@ -82,8 +82,8 @@ class BuildThroughDefaultFactory {
     @Test
     void default_build_for_special_method() {
         factorySet.getPropertyBuilder()
-                .registerFromProperty(m -> m.getName().equals("intValue"),
-                        (m, o, buildContext) -> buildContext.getSequence() + 1);
+                .registerThroughProperty(m -> m.getName().equals("intValue"),
+                        (m, o, buildContext) -> buildContext.getCurrentSequence() + 1);
 
         assertThat(factorySet.type(Bean.class).build())
                 .hasFieldOrPropertyWithValue("intValue", 2);
@@ -103,7 +103,7 @@ class BuildThroughDefaultFactory {
 
     @Test
     void should_skip_default_property_build_when_specify_value_in_properties() {
-        factorySet.getPropertyBuilder().registerFromType(Bean.class, (cl, pw, bc) -> {
+        factorySet.getPropertyBuilder().registerThroughType(Bean.class, (cl, pw, bc) -> {
             methodCalled = true;
             return new Bean();
         });

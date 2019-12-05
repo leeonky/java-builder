@@ -52,13 +52,13 @@ public class FactorySet {
         return factory;
     }
 
-    public <B extends BeanSpecification<T>, T> FactorySet define(Class<B> definition) {
-        B definitionInstance = BeanClass.newInstance(definition);
-        if (beanSpecificationNameMap.containsKey(definitionInstance.getName()))
-            throw new IllegalArgumentException(String.format("Specification '%s' already exists", definitionInstance.getName()));
-        BeanSpecificationFactory<T> beanSpecificationFactory = new BeanSpecificationFactory<>(definitionInstance);
-        beanSpecificationMap.put(definition, beanSpecificationFactory);
-        beanSpecificationNameMap.put(definitionInstance.getName(), beanSpecificationFactory);
+    public <B extends BeanSpecification<T>, T> FactorySet define(Class<B> beanSpecificationClass) {
+        B beanDefinition = BeanClass.newInstance(beanSpecificationClass);
+        if (beanSpecificationNameMap.containsKey(beanDefinition.getName()))
+            throw new IllegalArgumentException(String.format("Specification '%s' already exists", beanDefinition.getName()));
+        BeanSpecificationFactory<T> beanSpecificationFactory = new BeanSpecificationFactory<>(beanDefinition);
+        beanSpecificationMap.put(beanSpecificationClass, beanSpecificationFactory);
+        beanSpecificationNameMap.put(beanDefinition.getName(), beanSpecificationFactory);
         return this;
     }
 
@@ -72,18 +72,18 @@ public class FactorySet {
     }
 
     @SuppressWarnings("unchecked")
-    public <B extends BeanSpecification<T>, T> Builder<T> toBuild(Class<B> definition) {
-        Factory<T> factory = (Factory<T>) beanSpecificationMap.get(definition);
+    public <B extends BeanSpecification<T>, T> Builder<T> toBuild(Class<B> beanSpecificationClass) {
+        Factory<T> factory = (Factory<T>) beanSpecificationMap.get(beanSpecificationClass);
         if (null == factory)
-            throw new IllegalArgumentException(String.format("Specification '%s' not exists", definition.getName()));
+            throw new IllegalArgumentException(String.format("Specification '%s' not exists", beanSpecificationClass.getName()));
         return new Builder<>(factory, this);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Builder<T> toBuild(String specification) {
-        Factory<T> factory = (Factory<T>) beanSpecificationNameMap.get(specification);
+    public <T> Builder<T> toBuild(String beanSpecificationName) {
+        Factory<T> factory = (Factory<T>) beanSpecificationNameMap.get(beanSpecificationName);
         if (null == factory)
-            throw new IllegalArgumentException(String.format("Specification '%s' not exists", specification));
+            throw new IllegalArgumentException(String.format("Specification '%s' not exists", beanSpecificationName));
         return new Builder<>(factory, this);
     }
 

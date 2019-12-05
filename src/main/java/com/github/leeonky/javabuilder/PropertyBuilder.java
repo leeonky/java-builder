@@ -21,45 +21,45 @@ public class PropertyBuilder {
 
     public static PropertyBuilder createDefaultPropertyBuilder() {
         return new PropertyBuilder()
-                .registerFromType(String.class, (c, p, buildingContext) -> p.getName() + buildingContext.getSequence())
-                .registerFromType(long.class, (c, p, buildingContext) -> (long) buildingContext.getSequence())
-                .registerFromType(int.class, (c, p, buildingContext) -> buildingContext.getSequence())
-                .registerFromType(short.class, (c, p, buildingContext) -> (short) buildingContext.getSequence())
-                .registerFromType(byte.class, (c, p, buildingContext) -> (byte) buildingContext.getSequence())
-                .registerFromType(double.class, (c, p, buildingContext) -> (double) buildingContext.getSequence())
-                .registerFromType(float.class, (c, p, buildingContext) -> (float) buildingContext.getSequence())
-                .registerFromType(boolean.class, (c, p, buildingContext) -> (buildingContext.getSequence() % 2) != 0)
-                .registerFromType(Long.class, (c, p, buildingContext) -> (long) buildingContext.getSequence())
-                .registerFromType(Integer.class, (c, p, buildingContext) -> buildingContext.getSequence())
-                .registerFromType(Short.class, (c, p, buildingContext) -> (short) buildingContext.getSequence())
-                .registerFromType(Byte.class, (c, p, buildingContext) -> (byte) buildingContext.getSequence())
-                .registerFromType(Double.class, (c, p, buildingContext) -> (double) buildingContext.getSequence())
-                .registerFromType(Float.class, (c, p, buildingContext) -> (float) buildingContext.getSequence())
-                .registerFromType(Boolean.class, (c, p, buildingContext) -> (buildingContext.getSequence() % 2) != 0)
-                .registerFromType(BigInteger.class, (c, p, buildingContext) -> BigInteger.valueOf(buildingContext.getSequence()))
-                .registerFromType(BigDecimal.class, (c, p, buildingContext) -> BigDecimal.valueOf(buildingContext.getSequence()))
-                .registerFromType(UUID.class, (c, p, buildingContext) -> UUID.fromString(String.format("00000000-0000-0000-0000-%012d", buildingContext.getSequence())))
-                .registerFromType(Instant.class, (c, p, buildingContext) -> INSTANT_START.plusSeconds(buildingContext.getSequence()))
-                .registerFromType(Date.class, (c, p, buildingContext) -> Date.from(INSTANT_START.plus(buildingContext.getSequence(), ChronoUnit.DAYS)))
-                .registerFromType(LocalTime.class, (c, p, buildingContext) -> LOCAL_TIME_START.plusSeconds(buildingContext.getSequence()))
-                .registerFromType(LocalDate.class, (c, p, buildingContext) -> LOCAL_DATE_START.plusDays(buildingContext.getSequence()))
-                .registerFromType(LocalDateTime.class, (c, p, buildingContext) -> LOCAL_DATE_TIME_START.plusSeconds(buildingContext.getSequence()))
-                .registerFromType(OffsetDateTime.class, (c, p, buildingContext) -> INSTANT_START.plusSeconds(buildingContext.getSequence()).atZone(ZoneId.systemDefault()).toOffsetDateTime())
-                .registerFromType(ZonedDateTime.class, (c, p, buildingContext) -> INSTANT_START.plusSeconds(buildingContext.getSequence()).atZone(ZoneId.systemDefault()))
-                .registerFromType(Enum.class, (c, p, buildingContext) -> {
+                .registerThroughType(String.class, (c, p, buildingContext) -> p.getName() + buildingContext.getCurrentSequence())
+                .registerThroughType(long.class, (c, p, buildingContext) -> (long) buildingContext.getCurrentSequence())
+                .registerThroughType(int.class, (c, p, buildingContext) -> buildingContext.getCurrentSequence())
+                .registerThroughType(short.class, (c, p, buildingContext) -> (short) buildingContext.getCurrentSequence())
+                .registerThroughType(byte.class, (c, p, buildingContext) -> (byte) buildingContext.getCurrentSequence())
+                .registerThroughType(double.class, (c, p, buildingContext) -> (double) buildingContext.getCurrentSequence())
+                .registerThroughType(float.class, (c, p, buildingContext) -> (float) buildingContext.getCurrentSequence())
+                .registerThroughType(boolean.class, (c, p, buildingContext) -> (buildingContext.getCurrentSequence() % 2) != 0)
+                .registerThroughType(Long.class, (c, p, buildingContext) -> (long) buildingContext.getCurrentSequence())
+                .registerThroughType(Integer.class, (c, p, buildingContext) -> buildingContext.getCurrentSequence())
+                .registerThroughType(Short.class, (c, p, buildingContext) -> (short) buildingContext.getCurrentSequence())
+                .registerThroughType(Byte.class, (c, p, buildingContext) -> (byte) buildingContext.getCurrentSequence())
+                .registerThroughType(Double.class, (c, p, buildingContext) -> (double) buildingContext.getCurrentSequence())
+                .registerThroughType(Float.class, (c, p, buildingContext) -> (float) buildingContext.getCurrentSequence())
+                .registerThroughType(Boolean.class, (c, p, buildingContext) -> (buildingContext.getCurrentSequence() % 2) != 0)
+                .registerThroughType(BigInteger.class, (c, p, buildingContext) -> BigInteger.valueOf(buildingContext.getCurrentSequence()))
+                .registerThroughType(BigDecimal.class, (c, p, buildingContext) -> BigDecimal.valueOf(buildingContext.getCurrentSequence()))
+                .registerThroughType(UUID.class, (c, p, buildingContext) -> UUID.fromString(String.format("00000000-0000-0000-0000-%012d", buildingContext.getCurrentSequence())))
+                .registerThroughType(Instant.class, (c, p, buildingContext) -> INSTANT_START.plusSeconds(buildingContext.getCurrentSequence()))
+                .registerThroughType(Date.class, (c, p, buildingContext) -> Date.from(INSTANT_START.plus(buildingContext.getCurrentSequence(), ChronoUnit.DAYS)))
+                .registerThroughType(LocalTime.class, (c, p, buildingContext) -> LOCAL_TIME_START.plusSeconds(buildingContext.getCurrentSequence()))
+                .registerThroughType(LocalDate.class, (c, p, buildingContext) -> LOCAL_DATE_START.plusDays(buildingContext.getCurrentSequence()))
+                .registerThroughType(LocalDateTime.class, (c, p, buildingContext) -> LOCAL_DATE_TIME_START.plusSeconds(buildingContext.getCurrentSequence()))
+                .registerThroughType(OffsetDateTime.class, (c, p, buildingContext) -> INSTANT_START.plusSeconds(buildingContext.getCurrentSequence()).atZone(ZoneId.systemDefault()).toOffsetDateTime())
+                .registerThroughType(ZonedDateTime.class, (c, p, buildingContext) -> INSTANT_START.plusSeconds(buildingContext.getCurrentSequence()).atZone(ZoneId.systemDefault()))
+                .registerThroughType(Enum.class, (c, p, buildingContext) -> {
                     Enum[] enums = c.getEnumConstants();
-                    return enums[(buildingContext.getSequence() - 1) % enums.length];
+                    return enums[(buildingContext.getCurrentSequence() - 1) % enums.length];
                 });
     }
 
-    public <T, B> PropertyBuilder registerFromType(Class<T> propertyType,
-                                                   TriFunction<Class<T>, PropertyWriter<B>, BuildingContext<B>, T> builder) {
+    public <T, B> PropertyBuilder registerThroughType(Class<T> propertyType,
+                                                      TriFunction<Class<T>, PropertyWriter<B>, BuildingContext<B>, T> builder) {
         setters.add(new TypeHandler<>(propertyType, builder));
         return this;
     }
 
-    public <B> PropertyBuilder registerFromProperty(Predicate<PropertyWriter<B>> predicate,
-                                                    TriFunction<PropertyWriter<B>, Object, BuildingContext<B>, Object> builder) {
+    public <B> PropertyBuilder registerThroughProperty(Predicate<PropertyWriter<B>> predicate,
+                                                       TriFunction<PropertyWriter<B>, Object, BuildingContext<B>, Object> builder) {
         propertyBuilders.put(predicate, builder);
         return this;
     }
@@ -70,17 +70,16 @@ public class PropertyBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T buildDefaultProperty(T object, BuildingContext<T> buildingContext) {
+    public <T> void assignPropertiesAsDefaultValues(T object, BuildingContext<T> buildingContext) {
         buildingContext.getBeanClass().getPropertyWriters()
                 .values().stream()
                 .filter(propertyWriter -> skipper.stream().noneMatch(p -> p.test(propertyWriter)))
-                .filter(propertyWriter -> buildingContext.notSpecified(propertyWriter.getName()))
-                .forEach(propertyWriter -> buildDefaultProperty(object, propertyWriter, buildingContext));
-        return object;
+                .filter(propertyWriter -> buildingContext.isNotSpecified(propertyWriter.getName()))
+                .forEach(propertyWriter -> assignPropertyAsDefaultValue(object, propertyWriter, buildingContext));
     }
 
     @SuppressWarnings("unchecked")
-    private void buildDefaultProperty(Object object, PropertyWriter propertyWriter, BuildingContext<?> buildingContext) {
+    private void assignPropertyAsDefaultValue(Object object, PropertyWriter propertyWriter, BuildingContext<?> buildingContext) {
         Stream.concat(buildValueFromMethodBuilder(propertyWriter, object, buildingContext),
                 buildValueFromPropertyBuilder(propertyWriter, buildingContext)).findFirst()
                 .ifPresent(value -> propertyWriter.setValue(object, value));

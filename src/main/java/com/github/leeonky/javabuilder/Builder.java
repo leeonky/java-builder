@@ -1,12 +1,8 @@
 package com.github.leeonky.javabuilder;
 
-import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class Builder<T> {
@@ -15,7 +11,8 @@ public class Builder<T> {
     private final Map<String, Object> properties = new HashMap<>();
     private final Map<String, Object> params = new HashMap<>();
     private String[] combinations = new String[]{};
-    private Consumer<SpecificationBuilder<T>> specifications = null;
+    private Consumer<SpecificationBuilder<T>> specifications = specificationBuilder -> {
+    };
 
     Builder(Factory<T> factory, FactorySet factorySet) {
         this.factory = factory;
@@ -25,6 +22,9 @@ public class Builder<T> {
     private Builder<T> copy() {
         Builder<T> newBuilder = new Builder<>(factory, factorySet);
         newBuilder.properties.putAll(properties);
+        newBuilder.params.putAll(params);
+        newBuilder.combinations = Arrays.copyOf(combinations, combinations.length);
+        newBuilder.specifications = specifications;
         return newBuilder;
     }
 
@@ -36,38 +36,31 @@ public class Builder<T> {
     }
 
     public T build() {
-        Map<String, Object> processedProperties = new HashMap<>();
+        Map<String, Object> processedProperties = processReferenceProperties();
         BuildingContext<T> buildingContext = new BuildingContext<>(factorySet.getSequence(factory.getBeanClass().getType()),
                 params, processedProperties, factory, factorySet);
-        properties.forEach((k, v) -> processProperties(factory.getBeanClass(), processedProperties, k, v));
         T object = factory.newInstance(buildingContext);
         processedProperties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(object, k, v));
-        factory.postProcess(buildingContext, object);
+        factory.getSpecifications().accept(buildingContext.getSpecificationBuilder());
         factory.combine(buildingContext, combinations);
-        if (specifications != null)
-            specifications.accept(buildingContext.getSpecificationBuilder());
+        specifications.accept(buildingContext.getSpecificationBuilder());
         buildingContext.getSpecificationBuilder().collectSpecifications().forEach(spec -> spec.apply(object));
         return factorySet.getDataRepository().save(object);
     }
 
     @SuppressWarnings("unchecked")
-    private void processProperties(BeanClass<T> beanClass, Map<String, Object> processed, String name, Object value) {
-        if (name.contains(".")) {
-            String[] propertyList = name.split("\\.", 2);
-            String propertyName = propertyList[0];
-            String condition = propertyList[1];
-            String factoryName = null;
-            if (propertyName.contains("(")) {
-                String[] propertyFactory = propertyName.split("\\(");
-                propertyName = propertyFactory[0];
-                factoryName = propertyFactory[1].split("\\)")[0];
-            }
-            PropertyWriter<T> propertyWriter = beanClass.getPropertyWriter(propertyName);
-            Builder builder = ((factoryName != null ? factorySet.toBuild(factoryName) : factorySet.type(propertyWriter.getPropertyType())))
-                    .property(condition, value);
-            processed.put(propertyWriter.getName(), builder.query().stream().findFirst().orElseGet(builder::build));
-        } else
-            processed.put(name, value);
+    private Map<String, Object> processReferenceProperties() {
+        Map<String, Object> processedProperties = new HashMap<>();
+        properties.forEach((k, v) -> {
+            if (k.contains(".")) {
+                PropertyChain propertyChain = PropertyChain.parse(k);
+                PropertyWriter<T> propertyWriter = factory.getBeanClass().getPropertyWriter(propertyChain.getName());
+                Builder builder = propertyChain.toBuilder(factorySet, propertyWriter.getPropertyType(), v);
+                processedProperties.put(propertyWriter.getName(), builder.query().stream().findFirst().orElseGet(builder::build));
+            } else
+                processedProperties.put(k, v);
+        });
+        return processedProperties;
     }
 
     public Builder<T> properties(Map<String, Object> properties) {
@@ -84,7 +77,7 @@ public class Builder<T> {
 
     public Builder<T> specifications(Consumer<SpecificationBuilder<T>> specifications) {
         Builder<T> builder = copy();
-        builder.specifications = specifications;
+        builder.specifications = Objects.requireNonNull(specifications);
         return builder;
     }
 

@@ -9,8 +9,7 @@ public abstract class BeanSpecification<T> {
     @SuppressWarnings("unchecked")
     public Class<T> getType() {
         return (Class<T>) GenericType.createGenericType(getClass().getGenericSuperclass()).getGenericTypeParameter(0)
-                .orElseThrow(() -> new IllegalStateException("Invalid FactoryDefinition '" + getClass().getName() +
-                        "' should specify generic type or override getType() method"))
+                .orElseThrow(() -> new IllegalStateException(String.format("Invalid FactoryDefinition '%s' should specify generic type or override getType() method", getClass().getName())))
                 .getRawType();
     }
 

@@ -8,7 +8,7 @@ import java.util.Map;
 public interface DataRepository {
     <T> T save(T object);
 
-    <T> List<T> query(BeanClass<T> beanClass, Map<String, Object> properties);
+    <T> List<T> query(BeanClass<T> beanClass, Map<String, Object> criteria);
 
     void clear();
 }

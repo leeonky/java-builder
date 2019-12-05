@@ -14,15 +14,15 @@ public class SpecificationBuilder<T> {
         this.buildingContext = buildingContext;
     }
 
+    public List<Specification<T>> collectSpecifications() {
+        return specificationMap.values().stream()
+                .filter(specification -> buildingContext.isNotSpecified(specification.getProperty()))
+                .collect(Collectors.toList());
+    }
+
     public SpecificationBuilder<T> propertyValue(String property, Object value) {
         specificationMap.put(property, new PropertyValueSpecification(property, value));
         return this;
-    }
-
-    public List<Specification<T>> collectSpecifications() {
-        return specificationMap.values().stream()
-                .filter(specification -> buildingContext.notSpecified(specification.getProperty()))
-                .collect(Collectors.toList());
     }
 
     public <PT> SpecificationBuilder<T> propertyFactory(String property, Class<? extends BeanSpecification<PT>> specification) {

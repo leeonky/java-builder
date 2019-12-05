@@ -135,8 +135,5 @@ class BuildThroughSpecificationBuilder {
                         }));
             }
         }
-
-        public static class InvalidFactoryDefinition<T> extends BeanSpecification<T> {
-        }
     }
 }

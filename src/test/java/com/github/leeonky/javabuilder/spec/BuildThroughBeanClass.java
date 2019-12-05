@@ -41,7 +41,7 @@ class BuildThroughBeanClass {
         @Test
         void with_sequence_and_params() {
             factorySet.register(BeanWithNoDefaultConstructor.class, (buildingContext) -> {
-                BeanWithNoDefaultConstructor bean = new BeanWithNoDefaultConstructor(buildingContext.getSequence());
+                BeanWithNoDefaultConstructor bean = new BeanWithNoDefaultConstructor(buildingContext.getCurrentSequence());
                 bean.setStringValue(buildingContext.param("stringValue"));
                 return bean;
             });
@@ -74,7 +74,7 @@ class BuildThroughBeanClass {
 
         @Test
         void register_with_sequence() {
-            factorySet.onBuild(Bean.class, (bean, buildContext) -> bean.setStringValue("Hello" + buildContext.getSequence()));
+            factorySet.onBuild(Bean.class, (bean, buildContext) -> bean.setStringValue("Hello" + buildContext.getCurrentSequence()));
             Builder<Bean> builder = factorySet.type(Bean.class);
 
             assertThat(builder.build().getStringValue()).isEqualTo("Hello1");

@@ -19,25 +19,25 @@ public class BuildingContext<T> {
         this.factorySet = factorySet;
     }
 
-    public int getSequence() {
+    public int getCurrentSequence() {
         return sequence;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T param(String name) {
-        return (T) params.get(name);
+    public <P> P param(String name) {
+        return (P) params.get(name);
     }
 
     public BeanClass<T> getBeanClass() {
         return factory.getBeanClass();
     }
 
-    public boolean notSpecified(String name) {
+    public boolean isNotSpecified(String name) {
         return !properties.containsKey(name);
     }
 
-    public void setDefault(T object) {
-        factorySet.getPropertyBuilder().buildDefaultProperty(object, this);
+    public void assignPropertiesAsDefaultValues(T object) {
+        factorySet.getPropertyBuilder().assignPropertiesAsDefaultValues(object, this);
     }
 
     public FactorySet getFactorySet() {
