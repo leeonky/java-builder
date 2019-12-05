@@ -6,6 +6,7 @@ import com.github.leeonky.util.PropertyWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class Builder<T> {
@@ -13,6 +14,7 @@ public class Builder<T> {
     private final FactorySet factorySet;
     private final Map<String, Object> properties = new HashMap<>();
     private final Map<String, Object> params = new HashMap<>();
+    private String[] combinations = new String[]{};
     private Consumer<SpecificationBuilder<T>> specifications = null;
 
     Builder(Factory<T> factory, FactorySet factorySet) {
@@ -41,6 +43,7 @@ public class Builder<T> {
         T object = factory.newInstance(buildingContext);
         processedProperties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(object, k, v));
         factory.postProcess(buildingContext, object);
+        factory.combine(buildingContext, combinations);
         if (specifications != null)
             specifications.accept(buildingContext.getSpecificationBuilder());
         buildingContext.getSpecificationBuilder().collectSpecifications().forEach(spec -> spec.apply(object));
@@ -87,5 +90,11 @@ public class Builder<T> {
 
     public List<T> query() {
         return factorySet.getDataRepository().query(factory.getBeanClass(), properties);
+    }
+
+    public Builder<T> combine(String... combinations) {
+        Builder<T> builder = copy();
+        builder.combinations = Objects.requireNonNull(combinations);
+        return builder;
     }
 }

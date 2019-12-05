@@ -25,34 +25,31 @@ public class FactorySet {
         return propertyBuilder;
     }
 
-    public <T> FactorySet onBuild(Class<T> type, Consumer<T> build) {
+    public <T> Factory<T> onBuild(Class<T> type, Consumer<T> build) {
         return onBuild(type, (o, context) -> build.accept(o));
     }
 
-    public <T> FactorySet onBuild(Class<T> type, BiConsumer<T, BuildingContext<T>> build) {
+    public <T> Factory<T> onBuild(Class<T> type, BiConsumer<T, BuildingContext<T>> build) {
         try {
             type.getConstructor();
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException("No default constructor of class: " + type.getName());
         }
-        factories.put(type, new BeanFactory<>(type, build));
-        return this;
+        BeanFactory<T> beanFactory = new BeanFactory<>(type, build);
+        factories.put(type, beanFactory);
+        return beanFactory;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> Builder<T> type(Class<T> type) {
-        Factory<T> factory = (Factory<T>) factories.getOrDefault(type, new DefaultBeanFactory<>(type));
-        return new Builder<>(factory, this);
+    public <T> Factory<T> register(Class<T> type, Supplier<T> supplier) {
+        BeanWithNoDefaultConstructorFactory<T> factory = new BeanWithNoDefaultConstructorFactory<>(type, (buildContext) -> supplier.get());
+        factories.put(type, factory);
+        return factory;
     }
 
-    public <T> FactorySet register(Class<T> type, Supplier<T> supplier) {
-        factories.put(type, new BeanWithNoDefaultConstructorFactory<>(type, (buildContext) -> supplier.get()));
-        return this;
-    }
-
-    public <T> FactorySet register(Class<T> type, Function<BuildingContext<T>, T> supplier) {
-        factories.put(type, new BeanWithNoDefaultConstructorFactory<>(type, supplier));
-        return this;
+    public <T> Factory<T> register(Class<T> type, Function<BuildingContext<T>, T> supplier) {
+        BeanWithNoDefaultConstructorFactory<T> factory = new BeanWithNoDefaultConstructorFactory<>(type, supplier);
+        factories.put(type, factory);
+        return factory;
     }
 
     public <B extends BeanSpecification<T>, T> FactorySet define(Class<B> definition) {
@@ -63,6 +60,15 @@ public class FactorySet {
         beanSpecificationMap.put(definition, beanSpecificationFactory);
         beanSpecificationNameMap.put(definitionInstance.getName(), beanSpecificationFactory);
         return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Factory<T> factory(Class<T> type) {
+        return (Factory<T>) factories.computeIfAbsent(type, k -> new DefaultBeanFactory<>(type));
+    }
+
+    public <T> Builder<T> type(Class<T> type) {
+        return new Builder<>(factory(type), this);
     }
 
     @SuppressWarnings("unchecked")

@@ -118,10 +118,24 @@ class BuildThroughBeanClass {
 
         @Test
         void support_specify_specifications_in_build() {
-            assertThat(factorySet.type(Bean.class).specifications(specificationBuilder -> {
-                specificationBuilder.propertyValue("stringValue", "hello");
-            }).build()).hasFieldOrPropertyWithValue("stringValue", "hello");
+            assertThat(factorySet.type(Bean.class).specifications(specificationBuilder ->
+                    specificationBuilder.propertyValue("stringValue", "hello")).build())
+                    .hasFieldOrPropertyWithValue("stringValue", "hello");
+        }
 
+        @Test
+        void support_define_combination() {
+            factorySet.factory(Bean.class).combinable("com", specificationBuilder -> specificationBuilder.propertyValue("stringValue", "hello"));
+
+            assertThat(factorySet.type(Bean.class).combine("com").build())
+                    .hasFieldOrPropertyWithValue("stringValue", "hello");
+        }
+
+        @Test
+        void raise_error_when_combination_not_exist() {
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> factorySet.type(Bean.class).combine("com").build());
+
+            assertThat(exception).hasMessageContaining("Combination 'com' not exist");
         }
     }
 
