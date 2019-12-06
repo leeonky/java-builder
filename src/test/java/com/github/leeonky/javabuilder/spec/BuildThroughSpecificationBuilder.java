@@ -1,6 +1,7 @@
 package com.github.leeonky.javabuilder.spec;
 
 import com.github.leeonky.javabuilder.BeanSpecification;
+import com.github.leeonky.javabuilder.Combination;
 import com.github.leeonky.javabuilder.FactorySet;
 import com.github.leeonky.javabuilder.SpecificationBuilder;
 import lombok.Getter;
@@ -86,6 +87,22 @@ class BuildThroughSpecificationBuilder {
                 .isEqualTo("CNY");
     }
 
+    @Test
+    void support_define_combination_in_class() {
+        factorySet.define(Objects.USD.class);
+
+        assertThat(factorySet.toBuild(Objects.USD.class).combine("_100").build().getAmount())
+                .isEqualTo(100);
+    }
+
+    @Test
+    void specification_combination_name_in_method_annotation() {
+        factorySet.define(Objects.USD.class);
+
+        assertThat(factorySet.toBuild(Objects.USD.class).combine("200").build().getAmount())
+                .isEqualTo(200);
+    }
+
     public static class Objects {
 
         @Getter
@@ -109,6 +126,16 @@ class BuildThroughSpecificationBuilder {
             @Override
             public void specifications(SpecificationBuilder<Money> specificationBuilder) {
                 specificationBuilder.propertyValue("currency", "USD");
+            }
+
+            @Combination
+            public void _100(SpecificationBuilder<Money> specificationBuilder) {
+                specificationBuilder.propertyValue("amount", 100);
+            }
+
+            @Combination("200")
+            public void combination200(SpecificationBuilder<Money> specificationBuilder) {
+                specificationBuilder.propertyValue("amount", 200);
             }
         }
 

@@ -3,6 +3,7 @@ package com.github.leeonky.javabuilder;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,7 @@ public class SpecificationBuilder<T> {
     }
 
     public <PT> SpecificationBuilder<T> propertyFactory(String property, Class<? extends BeanSpecification<PT>> specification) {
-        specificationMap.put(property, new PropertyFactorySpecification<>(property, specification, null));
+        specificationMap.put(property, new PropertyFactorySpecification<>(property, specification, b -> b));
         return this;
     }
 
@@ -65,20 +66,18 @@ public class SpecificationBuilder<T> {
 
     class PropertyFactorySpecification<PT> extends AbstractSpecification<T> {
         private final Class<? extends BeanSpecification<PT>> specification;
-        private final Function<Builder<PT>, Builder<PT>> builder;
+        private final Function<Builder<PT>, Builder<PT>> additionalBuilderConfig;
 
-        PropertyFactorySpecification(String property, Class<? extends BeanSpecification<PT>> specification, Function<Builder<PT>, Builder<PT>> builder) {
+        PropertyFactorySpecification(String property, Class<? extends BeanSpecification<PT>> specification, Function<Builder<PT>, Builder<PT>> additionalBuilderConfig) {
             super(property);
             this.specification = specification;
-            this.builder = builder;
+            this.additionalBuilderConfig = Objects.requireNonNull(additionalBuilderConfig);
         }
 
         @Override
         public void apply(T instance) {
             Builder<PT> builder = buildingContext.getFactorySet().toBuild(specification);
-            if (this.builder != null)
-                builder = this.builder.apply(builder);
-            buildingContext.getBeanClass().setPropertyValue(instance, getProperty(), builder.build());
+            buildingContext.getBeanClass().setPropertyValue(instance, getProperty(), additionalBuilderConfig.apply(builder).build());
         }
     }
 }
