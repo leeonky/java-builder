@@ -2,10 +2,13 @@ package com.github.leeonky.javabuilder;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.singletonList;
 
 public class SpecificationBuilder<T> {
     private final BuildingContext<T> buildingContext;
@@ -34,8 +37,8 @@ public class SpecificationBuilder<T> {
     private void assignFromDependency(T instance, LinkedHashSet<String> properties, String property) {
         if (properties.contains(property)) {
             DependencyProperty<T> dependencyProperty = dependencyPropertyMap.get(property);
-            String dependencyDependency = dependencyProperty.getDependencyName();
-            assignFromDependency(instance, properties, dependencyDependency);
+            dependencyProperty.getDependencyName()
+                    .forEach(dependencyDependency -> assignFromDependency(instance, properties, dependencyDependency));
             dependencyProperty.apply(instance);
             properties.remove(property);
         }
@@ -67,21 +70,28 @@ public class SpecificationBuilder<T> {
         public <PT> PropertySpecificationBuilder buildFrom(Class<? extends BeanSpecification<PT>> specification,
                                                            Function<Builder<PT>, Builder<PT>> builder) {
             specificationMap.put(property, instance ->
-                    buildingContext.getBeanClass().setPropertyValue(instance, property, builder.apply(buildingContext.getFactorySet().toBuild(specification)).build()));
+                    buildingContext.getBeanClass().setPropertyValue(instance, property, builder.apply(buildingContext.getFactorySet()
+                            .toBuild(specification)).build()));
             return this;
         }
 
         public PropertySpecificationBuilder dependsOn(String dependency, Function<Object, Object> dependencyHandler) {
+            return dependsOn(singletonList(dependency), list -> dependencyHandler.apply(list.get(0)));
+        }
+
+        public PropertySpecificationBuilder dependsOn(List<String> dependencies, Function<List<Object>, Object> dependencyHandler) {
             dependencyPropertyMap.put(property, new DependencyProperty<T>() {
                 @Override
-                public String getDependencyName() {
-                    return dependency;
+                public List<String> getDependencyName() {
+                    return dependencies;
                 }
 
                 @Override
                 public void apply(T instance) {
                     buildingContext.getBeanClass().setPropertyValue(instance, property,
-                            dependencyHandler.apply(buildingContext.getBeanClass().getPropertyValue(instance, dependency)));
+                            dependencyHandler.apply(dependencies.stream()
+                                    .map(dependency -> buildingContext.getBeanClass().getPropertyValue(instance, dependency))
+                                    .collect(Collectors.toList())));
                 }
             });
             return this;
