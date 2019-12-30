@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SpecificationBuilder<T> {
@@ -37,7 +38,12 @@ public class SpecificationBuilder<T> {
         return this;
     }
 
-    abstract class AbstractSpecification<T> implements Specification<T> {
+    public <E> SpecificationBuilder<T> propertySupplier(String property, Supplier<E> supplier) {
+        specificationMap.put(property, new PropertySupplierSpecification<>(property, supplier));
+        return this;
+    }
+
+    abstract static class AbstractSpecification<T> implements Specification<T> {
         private final String property;
 
         protected AbstractSpecification(String property) {
@@ -78,6 +84,20 @@ public class SpecificationBuilder<T> {
         public void apply(T instance) {
             Builder<PT> builder = buildingContext.getFactorySet().toBuild(specification);
             buildingContext.getBeanClass().setPropertyValue(instance, getProperty(), additionalBuilderConfig.apply(builder).build());
+        }
+    }
+
+    class PropertySupplierSpecification<E> extends AbstractSpecification<T> {
+        private final Supplier<E> supplier;
+
+        PropertySupplierSpecification(String property, Supplier<E> supplier) {
+            super(property);
+            this.supplier = supplier;
+        }
+
+        @Override
+        public void apply(T instance) {
+            buildingContext.getBeanClass().setPropertyValue(instance, getProperty(), supplier.get());
         }
     }
 }

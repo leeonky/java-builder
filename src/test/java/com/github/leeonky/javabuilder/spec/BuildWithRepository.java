@@ -1,6 +1,7 @@
 package com.github.leeonky.javabuilder.spec;
 
 import com.github.leeonky.javabuilder.BeanSpecification;
+import com.github.leeonky.javabuilder.Combination;
 import com.github.leeonky.javabuilder.FactorySet;
 import com.github.leeonky.javabuilder.SpecificationBuilder;
 import lombok.Getter;
@@ -45,12 +46,18 @@ class BuildWithRepository {
     public static class Product {
         private String name;
         private Category category;
+        private boolean issued;
     }
 
     public static class ProgrammeBook extends BeanSpecification<Product> {
         @Override
         public void specifications(SpecificationBuilder<Product> specificationBuilder) {
             specificationBuilder.propertyValue("name", "Java");
+        }
+
+        @Combination("Issued")
+        public void issued(SpecificationBuilder<Product> specificationBuilder) {
+            specificationBuilder.propertyValue("issued", true);
         }
     }
 
@@ -133,6 +140,15 @@ class BuildWithRepository {
             Order order = factorySet.type(Order.class).property("product(ProgrammeBook).category.name", "book").build();
 
             assertThat(order.getProduct().getName()).isEqualTo("Java");
+        }
+
+        @Test
+        void support_build_property_with_factory_name_and_combination() {
+            factorySet.define(ProgrammeBook.class);
+
+            Order order = factorySet.type(Order.class).property("product(Issued, ProgrammeBook).category.name", "book").build();
+
+            assertThat(order.getProduct().isIssued()).isTrue();
         }
 
 

@@ -79,6 +79,14 @@ class BuildThroughSpecificationBuilder {
     }
 
     @Test
+    void should_support_use_supplier_in_property() {
+        factorySet.define(Objects.ProductWithSupplier.class);
+
+        assertThat(factorySet.toBuild(Objects.ProductWithSupplier.class).build().getPrice().getAmount())
+                .isEqualTo(100);
+    }
+
+    @Test
     void support_override_sub_build_in_specification() {
         factorySet.define(Objects.USD.class);
         factorySet.define(Objects.ProductOverrideSpecification.class);
@@ -150,6 +158,13 @@ class BuildThroughSpecificationBuilder {
             @Override
             public void specifications(SpecificationBuilder<Product> specificationBuilder) {
                 specificationBuilder.propertyFactory("price", USD.class);
+            }
+        }
+
+        public static class ProductWithSupplier extends BeanSpecification<Product> {
+            @Override
+            public void specifications(SpecificationBuilder<Product> specificationBuilder) {
+                specificationBuilder.propertySupplier("price", () -> new Money().setAmount(100));
             }
         }
 
