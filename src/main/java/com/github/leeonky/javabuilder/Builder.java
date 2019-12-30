@@ -4,6 +4,7 @@ import com.github.leeonky.util.PropertyWriter;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class Builder<T> {
     private final Factory<T> factory;
@@ -67,6 +68,10 @@ public class Builder<T> {
         Builder<T> builder = copy();
         builder.properties.putAll(properties);
         return builder;
+    }
+
+    public Stream<Builder<T>> properties(Collection<Map<String, Object>> properties) {
+        return properties.stream().map(this::properties);
     }
 
     public Builder<T> param(String paramName, Object value) {
