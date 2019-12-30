@@ -133,17 +133,17 @@ class BuildThroughSpecificationBuilder {
         public static class USD extends BeanSpecification<Money> {
             @Override
             public void specifications(SpecificationBuilder<Money> specificationBuilder) {
-                specificationBuilder.propertyValue("currency", "USD");
+                specificationBuilder.property("currency").hasValue("USD");
             }
 
             @Combination
             public void _100(SpecificationBuilder<Money> specificationBuilder) {
-                specificationBuilder.propertyValue("amount", 100);
+                specificationBuilder.property("amount").hasValue(100);
             }
 
             @Combination("200")
             public void combination200(SpecificationBuilder<Money> specificationBuilder) {
-                specificationBuilder.propertyValue("amount", 200);
+                specificationBuilder.property("amount").hasValue(200);
             }
         }
 
@@ -157,23 +157,23 @@ class BuildThroughSpecificationBuilder {
         public static class ProductInUSD extends BeanSpecification<Product> {
             @Override
             public void specifications(SpecificationBuilder<Product> specificationBuilder) {
-                specificationBuilder.propertyFactory("price", USD.class);
+                specificationBuilder.property("price").buildFrom(USD.class);
             }
         }
 
         public static class ProductWithSupplier extends BeanSpecification<Product> {
             @Override
             public void specifications(SpecificationBuilder<Product> specificationBuilder) {
-                specificationBuilder.propertySupplier("price", () -> new Money().setAmount(100));
+                specificationBuilder.property("price").buildFrom(() -> new Money().setAmount(100));
             }
         }
 
         public static class ProductOverrideSpecification extends BeanSpecification<Product> {
             @Override
             public void specifications(SpecificationBuilder<Product> specificationBuilder) {
-                specificationBuilder.propertyFactory("price", USD.class, builder ->
+                specificationBuilder.property("price").buildFrom(USD.class, builder ->
                         builder.specifications(specificationBuilder1 -> {
-                            specificationBuilder1.propertyValue("currency", "CNY");
+                            specificationBuilder1.property("currency").hasValue("CNY");
                         }));
             }
         }

@@ -39,11 +39,9 @@ class BuildThroughComplexSpecification {
 
             @Override
             public void specifications(SpecificationBuilder<Product> specificationBuilder) {
-                specificationBuilder.propertyDependsOn("shortCut", "shortName",
-                        (shortName) -> String.valueOf(((String) shortName).charAt(0)));
+                specificationBuilder.property("shortCut").dependsOn("shortName", (shortName) -> String.valueOf(((String) shortName).charAt(0)));
 
-                specificationBuilder.propertyDependsOn("shortName", "name",
-                        (name) -> ((String) name).split(" ")[0]);
+                specificationBuilder.property("shortName").dependsOn("name", (name) -> ((String) name).split(" ")[0]);
             }
         }
     }
