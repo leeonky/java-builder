@@ -45,7 +45,7 @@ public class Builder<T> {
         factory.getSpecifications().accept(buildingContext.getSpecificationBuilder());
         factory.combine(buildingContext, combinations);
         specifications.accept(buildingContext.getSpecificationBuilder());
-        buildingContext.getSpecificationBuilder().collectSpecifications().forEach(spec -> spec.apply(object));
+        buildingContext.getSpecificationBuilder().applySpecifications(object);
         return factorySet.getDataRepository().save(object);
     }
 
