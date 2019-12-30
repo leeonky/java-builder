@@ -22,7 +22,7 @@ class BuildThroughDefaultFactory {
 
     @Test
     void default_build() {
-        assertThat(factorySet.type(Bean.class).build())
+        assertThat(factorySet.type(Bean.class).create())
                 .hasFieldOrPropertyWithValue("stringValue", "stringValue1")
                 .hasFieldOrPropertyWithValue("longValue", 1L)
                 .hasFieldOrPropertyWithValue("intValue", 1)
@@ -50,7 +50,7 @@ class BuildThroughDefaultFactory {
                 .hasFieldOrPropertyWithValue("zonedDateTimeValue", Instant.parse("1996-01-23T00:00:01Z").atZone(ZoneId.systemDefault()))
                 .hasFieldOrPropertyWithValue("enumValue", A);
 
-        assertThat(factorySet.type(Bean.class).build())
+        assertThat(factorySet.type(Bean.class).create())
                 .hasFieldOrPropertyWithValue("stringValue", "stringValue2")
                 .hasFieldOrPropertyWithValue("longValue", 2L)
                 .hasFieldOrPropertyWithValue("intValue", 2)
@@ -85,10 +85,10 @@ class BuildThroughDefaultFactory {
                 .registerThroughProperty(m -> m.getName().equals("intValue"),
                         (m, o, buildContext) -> buildContext.getCurrentSequence() + 1);
 
-        assertThat(factorySet.type(Bean.class).build())
+        assertThat(factorySet.type(Bean.class).create())
                 .hasFieldOrPropertyWithValue("intValue", 2);
 
-        assertThat(factorySet.type(Bean.class).build())
+        assertThat(factorySet.type(Bean.class).create())
                 .hasFieldOrPropertyWithValue("intValue", 3);
     }
 
@@ -97,7 +97,7 @@ class BuildThroughDefaultFactory {
         factorySet.getPropertyBuilder()
                 .skipProperty(m -> m.getName().equals("intValue"));
 
-        assertThat(factorySet.type(Bean.class).build())
+        assertThat(factorySet.type(Bean.class).create())
                 .hasFieldOrPropertyWithValue("intValue", 0);
     }
 
@@ -109,7 +109,7 @@ class BuildThroughDefaultFactory {
         });
         Bean newBean = new Bean();
 
-        assertThat(factorySet.type(Bean.class).property("beanValue", newBean).build().getBeanValue())
+        assertThat(factorySet.type(Bean.class).property("beanValue", newBean).create().getBeanValue())
                 .isEqualTo(newBean);
         assertThat(methodCalled).isFalse();
     }

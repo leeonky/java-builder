@@ -19,7 +19,7 @@ class BuildThroughSpecificationBuilder {
     void support_define_specification_with_value_in_class() {
         factorySet.define(Objects.USD.class);
 
-        assertThat(factorySet.toBuild(Objects.USD.class).build())
+        assertThat(factorySet.toBuild(Objects.USD.class).create())
                 .hasFieldOrPropertyWithValue("currency", "USD");
     }
 
@@ -28,7 +28,7 @@ class BuildThroughSpecificationBuilder {
         factorySet.define(Objects.USD.class);
         factorySet.define(Objects.ProductInUSD.class);
 
-        assertThat(factorySet.toBuild(Objects.ProductInUSD.class).build().getPrice())
+        assertThat(factorySet.toBuild(Objects.ProductInUSD.class).create().getPrice())
                 .hasFieldOrPropertyWithValue("currency", "USD");
     }
 
@@ -36,19 +36,19 @@ class BuildThroughSpecificationBuilder {
     void support_build_via_specification_name() {
         factorySet.define(Objects.USD.class);
 
-        assertThat(factorySet.toBuild("USD").build())
+        assertThat(factorySet.toBuild("USD").create())
                 .hasFieldOrPropertyWithValue("currency", "USD");
     }
 
     @Test
     void should_raise_error_when_specification_not_exist() {
-        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> factorySet.toBuild(Objects.USD.class).build());
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> factorySet.toBuild(Objects.USD.class).create());
         assertThat(runtimeException).hasMessageContaining("Specification 'com.github.leeonky.javabuilder.spec.BuildThroughSpecificationBuilder$Objects$USD' not exists");
     }
 
     @Test
     void should_raise_error_when_specification_name_not_exist() {
-        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> factorySet.toBuild("USD").build());
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> factorySet.toBuild("USD").create());
         assertThat(runtimeException).hasMessageContaining("Specification 'USD' not exists");
     }
 
@@ -66,7 +66,7 @@ class BuildThroughSpecificationBuilder {
 
         factorySet.define(Objects.USD.class);
 
-        assertThat(factorySet.toBuild(Objects.USD.class).build())
+        assertThat(factorySet.toBuild(Objects.USD.class).create())
                 .hasFieldOrPropertyWithValue("amount", 100);
     }
 
@@ -74,7 +74,7 @@ class BuildThroughSpecificationBuilder {
     void should_skip_specification_when_given_property_value_in_build() {
         factorySet.define(Objects.ProductInUSD.class);
 
-        assertThat(factorySet.toBuild(Objects.ProductInUSD.class).property("price", null).build().getPrice())
+        assertThat(factorySet.toBuild(Objects.ProductInUSD.class).property("price", null).create().getPrice())
                 .isNull();
     }
 
@@ -82,7 +82,7 @@ class BuildThroughSpecificationBuilder {
     void should_support_use_supplier_in_property() {
         factorySet.define(Objects.ProductWithSupplier.class);
 
-        assertThat(factorySet.toBuild(Objects.ProductWithSupplier.class).build().getPrice().getAmount())
+        assertThat(factorySet.toBuild(Objects.ProductWithSupplier.class).create().getPrice().getAmount())
                 .isEqualTo(100);
     }
 
@@ -91,7 +91,7 @@ class BuildThroughSpecificationBuilder {
         factorySet.define(Objects.USD.class);
         factorySet.define(Objects.ProductOverrideSpecification.class);
 
-        assertThat(factorySet.toBuild(Objects.ProductOverrideSpecification.class).build().getPrice().getCurrency())
+        assertThat(factorySet.toBuild(Objects.ProductOverrideSpecification.class).create().getPrice().getCurrency())
                 .isEqualTo("CNY");
     }
 
@@ -99,7 +99,7 @@ class BuildThroughSpecificationBuilder {
     void support_define_combination_in_class() {
         factorySet.define(Objects.USD.class);
 
-        assertThat(factorySet.toBuild(Objects.USD.class).combine("_100").build().getAmount())
+        assertThat(factorySet.toBuild(Objects.USD.class).combine("_100").create().getAmount())
                 .isEqualTo(100);
     }
 
@@ -107,7 +107,7 @@ class BuildThroughSpecificationBuilder {
     void specification_combination_name_in_method_annotation() {
         factorySet.define(Objects.USD.class);
 
-        assertThat(factorySet.toBuild(Objects.USD.class).combine("200").build().getAmount())
+        assertThat(factorySet.toBuild(Objects.USD.class).combine("200").create().getAmount())
                 .isEqualTo(200);
     }
 

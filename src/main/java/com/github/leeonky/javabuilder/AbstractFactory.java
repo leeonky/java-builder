@@ -34,7 +34,7 @@ public abstract class AbstractFactory<T> implements Factory<T> {
             Consumer<SpecificationBuilder<T>> consumer = this.combinations.get(combination);
             if (consumer == null)
                 throw new IllegalArgumentException(String.format("Combination '%s' not exist", combination));
-            consumer.accept(buildingContext.getSpecificationBuilder());
+            buildingContext.collectSpecifications(consumer);
         }
     }
 

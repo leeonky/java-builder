@@ -63,7 +63,7 @@ public class SpecificationBuilder<T> {
 
         public <PT> PropertySpecificationBuilder buildFrom(Class<? extends BeanSpecification<PT>> specification) {
             specificationMap.put(property, instance ->
-                    buildingContext.getBeanClass().setPropertyValue(instance, property, buildingContext.getFactorySet().toBuild(specification).build()));
+                    buildingContext.getBeanClass().setPropertyValue(instance, property, buildingContext.getFactorySet().toBuild(specification).create()));
             return this;
         }
 
@@ -71,7 +71,7 @@ public class SpecificationBuilder<T> {
                                                            Function<Builder<PT>, Builder<PT>> builder) {
             specificationMap.put(property, instance ->
                     buildingContext.getBeanClass().setPropertyValue(instance, property, builder.apply(buildingContext.getFactorySet()
-                            .toBuild(specification)).build()));
+                            .toBuild(specification)).create()));
             return this;
         }
 

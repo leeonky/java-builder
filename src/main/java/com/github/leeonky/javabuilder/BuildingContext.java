@@ -3,6 +3,7 @@ package com.github.leeonky.javabuilder;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class BuildingContext<T> {
     private final int sequence;
@@ -46,5 +47,13 @@ public class BuildingContext<T> {
 
     public SpecificationBuilder<T> getSpecificationBuilder() {
         return specificationBuilder;
+    }
+
+    public void assignProperties(T instance) {
+        properties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(instance, k, v));
+    }
+
+    public void collectSpecifications(Consumer<SpecificationBuilder<T>> specifications) {
+        specifications.accept(specificationBuilder);
     }
 }

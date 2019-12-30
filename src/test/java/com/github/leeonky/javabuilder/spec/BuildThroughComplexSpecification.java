@@ -51,7 +51,7 @@ class BuildThroughComplexSpecification {
         void should_support_build_property_value_from_dependency_chain_with_dependency_orders() {
             factorySet.define(Objects.ProductWithDiscount.class);
 
-            assertThat(factorySet.toBuild(Objects.ProductWithDiscount.class).property("price", 10000).build())
+            assertThat(factorySet.toBuild(Objects.ProductWithDiscount.class).property("price", 10000).create())
                     .hasFieldOrPropertyWithValue("tax", 1000)
                     .hasFieldOrPropertyWithValue("taxDiscount", 10);
         }
@@ -60,7 +60,7 @@ class BuildThroughComplexSpecification {
         void should_skip_dependency_logic_when_specify_value_in_property() {
             factorySet.define(Objects.ProductWithDiscount.class);
 
-            assertThat(factorySet.toBuild(Objects.ProductWithDiscount.class).property("tax", 100).build())
+            assertThat(factorySet.toBuild(Objects.ProductWithDiscount.class).property("tax", 100).create())
                     .hasFieldOrPropertyWithValue("taxDiscount", 1)
             ;
         }
@@ -72,7 +72,7 @@ class BuildThroughComplexSpecification {
             assertThat(factorySet.toBuild(Objects.ProductWithMultiDependency.class)
                     .property("tax", 100)
                     .property("price", 2000)
-                    .build())
+                    .create())
                     .hasFieldOrPropertyWithValue("minPriceWithoutTax", 1900)
             ;
         }

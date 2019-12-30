@@ -36,17 +36,28 @@ public class Builder<T> {
         return builder;
     }
 
-    public T build() {
-        Map<String, Object> processedProperties = processReferenceProperties();
+    public T create() {
         BuildingContext<T> buildingContext = new BuildingContext<>(factorySet.getSequence(factory.getBeanClass().getType()),
-                params, processedProperties, factory, factorySet);
-        T object = factory.newInstance(buildingContext);
-        processedProperties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(object, k, v));
-        factory.getSpecifications().accept(buildingContext.getSpecificationBuilder());
-        factory.combine(buildingContext, combinations);
-        specifications.accept(buildingContext.getSpecificationBuilder());
+                params, processReferenceProperties(), factory, factorySet);
+
+        collectAllSpecifications(buildingContext);
+
+        T object = build(buildingContext);
+
         buildingContext.getSpecificationBuilder().applySpecifications(object);
         return factorySet.getDataRepository().save(object);
+    }
+
+    public T build(BuildingContext<T> buildingContext) {
+        T object = factory.newInstance(buildingContext);
+        buildingContext.assignProperties(object);
+        return object;
+    }
+
+    private void collectAllSpecifications(BuildingContext<T> buildingContext) {
+        buildingContext.collectSpecifications(factory.getSpecifications());
+        factory.combine(buildingContext, combinations);
+        buildingContext.collectSpecifications(specifications);
     }
 
     @SuppressWarnings("unchecked")
@@ -57,7 +68,7 @@ public class Builder<T> {
                 PropertyChain propertyChain = PropertyChain.parse(k);
                 PropertyWriter<T> propertyWriter = factory.getBeanClass().getPropertyWriter(propertyChain.getName());
                 Builder builder = propertyChain.toBuilder(factorySet, propertyWriter.getPropertyType(), v);
-                processedProperties.put(propertyWriter.getName(), builder.query().stream().findFirst().orElseGet(builder::build));
+                processedProperties.put(propertyWriter.getName(), builder.query().stream().findFirst().orElseGet(builder::create));
             } else
                 processedProperties.put(k, v);
         });

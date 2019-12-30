@@ -36,7 +36,7 @@ class BuildThroughBeanClass {
                 return bean;
             });
 
-            assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).build())
+            assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).create())
                     .hasFieldOrPropertyWithValue("stringValue", "Hello");
         }
 
@@ -48,7 +48,7 @@ class BuildThroughBeanClass {
                 return bean;
             });
 
-            assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).param("stringValue", "Hello").build())
+            assertThat(factorySet.type(BeanWithNoDefaultConstructor.class).param("stringValue", "Hello").create())
                     .hasFieldOrPropertyWithValue("intValue", 1)
                     .hasFieldOrPropertyWithValue("stringValue", "Hello");
         }
@@ -61,7 +61,7 @@ class BuildThroughBeanClass {
         void register_and_build() {
             factorySet.onBuild(Bean.class, bean -> bean.setStringValue("Hello"));
 
-            assertThat(factorySet.type(Bean.class).build())
+            assertThat(factorySet.type(Bean.class).create())
                     .hasFieldOrPropertyWithValue("stringValue", "Hello");
         }
 
@@ -70,7 +70,7 @@ class BuildThroughBeanClass {
             factorySet.onBuild(Bean.class, bean -> {
             });
 
-            assertThat(factorySet.type(Bean.class).property("stringValue", "new string value").build())
+            assertThat(factorySet.type(Bean.class).property("stringValue", "new string value").create())
                     .hasFieldOrPropertyWithValue("stringValue", "new string value");
         }
 
@@ -79,8 +79,8 @@ class BuildThroughBeanClass {
             factorySet.onBuild(Bean.class, (bean, buildContext) -> bean.setStringValue("Hello" + buildContext.getCurrentSequence()));
             Builder<Bean> builder = factorySet.type(Bean.class);
 
-            assertThat(builder.build().getStringValue()).isEqualTo("Hello1");
-            assertThat(builder.build().getStringValue()).isEqualTo("Hello2");
+            assertThat(builder.create().getStringValue()).isEqualTo("Hello1");
+            assertThat(builder.create().getStringValue()).isEqualTo("Hello2");
         }
 
         @Test
@@ -88,7 +88,7 @@ class BuildThroughBeanClass {
             factorySet.onBuild(Bean.class, (bean, buildContext) -> bean.setStringValue(buildContext.param("message")));
             Builder<Bean> builder = factorySet.type(Bean.class);
 
-            assertThat(builder.param("message", "hello").build().getStringValue()).isEqualTo("hello");
+            assertThat(builder.param("message", "hello").create().getStringValue()).isEqualTo("hello");
         }
 
         @Test
@@ -98,7 +98,7 @@ class BuildThroughBeanClass {
 
             assertThat(factorySet.type(Bean.class).properties(new HashMap<String, Object>() {{
                 put("stringValue", "Hello");
-            }}).build()).hasFieldOrPropertyWithValue("stringValue", "Hello");
+            }}).create()).hasFieldOrPropertyWithValue("stringValue", "Hello");
         }
 
         @Test
@@ -114,13 +114,13 @@ class BuildThroughBeanClass {
             factorySet.onBuild(Bean.class, bean -> {
             });
 
-            assertThat(factorySet.type(Bean.class).property("stringValue", 1).build())
+            assertThat(factorySet.type(Bean.class).property("stringValue", 1).create())
                     .hasFieldOrPropertyWithValue("stringValue", "1");
         }
 
         @Test
         void support_specify_specifications_in_build() {
-            assertThat(factorySet.type(Bean.class).specifications(specificationBuilder -> specificationBuilder.property("stringValue").hasValue("hello")).build())
+            assertThat(factorySet.type(Bean.class).specifications(specificationBuilder -> specificationBuilder.property("stringValue").hasValue("hello")).create())
                     .hasFieldOrPropertyWithValue("stringValue", "hello");
         }
 
@@ -128,13 +128,13 @@ class BuildThroughBeanClass {
         void support_define_combination() {
             factorySet.factory(Bean.class).combinable("com", specificationBuilder -> specificationBuilder.property("stringValue").hasValue("hello"));
 
-            assertThat(factorySet.type(Bean.class).combine("com").build())
+            assertThat(factorySet.type(Bean.class).combine("com").create())
                     .hasFieldOrPropertyWithValue("stringValue", "hello");
         }
 
         @Test
         void raise_error_when_combination_not_exist() {
-            RuntimeException exception = assertThrows(RuntimeException.class, () -> factorySet.type(Bean.class).combine("com").build());
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> factorySet.type(Bean.class).combine("com").create());
 
             assertThat(exception).hasMessageContaining("Combination 'com' not exist");
         }
@@ -143,7 +143,7 @@ class BuildThroughBeanClass {
         void should_support_build_a_list() {
             assertThat(factorySet.type(Bean.class).properties(singletonList(new HashMap<String, Object>() {{
                 put("stringValue", "hello");
-            }})).map(Builder::build).collect(Collectors.toList()).get(0)).hasFieldOrPropertyWithValue("stringValue", "hello");
+            }})).map(Builder::create).collect(Collectors.toList()).get(0)).hasFieldOrPropertyWithValue("stringValue", "hello");
         }
     }
 

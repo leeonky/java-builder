@@ -66,7 +66,7 @@ class BuildWithRepository {
 
         @Test
         void should_support_cache_and_query_object() {
-            Bean bean = factorySet.type(Bean.class).property("stringValue", "hello").build();
+            Bean bean = factorySet.type(Bean.class).property("stringValue", "hello").create();
 
             List<Bean> queriedBean = factorySet.type(Bean.class).property("stringValue", "hello").query();
 
@@ -78,16 +78,16 @@ class BuildWithRepository {
 
         @Test
         void should_support_auto_convert_in_query() {
-            Bean bean = factorySet.type(Bean.class).property("intValue", 1).build();
+            Bean bean = factorySet.type(Bean.class).property("intValue", 1).create();
 
             assertThat(bean).isEqualTo(factorySet.type(Bean.class).property("intValue", "1").query().get(0));
         }
 
         @Test
         void should_support_query_with_property_chain() {
-            Category category = factorySet.type(Category.class).property("name", "math").build();
-            Product product = factorySet.type(Product.class).property("category", category).build();
-            Order order = factorySet.type(Order.class).property("product", product).build();
+            Category category = factorySet.type(Category.class).property("name", "math").create();
+            Product product = factorySet.type(Product.class).property("category", category).create();
+            Order order = factorySet.type(Order.class).property("product", product).create();
 
             assertThat(factorySet.type(Order.class).property("product.category.name", "math").query())
                     .containsOnly(order);
@@ -95,9 +95,9 @@ class BuildWithRepository {
 
         @Test
         void support_auto_skip_factory_name() {
-            Category category = factorySet.type(Category.class).property("name", "math").build();
-            Product product = factorySet.type(Product.class).property("category", category).build();
-            Order order = factorySet.type(Order.class).property("product", product).build();
+            Category category = factorySet.type(Category.class).property("name", "math").create();
+            Product product = factorySet.type(Product.class).property("category", category).create();
+            Order order = factorySet.type(Order.class).property("product", product).create();
 
             assertThat(factorySet.type(Order.class).property("product.category.name", "math").query())
                     .containsOnly(order);
@@ -109,26 +109,26 @@ class BuildWithRepository {
 
         @Test
         void should_support_build_object_with_object_reference() {
-            Product product = factorySet.type(Product.class).property("name", "book").build();
+            Product product = factorySet.type(Product.class).property("name", "book").create();
 
-            Order order = factorySet.type(Order.class).property("product.name", "book").build();
+            Order order = factorySet.type(Order.class).property("product.name", "book").create();
 
             assertThat(order.getProduct()).isEqualTo(product);
         }
 
         @Test
         void should_support_build_object_with_more_nested_object_reference() {
-            Category category = factorySet.type(Category.class).property("name", "math").build();
-            Product product = factorySet.type(Product.class).property("category", category).build();
+            Category category = factorySet.type(Category.class).property("name", "math").create();
+            Product product = factorySet.type(Product.class).property("category", category).create();
 
-            Order order = factorySet.type(Order.class).property("product.category.name", "math").build();
+            Order order = factorySet.type(Order.class).property("product.category.name", "math").create();
 
             assertThat(order.getProduct()).isEqualTo(product);
         }
 
         @Test
         void should_support_build_object_with_default_property_build() {
-            Order order = factorySet.type(Order.class).property("product.name", "book").build();
+            Order order = factorySet.type(Order.class).property("product.name", "book").create();
 
             assertThat(order.getProduct().getName()).isEqualTo("book");
         }
@@ -137,7 +137,7 @@ class BuildWithRepository {
         void support_build_property_with_factory_name() {
             factorySet.define(ProgrammeBook.class);
 
-            Order order = factorySet.type(Order.class).property("product(ProgrammeBook).category.name", "book").build();
+            Order order = factorySet.type(Order.class).property("product(ProgrammeBook).category.name", "book").create();
 
             assertThat(order.getProduct().getName()).isEqualTo("Java");
         }
@@ -146,7 +146,7 @@ class BuildWithRepository {
         void support_build_property_with_factory_name_and_combination() {
             factorySet.define(ProgrammeBook.class);
 
-            Order order = factorySet.type(Order.class).property("product(Issued, ProgrammeBook).category.name", "book").build();
+            Order order = factorySet.type(Order.class).property("product(Issued, ProgrammeBook).category.name", "book").create();
 
             assertThat(order.getProduct().isIssued()).isTrue();
         }
@@ -154,8 +154,8 @@ class BuildWithRepository {
 
         @Test
         void support_build_reference_object_first() {
-            Product product = factorySet.type(Product.class).build();
-            Order order = factorySet.type(Order.class).property("product.category.name", "book").build();
+            Product product = factorySet.type(Product.class).create();
+            Order order = factorySet.type(Order.class).property("product.category.name", "book").create();
 
             assertThat(order).isInstanceOf(Order.class);
             assertThat(order.getProduct()).isNotEqualTo(product);
