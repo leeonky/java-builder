@@ -53,13 +53,13 @@ public class PropertyBuilder {
     }
 
     public <T, B> PropertyBuilder registerThroughType(Class<T> propertyType,
-                                                      TriFunction<Class<T>, PropertyWriter<B>, BuildingContext<B>, T> builder) {
+                                                      TriFunction<Class<T>, PropertyWriter<B>, BeanContext<B>, T> builder) {
         setters.add(new TypeHandler<>(propertyType, builder));
         return this;
     }
 
     public <B> PropertyBuilder registerThroughProperty(Predicate<PropertyWriter<B>> predicate,
-                                                       TriFunction<PropertyWriter<B>, Object, BuildingContext<B>, Object> builder) {
+                                                       TriFunction<PropertyWriter<B>, Object, BeanContext<B>, Object> builder) {
         propertyBuilders.put(predicate, builder);
         return this;
     }
@@ -70,33 +70,33 @@ public class PropertyBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> void assignPropertiesAsDefaultValues(T object, BuildingContext<T> buildingContext) {
-        buildingContext.getBeanClass().getPropertyWriters()
+    public <T> void assignPropertiesAsDefaultValues(T object, BeanContext<T> beanContext) {
+        beanContext.getBeanClass().getPropertyWriters()
                 .values().stream()
                 .filter(propertyWriter -> skipper.stream().noneMatch(p -> p.test(propertyWriter)))
-                .filter(propertyWriter -> buildingContext.isNotSpecified(propertyWriter.getName()))
-                .forEach(propertyWriter -> assignPropertyAsDefaultValue(object, propertyWriter, buildingContext));
+                .filter(propertyWriter -> beanContext.isNotSpecified(propertyWriter.getName()))
+                .forEach(propertyWriter -> assignPropertyAsDefaultValue(object, propertyWriter, beanContext));
     }
 
     @SuppressWarnings("unchecked")
-    private void assignPropertyAsDefaultValue(Object object, PropertyWriter propertyWriter, BuildingContext<?> buildingContext) {
-        Stream.concat(buildValueFromMethodBuilder(propertyWriter, object, buildingContext),
-                buildValueFromPropertyBuilder(propertyWriter, buildingContext)).findFirst()
+    private void assignPropertyAsDefaultValue(Object object, PropertyWriter propertyWriter, BeanContext<?> beanContext) {
+        Stream.concat(buildValueFromMethodBuilder(propertyWriter, object, beanContext),
+                buildValueFromPropertyBuilder(propertyWriter, beanContext)).findFirst()
                 .ifPresent(value -> propertyWriter.setValue(object, value));
     }
 
     @SuppressWarnings("unchecked")
-    private Stream<Object> buildValueFromMethodBuilder(PropertyWriter propertyWriter, Object object, BuildingContext<?> buildingContext) {
+    private Stream<Object> buildValueFromMethodBuilder(PropertyWriter propertyWriter, Object object, BeanContext<?> beanContext) {
         return propertyBuilders.entrySet().stream()
                 .filter(e -> e.getKey().test(propertyWriter))
-                .map(e -> e.getValue().apply(propertyWriter, object, buildingContext));
+                .map(e -> e.getValue().apply(propertyWriter, object, beanContext));
     }
 
     @SuppressWarnings("unchecked")
-    private Stream<Object> buildValueFromPropertyBuilder(PropertyWriter propertyWriter, BuildingContext<?> buildingContext) {
+    private Stream<Object> buildValueFromPropertyBuilder(PropertyWriter propertyWriter, BeanContext<?> beanContext) {
         return Stream.concat(setters.stream().filter(s -> s.isPreciseType(propertyWriter.getPropertyType())),
                 setters.stream().filter(s -> s.isBaseType(propertyWriter.getPropertyType())))
-                .map(t -> t.getHandler().apply(propertyWriter.getPropertyType(), propertyWriter, buildingContext));
+                .map(t -> t.getHandler().apply(propertyWriter.getPropertyType(), propertyWriter, beanContext));
     }
 
 }

@@ -5,13 +5,13 @@ import com.github.leeonky.util.BeanClass;
 import java.util.function.Consumer;
 
 public interface Factory<T> {
-    T newInstance(BuildingContext<T> buildingContext);
+    T newInstance(BeanContext<T> beanContext);
 
     BeanClass<T> getBeanClass();
 
     Factory<T> combinable(String name, Consumer<SpecificationBuilder<T>> specifications);
 
-    void combine(BuildingContext<T> buildingContext, String... combinations);
+    void combine(BeanContext<T> beanContext, String... combinations);
 
     void specifications(Consumer<SpecificationBuilder<T>> specificationBuilder);
 

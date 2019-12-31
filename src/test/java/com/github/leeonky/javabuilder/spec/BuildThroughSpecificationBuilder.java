@@ -130,6 +130,13 @@ class BuildThroughSpecificationBuilder {
             private Money discount;
         }
 
+        @Getter
+        @Setter
+        @Accessors(chain = true)
+        public static class ShoppingList {
+            private Product product;
+        }
+
         public static class USD extends BeanSpecification<Money> {
             @Override
             public void specifications(SpecificationBuilder<Money> specificationBuilder) {

@@ -2,11 +2,11 @@ package com.github.leeonky.javabuilder;
 
 import java.util.stream.Stream;
 
-class PropertyChain {
-    private final String name, condition, specificationName;
+class PropertyQueryChain {
+    private final String baseName, condition, specificationName;
     private final String[] combinations;
 
-    private PropertyChain(String chain) {
+    private PropertyQueryChain(String chain) {
         String[] propertyList = chain.split("\\.", 2);
         condition = propertyList[1];
         String propertyName = propertyList[0];
@@ -23,15 +23,15 @@ class PropertyChain {
             specificationName = null;
             combinations = null;
         }
-        name = propertyName;
+        baseName = propertyName;
     }
 
-    static PropertyChain parse(String chain) {
-        return new PropertyChain(chain);
+    static PropertyQueryChain parse(String chain) {
+        return new PropertyQueryChain(chain);
     }
 
-    public String getName() {
-        return name;
+    public String getBaseName() {
+        return baseName;
     }
 
     public String getCondition() {

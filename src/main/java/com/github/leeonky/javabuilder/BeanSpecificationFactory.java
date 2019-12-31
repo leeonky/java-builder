@@ -26,7 +26,7 @@ class BeanSpecificationFactory<T> extends AbstractFactory<T> {
     }
 
     @Override
-    public T newInstance(BuildingContext<T> buildingContext) {
-        return buildingContext.getFactorySet().type(getBeanClass().getType()).build(buildingContext);
+    public T newInstance(BeanContext<T> beanContext) {
+        return beanContext.getFactorySet().type(getBeanClass().getType()).build(beanContext);
     }
 }

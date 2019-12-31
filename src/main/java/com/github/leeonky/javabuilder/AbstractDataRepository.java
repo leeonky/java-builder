@@ -26,9 +26,9 @@ public abstract class AbstractDataRepository implements DataRepository {
         if (o == null)
             return false;
         if (key.contains(".")) {
-            PropertyChain propertyChain = PropertyChain.parse(key);
-            PropertyReader propertyReader = beanClass.getPropertyReader(propertyChain.getName());
-            return propertyMatched(propertyReader.getPropertyTypeWrapper(), propertyReader.getValue(o), propertyChain.getCondition(), target);
+            PropertyQueryChain propertyQueryChain = PropertyQueryChain.parse(key);
+            PropertyReader propertyReader = beanClass.getPropertyReader(propertyQueryChain.getBaseName());
+            return propertyMatched(propertyReader.getPropertyTypeWrapper(), propertyReader.getValue(o), propertyQueryChain.getCondition(), target);
         }
         PropertyReader propertyReader = beanClass.getPropertyReader(key);
         return Objects.equals(propertyReader.getValue(o), propertyReader.tryConvert(target));

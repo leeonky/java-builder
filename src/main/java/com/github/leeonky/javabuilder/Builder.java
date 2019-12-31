@@ -1,7 +1,5 @@
 package com.github.leeonky.javabuilder;
 
-import com.github.leeonky.util.PropertyWriter;
-
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -36,45 +34,6 @@ public class Builder<T> {
         return builder;
     }
 
-    public T create() {
-        BuildingContext<T> buildingContext = new BuildingContext<>(factorySet.getSequence(factory.getBeanClass().getType()),
-                params, processReferenceProperties(), factory, factorySet);
-
-        collectAllSpecifications(buildingContext);
-
-        T object = build(buildingContext);
-
-        buildingContext.getSpecificationBuilder().applySpecifications(object);
-        return factorySet.getDataRepository().save(object);
-    }
-
-    public T build(BuildingContext<T> buildingContext) {
-        T object = factory.newInstance(buildingContext);
-        buildingContext.assignProperties(object);
-        return object;
-    }
-
-    private void collectAllSpecifications(BuildingContext<T> buildingContext) {
-        buildingContext.collectSpecifications(factory.getSpecifications());
-        factory.combine(buildingContext, combinations);
-        buildingContext.collectSpecifications(specifications);
-    }
-
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> processReferenceProperties() {
-        Map<String, Object> processedProperties = new HashMap<>();
-        properties.forEach((k, v) -> {
-            if (k.contains(".")) {
-                PropertyChain propertyChain = PropertyChain.parse(k);
-                PropertyWriter<T> propertyWriter = factory.getBeanClass().getPropertyWriter(propertyChain.getName());
-                Builder builder = propertyChain.toBuilder(factorySet, propertyWriter.getPropertyType(), v);
-                processedProperties.put(propertyWriter.getName(), builder.query().stream().findFirst().orElseGet(builder::create));
-            } else
-                processedProperties.put(k, v);
-        });
-        return processedProperties;
-    }
-
     public Builder<T> properties(Map<String, Object> properties) {
         Builder<T> builder = copy();
         builder.properties.putAll(properties);
@@ -105,5 +64,40 @@ public class Builder<T> {
         Builder<T> builder = copy();
         builder.combinations = Objects.requireNonNull(combinations);
         return builder;
+    }
+
+    T build(BeanContext<T> beanContext) {
+        T object = factory.newInstance(beanContext);
+        beanContext.assignProperties(object);
+        return object;
+    }
+
+    public T create() {
+        BuildingContext buildingContext = new BuildingContext();
+        BeanContext<T> beanContext = new BeanContext<>(factorySet, factory, factorySet.getSequence(factory.getBeanClass().getType()),
+                params, properties, buildingContext);
+
+        collectAllSpecifications(beanContext);
+
+        T object = build(beanContext);
+
+        beanContext.getSpecificationBuilder().applySpecifications(object);
+        buildingContext.getUnSavedObjects().forEach(o -> factorySet.getDataRepository().save(o));
+        return factorySet.getDataRepository().save(object);
+    }
+
+    T create(BeanContext<?> beanContext) {
+        BeanContext<T> subContext = beanContext.createSubContext(factory, factorySet.getSequence(factory.getBeanClass().getType()), params, properties);
+        collectAllSpecifications(subContext);
+        T object = build(subContext);
+        subContext.getSpecificationBuilder().applySpecifications(object);
+        subContext.collectForLastSave(object);
+        return object;
+    }
+
+    private void collectAllSpecifications(BeanContext<T> beanContext) {
+        beanContext.collectSpecifications(factory.getSpecifications());
+        factory.combine(beanContext, combinations);
+        beanContext.collectSpecifications(specifications);
     }
 }

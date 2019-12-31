@@ -127,10 +127,11 @@ class BuildWithRepository {
         }
 
         @Test
-        void should_support_build_object_with_default_property_build() {
+        void should_support_build_object_with_default_property_create_and_cache() {
             Order order = factorySet.type(Order.class).property("product.name", "book").create();
 
             assertThat(order.getProduct().getName()).isEqualTo("book");
+            assertThat(factorySet.type(Product.class).property("name", "book").query().get(0)).isEqualTo(order.getProduct());
         }
 
         @Test

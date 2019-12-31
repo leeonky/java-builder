@@ -29,7 +29,7 @@ public class FactorySet {
         return onBuild(type, (o, context) -> build.accept(o));
     }
 
-    public <T> Factory<T> onBuild(Class<T> type, BiConsumer<T, BuildingContext<T>> build) {
+    public <T> Factory<T> onBuild(Class<T> type, BiConsumer<T, BeanContext<T>> build) {
         try {
             type.getConstructor();
         } catch (NoSuchMethodException e) {
@@ -46,7 +46,7 @@ public class FactorySet {
         return factory;
     }
 
-    public <T> Factory<T> register(Class<T> type, Function<BuildingContext<T>, T> supplier) {
+    public <T> Factory<T> register(Class<T> type, Function<BeanContext<T>, T> supplier) {
         BeanWithNoDefaultConstructorFactory<T> factory = new BeanWithNoDefaultConstructorFactory<>(type, supplier);
         factories.put(type, factory);
         return factory;

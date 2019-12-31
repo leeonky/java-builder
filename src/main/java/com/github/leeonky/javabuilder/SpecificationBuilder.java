@@ -11,12 +11,12 @@ import java.util.stream.Collectors;
 import static java.util.Collections.singletonList;
 
 public class SpecificationBuilder<T> {
-    private final BuildingContext<T> buildingContext;
+    private final BeanContext<T> beanContext;
     private final Map<String, Specification<T>> specificationMap = new LinkedHashMap<>();
     private final Map<String, DependencyProperty<T>> dependencyPropertyMap = new LinkedHashMap<>();
 
-    SpecificationBuilder(BuildingContext<T> buildingContext) {
-        this.buildingContext = buildingContext;
+    SpecificationBuilder(BeanContext<T> beanContext) {
+        this.beanContext = beanContext;
     }
 
     public PropertySpecificationBuilder property(String property) {
@@ -25,10 +25,10 @@ public class SpecificationBuilder<T> {
 
     public void applySpecifications(T instance) {
         specificationMap.entrySet().stream()
-                .filter(s -> buildingContext.isNotSpecified(s.getKey()))
+                .filter(s -> beanContext.isNotSpecified(s.getKey()))
                 .forEach(s -> s.getValue().apply(instance));
         LinkedHashSet<String> properties = new LinkedHashSet<>(dependencyPropertyMap.keySet())
-                .stream().filter(buildingContext::isNotSpecified)
+                .stream().filter(beanContext::isNotSpecified)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         while (properties.size() > 0)
             assignFromDependency(instance, properties, properties.iterator().next());
@@ -52,26 +52,26 @@ public class SpecificationBuilder<T> {
         }
 
         public PropertySpecificationBuilder hasValue(Object value) {
-            specificationMap.put(property, instance -> buildingContext.getBeanClass().setPropertyValue(instance, property, value));
+            specificationMap.put(property, instance -> beanContext.getBeanClass().setPropertyValue(instance, property, value));
             return this;
         }
 
         public <E> PropertySpecificationBuilder buildFrom(Supplier<E> supplier) {
-            specificationMap.put(property, instance -> buildingContext.getBeanClass().setPropertyValue(instance, property, supplier.get()));
+            specificationMap.put(property, instance -> beanContext.getBeanClass().setPropertyValue(instance, property, supplier.get()));
             return this;
         }
 
         public <PT> PropertySpecificationBuilder buildFrom(Class<? extends BeanSpecification<PT>> specification) {
             specificationMap.put(property, instance ->
-                    buildingContext.getBeanClass().setPropertyValue(instance, property, buildingContext.getFactorySet().toBuild(specification).create()));
+                    beanContext.getBeanClass().setPropertyValue(instance, property, beanContext.getFactorySet().toBuild(specification).create(beanContext)));
             return this;
         }
 
         public <PT> PropertySpecificationBuilder buildFrom(Class<? extends BeanSpecification<PT>> specification,
                                                            Function<Builder<PT>, Builder<PT>> builder) {
             specificationMap.put(property, instance ->
-                    buildingContext.getBeanClass().setPropertyValue(instance, property, builder.apply(buildingContext.getFactorySet()
-                            .toBuild(specification)).create()));
+                    beanContext.getBeanClass().setPropertyValue(instance, property, builder.apply(beanContext.getFactorySet()
+                            .toBuild(specification)).create(beanContext)));
             return this;
         }
 
@@ -88,9 +88,9 @@ public class SpecificationBuilder<T> {
 
                 @Override
                 public void apply(T instance) {
-                    buildingContext.getBeanClass().setPropertyValue(instance, property,
+                    beanContext.getBeanClass().setPropertyValue(instance, property,
                             dependencyHandler.apply(dependencies.stream()
-                                    .map(dependency -> buildingContext.getBeanClass().getPropertyValue(instance, dependency))
+                                    .map(dependency -> beanContext.getBeanClass().getPropertyValue(instance, dependency))
                                     .collect(Collectors.toList())));
                 }
             });

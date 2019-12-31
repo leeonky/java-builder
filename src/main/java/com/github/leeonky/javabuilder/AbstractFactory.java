@@ -29,12 +29,12 @@ public abstract class AbstractFactory<T> implements Factory<T> {
     }
 
     @Override
-    public void combine(BuildingContext<T> buildingContext, String... combinations) {
+    public void combine(BeanContext<T> beanContext, String... combinations) {
         for (String combination : Objects.requireNonNull(combinations)) {
             Consumer<SpecificationBuilder<T>> consumer = this.combinations.get(combination);
             if (consumer == null)
                 throw new IllegalArgumentException(String.format("Combination '%s' not exist", combination));
-            buildingContext.collectSpecifications(consumer);
+            beanContext.collectSpecifications(consumer);
         }
     }
 
