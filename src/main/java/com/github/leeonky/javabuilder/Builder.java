@@ -79,7 +79,6 @@ public class Builder<T> {
         T object = build(beanContext);
         beanContext.getSpecificationBuilder().applySpecifications(object);
         buildingContext.applyAllSpecifications(object);
-        buildingContext.saveCachedObjects();
         return factorySet.getDataRepository().save(object);
     }
 
@@ -92,16 +91,15 @@ public class Builder<T> {
     }
 
     public BeanContext<T> createSubBeanContext(BeanContext<?> parent, String propertyName) {
-        BeanContext<T> subContext = parent.createSubContext(factory,
+        return parent.createSubContext(factory,
                 factorySet.getSequence(factory.getBeanClass().getType()),
                 params, properties, propertyName, specifications, combinations);
-        return subContext;
     }
 
     public T subCreate(BeanContext<T> subContext) {
         T object = build(subContext);
         subContext.getSpecificationBuilder().applySpecifications(object);
-        subContext.cacheForSaving(object);
+        factorySet.getDataRepository().save(object);
         return object;
     }
 }

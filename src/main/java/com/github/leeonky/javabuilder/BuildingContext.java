@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 
 class BuildingContext {
     private final FactorySet factorySet;
+    @Deprecated
     private List<Object> unSavedObjects = new ArrayList<>();
     private Map<PropertyChain, SupplierSpecification> propertySpecifications = new LinkedHashMap<>();
 

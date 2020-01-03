@@ -76,7 +76,6 @@ public class FactorySet {
         Factory<T> factory = (Factory<T>) beanSpecificationMap.get(beanSpecificationClass);
         if (null == factory)
             return define(beanSpecificationClass).toBuild(beanSpecificationClass);
-//            throw new IllegalArgumentException(String.format("Specification '%s' not exists", beanSpecificationClass.getName()));
         return new Builder<>(factory, this);
     }
 
