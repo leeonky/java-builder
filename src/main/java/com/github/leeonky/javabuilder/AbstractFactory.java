@@ -9,8 +9,8 @@ import java.util.function.Consumer;
 
 public abstract class AbstractFactory<T> implements Factory<T> {
     private final BeanClass<T> beanClass;
-    private final Map<String, Consumer<SpecificationBuilder<T>>> combinations = new HashMap<>();
-    private Consumer<SpecificationBuilder<T>> specifications = specificationBuilder -> {
+    private final Map<String, Consumer<SpecificationBuilder<T>>> definedCombinationSpecificationsDefinitions = new HashMap<>();
+    private Consumer<SpecificationBuilder<T>> definedSpecificationsDefinition = builder -> {
     };
 
     AbstractFactory(Class<T> type) {
@@ -23,15 +23,16 @@ public abstract class AbstractFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Factory<T> combinable(String name, Consumer<SpecificationBuilder<T>> specifications) {
-        combinations.put(name, specifications);
+    public Factory<T> combinable(String name, Consumer<SpecificationBuilder<T>> specificationsDefinition) {
+        definedCombinationSpecificationsDefinitions.put(name, specificationsDefinition);
         return this;
     }
 
     @Override
-    public void combine(BeanContext<T> beanContext, String... combinations) {
-        for (String combination : Objects.requireNonNull(combinations)) {
-            Consumer<SpecificationBuilder<T>> consumer = this.combinations.get(combination);
+    public void collectSpecifications(BeanContext<T> beanContext, String... specifiedCombinations) {
+        beanContext.collectSpecifications(definedSpecificationsDefinition);
+        for (String combination : Objects.requireNonNull(specifiedCombinations)) {
+            Consumer<SpecificationBuilder<T>> consumer = definedCombinationSpecificationsDefinitions.get(combination);
             if (consumer == null)
                 throw new IllegalArgumentException(String.format("Combination '%s' not exist", combination));
             beanContext.collectSpecifications(consumer);
@@ -39,12 +40,7 @@ public abstract class AbstractFactory<T> implements Factory<T> {
     }
 
     @Override
-    public Consumer<SpecificationBuilder<T>> getSpecifications() {
-        return specifications;
-    }
-
-    @Override
-    public void specifications(Consumer<SpecificationBuilder<T>> specifications) {
-        this.specifications = specifications;
+    public void specifications(Consumer<SpecificationBuilder<T>> specificationsDefinition) {
+        definedSpecificationsDefinition = specificationsDefinition;
     }
 }

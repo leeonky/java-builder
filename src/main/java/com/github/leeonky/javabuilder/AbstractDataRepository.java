@@ -16,19 +16,18 @@ public abstract class AbstractDataRepository implements DataRepository {
     @Override
     public <T> List<T> query(BeanClass<T> beanClass, Map<String, Object> criteria) {
         return queryAll(beanClass.getType()).stream()
-                .filter(o -> criteria.entrySet().stream()
-                        .allMatch(e -> propertyMatched(beanClass, o, e.getKey(), e.getValue())))
+                .filter(o -> criteria.entrySet().stream().allMatch(e -> isPropertyValueMatched(beanClass, o, e.getKey(), e.getValue())))
                 .collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
-    private boolean propertyMatched(BeanClass<?> beanClass, Object o, String key, Object target) {
+    private boolean isPropertyValueMatched(BeanClass<?> beanClass, Object o, String key, Object target) {
         if (o == null)
             return false;
         if (key.contains(".")) {
             PropertyQueryChain propertyQueryChain = PropertyQueryChain.parse(key);
             PropertyReader propertyReader = beanClass.getPropertyReader(propertyQueryChain.getBaseName());
-            return propertyMatched(propertyReader.getPropertyTypeWrapper(), propertyReader.getValue(o), propertyQueryChain.getCondition(), target);
+            return isPropertyValueMatched(propertyReader.getPropertyTypeWrapper(), propertyReader.getValue(o), propertyQueryChain.getCondition(), target);
         }
         PropertyReader propertyReader = beanClass.getPropertyReader(key);
         return Objects.equals(propertyReader.getValue(o), propertyReader.tryConvert(target));

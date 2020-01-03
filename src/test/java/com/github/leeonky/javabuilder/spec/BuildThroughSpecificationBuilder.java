@@ -7,6 +7,7 @@ import com.github.leeonky.javabuilder.SpecificationBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -84,6 +85,13 @@ class BuildThroughSpecificationBuilder {
 
         assertThat(factorySet.toBuild(Objects.ProductWithSupplier.class).create().getPrice().getAmount())
                 .isEqualTo(100);
+    }
+
+    @Test
+    void should_support_skip_supplier_in_property() {
+        factorySet.define(Objects.ProductSkipSupplier.class);
+
+        assertThat(factorySet.toBuild(Objects.ProductSkipSupplier.class).property("price", null).create().getPrice()).isNull();
     }
 
     @Test
@@ -182,6 +190,13 @@ class BuildThroughSpecificationBuilder {
                         builder.specifications(specificationBuilder1 -> {
                             specificationBuilder1.property("currency").hasValue("CNY");
                         }));
+            }
+        }
+
+        public static class ProductSkipSupplier extends BeanSpecification<Product> {
+            @Override
+            public void specifications(SpecificationBuilder<Product> specificationBuilder) {
+                specificationBuilder.property("price").buildFrom(Assertions::fail);
             }
         }
     }

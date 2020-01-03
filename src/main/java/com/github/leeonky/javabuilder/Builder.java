@@ -73,31 +73,35 @@ public class Builder<T> {
     }
 
     public T create() {
-        BuildingContext buildingContext = new BuildingContext();
-        BeanContext<T> beanContext = new BeanContext<>(factorySet, factory, factorySet.getSequence(factory.getBeanClass().getType()),
-                params, properties, buildingContext);
-
-        collectAllSpecifications(beanContext);
-
+        BuildingContext buildingContext = new BuildingContext(factorySet);
+        BeanContext<T> beanContext = buildingContext.createBeanContext(factory, params, properties, specifications, combinations);
+        beanContext.collectAllSpecifications();
         T object = build(beanContext);
-
         beanContext.getSpecificationBuilder().applySpecifications(object);
-        buildingContext.getUnSavedObjects().forEach(o -> factorySet.getDataRepository().save(o));
+        buildingContext.applyAllSpecifications(object);
+        buildingContext.saveCachedObjects();
         return factorySet.getDataRepository().save(object);
     }
 
-    T create(BeanContext<?> beanContext) {
-        BeanContext<T> subContext = beanContext.createSubContext(factory, factorySet.getSequence(factory.getBeanClass().getType()), params, properties);
-        collectAllSpecifications(subContext);
-        T object = build(subContext);
-        subContext.getSpecificationBuilder().applySpecifications(object);
-        subContext.collectForLastSave(object);
-        return object;
+    T subCreate(BeanContext<?> beanContext, String propertyName) {
+        BeanContext<T> subContext = beanContext.createSubContext(factory,
+                factorySet.getSequence(factory.getBeanClass().getType()),
+                params, properties, propertyName, specifications, combinations);
+        subContext.collectAllSpecifications();
+        return subCreate(subContext);
     }
 
-    private void collectAllSpecifications(BeanContext<T> beanContext) {
-        beanContext.collectSpecifications(factory.getSpecifications());
-        factory.combine(beanContext, combinations);
-        beanContext.collectSpecifications(specifications);
+    public BeanContext<T> createSubBeanContext(BeanContext<?> parent, String propertyName) {
+        BeanContext<T> subContext = parent.createSubContext(factory,
+                factorySet.getSequence(factory.getBeanClass().getType()),
+                params, properties, propertyName, specifications, combinations);
+        return subContext;
+    }
+
+    public T subCreate(BeanContext<T> subContext) {
+        T object = build(subContext);
+        subContext.getSpecificationBuilder().applySpecifications(object);
+        subContext.cacheForSaving(object);
+        return object;
     }
 }

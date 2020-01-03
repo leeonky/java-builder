@@ -12,7 +12,6 @@ import static java.util.Collections.singletonList;
 
 public class SpecificationBuilder<T> {
     private final BeanContext<T> beanContext;
-    private final Map<String, Specification<T>> specificationMap = new LinkedHashMap<>();
     private final Map<String, DependencyProperty<T>> dependencyPropertyMap = new LinkedHashMap<>();
 
     SpecificationBuilder(BeanContext<T> beanContext) {
@@ -24,11 +23,8 @@ public class SpecificationBuilder<T> {
     }
 
     public void applySpecifications(T instance) {
-        specificationMap.entrySet().stream()
-                .filter(s -> beanContext.isNotSpecified(s.getKey()))
-                .forEach(s -> s.getValue().apply(instance));
         LinkedHashSet<String> properties = new LinkedHashSet<>(dependencyPropertyMap.keySet())
-                .stream().filter(beanContext::isNotSpecified)
+                .stream().filter(beanContext::isPropertyNotSpecified)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         while (properties.size() > 0)
             assignFromDependency(instance, properties, properties.iterator().next());
@@ -52,26 +48,28 @@ public class SpecificationBuilder<T> {
         }
 
         public PropertySpecificationBuilder hasValue(Object value) {
-            specificationMap.put(property, instance -> beanContext.getBeanClass().setPropertyValue(instance, property, value));
-            return this;
+            return buildFrom(() -> value);
         }
 
         public <E> PropertySpecificationBuilder buildFrom(Supplier<E> supplier) {
-            specificationMap.put(property, instance -> beanContext.getBeanClass().setPropertyValue(instance, property, supplier.get()));
+            if (beanContext.isPropertyNotSpecified(property)) {
+                beanContext.appendValueSpecification(property, supplier);
+            }
             return this;
         }
 
         public <PT> PropertySpecificationBuilder buildFrom(Class<? extends BeanSpecification<PT>> specification) {
-            specificationMap.put(property, instance ->
-                    beanContext.getBeanClass().setPropertyValue(instance, property, beanContext.getFactorySet().toBuild(specification).create(beanContext)));
-            return this;
+            return buildFrom(specification, builder -> builder);
         }
 
         public <PT> PropertySpecificationBuilder buildFrom(Class<? extends BeanSpecification<PT>> specification,
-                                                           Function<Builder<PT>, Builder<PT>> builder) {
-            specificationMap.put(property, instance ->
-                    beanContext.getBeanClass().setPropertyValue(instance, property, builder.apply(beanContext.getFactorySet()
-                            .toBuild(specification)).create(beanContext)));
+                                                           Function<Builder<PT>, Builder<PT>> customerBuilder) {
+            if (beanContext.isPropertyNotSpecified(property)) {
+                Builder<PT> builder = customerBuilder.apply(beanContext.getFactorySet().toBuild(specification));
+                BeanContext<PT> subBeanContext = builder.createSubBeanContext(beanContext, property);
+                buildFrom(() -> builder.subCreate(subBeanContext));
+                subBeanContext.collectAllSpecifications();
+            }
             return this;
         }
 

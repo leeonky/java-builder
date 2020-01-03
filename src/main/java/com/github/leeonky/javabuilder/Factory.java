@@ -11,9 +11,7 @@ public interface Factory<T> {
 
     Factory<T> combinable(String name, Consumer<SpecificationBuilder<T>> specifications);
 
-    void combine(BeanContext<T> beanContext, String... combinations);
+    void collectSpecifications(BeanContext<T> beanContext, String... combinations);
 
     void specifications(Consumer<SpecificationBuilder<T>> specificationBuilder);
-
-    Consumer<SpecificationBuilder<T>> getSpecifications();
 }

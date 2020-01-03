@@ -70,16 +70,16 @@ public class PropertyBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> void assignPropertiesAsDefaultValues(T object, BeanContext<T> beanContext) {
+    public <T> void assignDefaultValueToProperties(T object, BeanContext<T> beanContext) {
         beanContext.getBeanClass().getPropertyWriters()
                 .values().stream()
                 .filter(propertyWriter -> skipper.stream().noneMatch(p -> p.test(propertyWriter)))
-                .filter(propertyWriter -> beanContext.isNotSpecified(propertyWriter.getName()))
-                .forEach(propertyWriter -> assignPropertyAsDefaultValue(object, propertyWriter, beanContext));
+                .filter(propertyWriter -> beanContext.isPropertyNotSpecified(propertyWriter.getName()))
+                .forEach(propertyWriter -> assignDefaultValueToProperty(object, propertyWriter, beanContext));
     }
 
     @SuppressWarnings("unchecked")
-    private void assignPropertyAsDefaultValue(Object object, PropertyWriter propertyWriter, BeanContext<?> beanContext) {
+    private void assignDefaultValueToProperty(Object object, PropertyWriter propertyWriter, BeanContext<?> beanContext) {
         Stream.concat(buildValueFromMethodBuilder(propertyWriter, object, beanContext),
                 buildValueFromPropertyBuilder(propertyWriter, beanContext)).findFirst()
                 .ifPresent(value -> propertyWriter.setValue(object, value));
