@@ -75,7 +75,8 @@ public class FactorySet {
     public <B extends BeanSpecification<T>, T> Builder<T> toBuild(Class<B> beanSpecificationClass) {
         Factory<T> factory = (Factory<T>) beanSpecificationMap.get(beanSpecificationClass);
         if (null == factory)
-            throw new IllegalArgumentException(String.format("Specification '%s' not exists", beanSpecificationClass.getName()));
+            return define(beanSpecificationClass).toBuild(beanSpecificationClass);
+//            throw new IllegalArgumentException(String.format("Specification '%s' not exists", beanSpecificationClass.getName()));
         return new Builder<>(factory, this);
     }
 

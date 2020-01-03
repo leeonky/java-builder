@@ -18,17 +18,12 @@ class BuildThroughSpecificationBuilder {
 
     @Test
     void support_define_specification_with_value_in_class() {
-        factorySet.define(Objects.USD.class);
-
         assertThat(factorySet.toBuild(Objects.USD.class).create())
                 .hasFieldOrPropertyWithValue("currency", "USD");
     }
 
     @Test
     void support_define_specification_with_factory_in_class() {
-        factorySet.define(Objects.USD.class);
-        factorySet.define(Objects.ProductInUSD.class);
-
         assertThat(factorySet.toBuild(Objects.ProductInUSD.class).create().getPrice())
                 .hasFieldOrPropertyWithValue("currency", "USD");
     }
@@ -39,12 +34,6 @@ class BuildThroughSpecificationBuilder {
 
         assertThat(factorySet.toBuild("USD").create())
                 .hasFieldOrPropertyWithValue("currency", "USD");
-    }
-
-    @Test
-    void should_raise_error_when_specification_not_exist() {
-        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> factorySet.toBuild(Objects.USD.class).create());
-        assertThat(runtimeException).hasMessageContaining("Specification 'com.github.leeonky.javabuilder.spec.BuildThroughSpecificationBuilder$Objects$USD' not exists");
     }
 
     @Test
@@ -65,56 +54,41 @@ class BuildThroughSpecificationBuilder {
     void should_call_default_type_build_as_base_building() {
         factorySet.onBuild(Objects.Money.class, (m -> m.setAmount(100)));
 
-        factorySet.define(Objects.USD.class);
-
         assertThat(factorySet.toBuild(Objects.USD.class).create())
                 .hasFieldOrPropertyWithValue("amount", 100);
     }
 
     @Test
     void should_skip_specification_when_given_property_value_in_build() {
-        factorySet.define(Objects.ProductInUSD.class);
-
         assertThat(factorySet.toBuild(Objects.ProductInUSD.class).property("price", null).create().getPrice())
                 .isNull();
     }
 
     @Test
     void should_support_use_supplier_in_property() {
-        factorySet.define(Objects.ProductWithSupplier.class);
-
         assertThat(factorySet.toBuild(Objects.ProductWithSupplier.class).create().getPrice().getAmount())
                 .isEqualTo(100);
     }
 
     @Test
     void should_support_skip_supplier_in_property() {
-        factorySet.define(Objects.ProductSkipSupplier.class);
-
         assertThat(factorySet.toBuild(Objects.ProductSkipSupplier.class).property("price", null).create().getPrice()).isNull();
     }
 
     @Test
     void support_override_sub_build_in_specification() {
-        factorySet.define(Objects.USD.class);
-        factorySet.define(Objects.ProductOverrideSpecification.class);
-
         assertThat(factorySet.toBuild(Objects.ProductOverrideSpecification.class).create().getPrice().getCurrency())
                 .isEqualTo("CNY");
     }
 
     @Test
     void support_define_combination_in_class() {
-        factorySet.define(Objects.USD.class);
-
         assertThat(factorySet.toBuild(Objects.USD.class).combine("_100").create().getAmount())
                 .isEqualTo(100);
     }
 
     @Test
     void specification_combination_name_in_method_annotation() {
-        factorySet.define(Objects.USD.class);
-
         assertThat(factorySet.toBuild(Objects.USD.class).combine("200").create().getAmount())
                 .isEqualTo(200);
     }
@@ -135,14 +109,6 @@ class BuildThroughSpecificationBuilder {
         public static class Product {
             private String name;
             private Money price;
-            private Money discount;
-        }
-
-        @Getter
-        @Setter
-        @Accessors(chain = true)
-        public static class ShoppingList {
-            private Product product;
         }
 
         public static class USD extends BeanSpecification<Money> {
