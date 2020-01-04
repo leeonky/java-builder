@@ -47,37 +47,39 @@ public class SpecificationBuilder<T> {
             this.property = property;
         }
 
-        public PropertySpecificationBuilder hasValue(Object value) {
-            return buildFrom(() -> value);
+        public SpecificationBuilder<T> eq(Object value) {
+            return from(() -> value);
         }
 
-        public <E> PropertySpecificationBuilder buildFrom(Supplier<E> supplier) {
+        public <E> SpecificationBuilder<T> from(Supplier<E> supplier) {
+            beanContext.appendValueSpecification(property, supplier);
+            return SpecificationBuilder.this;
+        }
+
+        public <PT> SpecificationBuilder<T> from(Class<? extends BeanSpecification<PT>> specification) {
+            return from(specification, builder -> builder);
+        }
+
+        public <PT> SpecificationBuilder<T> from(Class<? extends BeanSpecification<PT>> specification,
+                                                 Function<Builder<PT>, Builder<PT>> customerBuilder) {
+            return from(customerBuilder.apply(beanContext.getFactorySet().toBuild(specification)));
+        }
+
+        <PT> SpecificationBuilder<T> from(Builder<PT> builder) {
             if (beanContext.isPropertyNotSpecified(property)) {
-                beanContext.appendValueSpecification(property, supplier);
-            }
-            return this;
-        }
-
-        public <PT> PropertySpecificationBuilder buildFrom(Class<? extends BeanSpecification<PT>> specification) {
-            return buildFrom(specification, builder -> builder);
-        }
-
-        public <PT> PropertySpecificationBuilder buildFrom(Class<? extends BeanSpecification<PT>> specification,
-                                                           Function<Builder<PT>, Builder<PT>> customerBuilder) {
-            if (beanContext.isPropertyNotSpecified(property)) {
-                Builder<PT> builder = customerBuilder.apply(beanContext.getFactorySet().toBuild(specification));
                 BeanContext<PT> subBeanContext = builder.createSubBeanContext(beanContext, property);
-                buildFrom(() -> builder.subCreate(subBeanContext));
+                from(() -> builder.subCreate(subBeanContext));
+                subBeanContext.queryOrCreateReferenceBeans();
                 subBeanContext.collectAllSpecifications();
             }
-            return this;
+            return SpecificationBuilder.this;
         }
 
-        public PropertySpecificationBuilder dependsOn(String dependency, Function<Object, Object> dependencyHandler) {
+        public SpecificationBuilder<T> dependsOn(String dependency, Function<Object, Object> dependencyHandler) {
             return dependsOn(singletonList(dependency), list -> dependencyHandler.apply(list.get(0)));
         }
 
-        public PropertySpecificationBuilder dependsOn(List<String> dependencies, Function<List<Object>, Object> dependencyHandler) {
+        public SpecificationBuilder<T> dependsOn(List<String> dependencies, Function<List<Object>, Object> dependencyHandler) {
             dependencyPropertyMap.put(property, new DependencyProperty<T>() {
                 @Override
                 public List<String> getDependencyName() {
@@ -92,7 +94,15 @@ public class SpecificationBuilder<T> {
                                     .collect(Collectors.toList())));
                 }
             });
-            return this;
+            return SpecificationBuilder.this;
+        }
+
+        public SpecificationBuilder<T> type(Class<?> type) {
+            return type(type, builder -> builder);
+        }
+
+        public <PT> SpecificationBuilder<T> type(Class<PT> type, Function<Builder<PT>, Builder<PT>> customerBuilder) {
+            return from(customerBuilder.apply(customerBuilder.apply(beanContext.getFactorySet().type(type))));
         }
     }
 }

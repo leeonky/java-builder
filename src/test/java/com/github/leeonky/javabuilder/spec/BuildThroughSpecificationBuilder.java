@@ -65,6 +65,12 @@ class BuildThroughSpecificationBuilder {
     }
 
     @Test
+    void should_support_use_default_type_build_in_property() {
+        assertThat(factorySet.toBuild(Objects.ProductInMoney.class).create().getPrice())
+                .isInstanceOf(Objects.Money.class);
+    }
+
+    @Test
     void should_support_use_supplier_in_property() {
         assertThat(factorySet.toBuild(Objects.ProductWithSupplier.class).create().getPrice().getAmount())
                 .isEqualTo(100);
@@ -114,17 +120,17 @@ class BuildThroughSpecificationBuilder {
         public static class USD extends BeanSpecification<Money> {
             @Override
             public void specifications(SpecificationBuilder<Money> specificationBuilder) {
-                specificationBuilder.property("currency").hasValue("USD");
+                specificationBuilder.property("currency").eq("USD");
             }
 
             @Combination
             public void _100(SpecificationBuilder<Money> specificationBuilder) {
-                specificationBuilder.property("amount").hasValue(100);
+                specificationBuilder.property("amount").eq(100);
             }
 
             @Combination("200")
             public void combination200(SpecificationBuilder<Money> specificationBuilder) {
-                specificationBuilder.property("amount").hasValue(200);
+                specificationBuilder.property("amount").eq(200);
             }
         }
 
@@ -135,26 +141,33 @@ class BuildThroughSpecificationBuilder {
             }
         }
 
+        public static class ProductInMoney extends BeanSpecification<Product> {
+            @Override
+            public void specifications(SpecificationBuilder<Product> specificationBuilder) {
+                specificationBuilder.property("price").type(Money.class);
+            }
+        }
+
         public static class ProductInUSD extends BeanSpecification<Product> {
             @Override
             public void specifications(SpecificationBuilder<Product> specificationBuilder) {
-                specificationBuilder.property("price").buildFrom(USD.class);
+                specificationBuilder.property("price").from(USD.class);
             }
         }
 
         public static class ProductWithSupplier extends BeanSpecification<Product> {
             @Override
             public void specifications(SpecificationBuilder<Product> specificationBuilder) {
-                specificationBuilder.property("price").buildFrom(() -> new Money().setAmount(100));
+                specificationBuilder.property("price").from(() -> new Money().setAmount(100));
             }
         }
 
         public static class ProductOverrideSpecification extends BeanSpecification<Product> {
             @Override
             public void specifications(SpecificationBuilder<Product> specificationBuilder) {
-                specificationBuilder.property("price").buildFrom(USD.class, builder ->
+                specificationBuilder.property("price").from(USD.class, builder ->
                         builder.specifications(specificationBuilder1 -> {
-                            specificationBuilder1.property("currency").hasValue("CNY");
+                            specificationBuilder1.property("currency").eq("CNY");
                         }));
             }
         }
@@ -162,7 +175,7 @@ class BuildThroughSpecificationBuilder {
         public static class ProductSkipSupplier extends BeanSpecification<Product> {
             @Override
             public void specifications(SpecificationBuilder<Product> specificationBuilder) {
-                specificationBuilder.property("price").buildFrom(Assertions::fail);
+                specificationBuilder.property("price").from(Assertions::fail);
             }
         }
     }

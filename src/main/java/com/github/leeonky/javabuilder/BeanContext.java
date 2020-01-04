@@ -3,10 +3,7 @@ package com.github.leeonky.javabuilder;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -15,7 +12,7 @@ public class BeanContext<T> {
     private final FactorySet factorySet;
     private final int sequence;
     private final Map<String, Object> params;
-    private final Map<String, Object> properties;
+    private final Map<String, Object> properties = new LinkedHashMap<>(), originalProperties;
     private final Consumer<SpecificationBuilder<T>> specifications;
     private final String[] combinations;
     private final BuildingContext buildingContext;
@@ -33,31 +30,29 @@ public class BeanContext<T> {
         this.buildingContext = buildingContext;
         this.parent = parent;
         this.currentPropertyName = currentPropertyName;
-        this.properties = queryOrCreateReferenceBeans(properties);
         this.specifications = specifications;
         this.combinations = combinations;
+        originalProperties = new LinkedHashMap<>(properties);
+    }
+
+    void queryOrCreateReferenceBeans() {
+        originalProperties.forEach((k, v) -> {
+            if (k.contains(".")) {
+                PropertyQueryChain propertyQueryChain = PropertyQueryChain.parse(k);
+                PropertyWriter<T> propertyWriter = factory.getBeanClass().getPropertyWriter(propertyQueryChain.getBaseName());
+                Builder<?> builder = propertyQueryChain.toBuilder(factorySet, propertyWriter.getPropertyType(), v);
+                Optional<?> queried = builder.query().stream().findFirst();
+                queried.ifPresent(o -> properties.put(propertyWriter.getName(), o));
+                if (!queried.isPresent())
+                    specificationBuilder.property(propertyWriter.getName()).from(builder);
+            } else
+                properties.put(k, v);
+        });
     }
 
     void collectAllSpecifications() {
         factory.collectSpecifications(this, combinations);
         collectSpecifications(specifications);
-    }
-
-
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> queryOrCreateReferenceBeans(Map<String, Object> properties) {
-        Map<String, Object> processedProperties = new LinkedHashMap<>();
-        properties.forEach((k, v) -> {
-            if (k.contains(".")) {
-                PropertyQueryChain propertyQueryChain = PropertyQueryChain.parse(k);
-                PropertyWriter<T> propertyWriter = factory.getBeanClass().getPropertyWriter(propertyQueryChain.getBaseName());
-                Builder builder = propertyQueryChain.toBuilder(factorySet, propertyWriter.getPropertyType(), v);
-                processedProperties.put(propertyWriter.getName(), builder.query().stream().findFirst()
-                        .orElseGet(() -> builder.subCreate(this, propertyWriter.getName())));
-            } else
-                processedProperties.put(k, v);
-        });
-        return processedProperties;
     }
 
     public int getCurrentSequence() {
@@ -106,9 +101,11 @@ public class BeanContext<T> {
         buildingContext.cacheForSaving(object);
     }
 
-    public <E> void appendValueSpecification(String property, Supplier<E> supplier) {
-        PropertyChain propertyChain = new PropertyChain(propertyChain(property));
-        buildingContext.appendPropertySpecification(propertyChain, new SupplierSpecification(propertyChain, supplier));
+    <E> void appendValueSpecification(String property, Supplier<E> supplier) {
+        if (isPropertyNotSpecified(property)) {
+            PropertyChain propertyChain = new PropertyChain(propertyChain(property));
+            buildingContext.appendPropertySpecification(propertyChain, new SupplierSpecification(propertyChain, supplier));
+        }
     }
 
     private List<String> propertyChain(String property) {

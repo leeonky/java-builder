@@ -21,7 +21,7 @@ class PropertyQueryChain {
             specificationName = combinedSpecificationName[combinedSpecificationName.length - 1].trim();
         } else {
             specificationName = null;
-            combinations = null;
+            combinations = new String[0];
         }
         baseName = propertyName;
     }
@@ -39,8 +39,8 @@ class PropertyQueryChain {
     }
 
     Builder<?> toBuilder(FactorySet factorySet, Class<?> type, Object param) {
-        return (specificationName != null ? factorySet.toBuild(specificationName).combine(combinations)
-                : factorySet.type(type))
+        return (specificationName != null ? factorySet.toBuild(specificationName) : factorySet.type(type))
+                .combine(combinations)
                 .property(getCondition(), param);
     }
 }

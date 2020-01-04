@@ -75,6 +75,7 @@ public class Builder<T> {
     public T create() {
         BuildingContext buildingContext = new BuildingContext(factorySet);
         BeanContext<T> beanContext = buildingContext.createBeanContext(factory, params, properties, specifications, combinations);
+        beanContext.queryOrCreateReferenceBeans();
         beanContext.collectAllSpecifications();
         T object = build(beanContext);
         beanContext.getSpecificationBuilder().applySpecifications(object);
@@ -86,6 +87,7 @@ public class Builder<T> {
         BeanContext<T> subContext = beanContext.createSubContext(factory,
                 factorySet.getSequence(factory.getBeanClass().getType()),
                 params, properties, propertyName, specifications, combinations);
+        subContext.queryOrCreateReferenceBeans();
         subContext.collectAllSpecifications();
         return subCreate(subContext);
     }

@@ -52,12 +52,12 @@ class BuildWithRepository {
     public static class ProgrammeBook extends BeanSpecification<Product> {
         @Override
         public void specifications(SpecificationBuilder<Product> specificationBuilder) {
-            specificationBuilder.property("name").hasValue("Java");
+            specificationBuilder.property("name").eq("Java");
         }
 
         @Combination("Issued")
         public void issued(SpecificationBuilder<Product> specificationBuilder) {
-            specificationBuilder.property("issued").hasValue(true);
+            specificationBuilder.property("issued").eq(true);
         }
     }
 
