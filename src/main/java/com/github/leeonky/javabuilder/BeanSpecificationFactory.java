@@ -8,7 +8,7 @@ class BeanSpecificationFactory<T> extends AbstractFactory<T> {
 
     <B extends BeanSpecification<T>> BeanSpecificationFactory(B beanSpecification) {
         super(beanSpecification.getType());
-        specifications(beanSpecification::specifications);
+        spec(beanSpecification::specifications);
         Stream.of(beanSpecification.getClass().getMethods())
                 .filter(method -> method.getAnnotation(Combination.class) != null)
                 .forEach(method -> combinable(getCombinationName(method), specificationBuilder -> {
@@ -27,6 +27,6 @@ class BeanSpecificationFactory<T> extends AbstractFactory<T> {
 
     @Override
     public T newInstance(BeanContext<T> beanContext) {
-        return beanContext.getFactorySet().type(getBeanClass().getType()).build(beanContext);
+        return beanContext.getFactorySet().type(getBeanClass().getType()).build(beanContext.getBuildingContext());
     }
 }

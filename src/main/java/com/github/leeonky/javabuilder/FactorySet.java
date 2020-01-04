@@ -87,7 +87,7 @@ public class FactorySet {
         return new Builder<>(factory, this);
     }
 
-    public int getSequence(Class<?> type) {
+    int getSequence(Class<?> type) {
         synchronized (FactorySet.class) {
             int sequence = sequences.getOrDefault(type, 0) + 1;
             sequences.put(type, sequence);

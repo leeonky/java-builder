@@ -9,9 +9,9 @@ public interface Factory<T> {
 
     BeanClass<T> getBeanClass();
 
-    Factory<T> combinable(String name, Consumer<SpecificationBuilder<T>> specifications);
+    Factory<T> combinable(String name, Consumer<SpecBuilder<T>> specifications);
 
-    void collectSpecifications(BeanContext<T> beanContext, String... combinations);
+    void collectSpecs(BeanContext<T> beanContext, String... combinations);
 
-    void specifications(Consumer<SpecificationBuilder<T>> specificationBuilder);
+    void spec(Consumer<SpecBuilder<T>> specBuilder);
 }

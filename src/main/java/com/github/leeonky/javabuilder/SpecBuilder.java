@@ -10,16 +10,16 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 
-public class SpecificationBuilder<T> {
+public class SpecBuilder<T> {
     private final BeanContext<T> beanContext;
     private final Map<String, DependencyProperty<T>> dependencyPropertyMap = new LinkedHashMap<>();
 
-    SpecificationBuilder(BeanContext<T> beanContext) {
+    SpecBuilder(BeanContext<T> beanContext) {
         this.beanContext = beanContext;
     }
 
-    public PropertySpecificationBuilder property(String property) {
-        return new PropertySpecificationBuilder(property);
+    public PropertySpecBuilder property(String property) {
+        return new PropertySpecBuilder(property);
     }
 
     public void applySpecifications(T instance) {
@@ -40,46 +40,46 @@ public class SpecificationBuilder<T> {
         }
     }
 
-    public class PropertySpecificationBuilder {
+    public class PropertySpecBuilder {
         private final String property;
 
-        PropertySpecificationBuilder(String property) {
+        PropertySpecBuilder(String property) {
             this.property = property;
         }
 
-        public SpecificationBuilder<T> eq(Object value) {
+        public SpecBuilder<T> eq(Object value) {
             return from(() -> value);
         }
 
-        public <E> SpecificationBuilder<T> from(Supplier<E> supplier) {
+        public <E> SpecBuilder<T> from(Supplier<E> supplier) {
             beanContext.appendValueSpecification(property, supplier);
-            return SpecificationBuilder.this;
+            return SpecBuilder.this;
         }
 
-        public <PT> SpecificationBuilder<T> from(Class<? extends BeanSpecification<PT>> specification) {
+        public <PT> SpecBuilder<T> from(Class<? extends BeanSpecification<PT>> specification) {
             return from(specification, builder -> builder);
         }
 
-        public <PT> SpecificationBuilder<T> from(Class<? extends BeanSpecification<PT>> specification,
-                                                 Function<Builder<PT>, Builder<PT>> customerBuilder) {
+        public <PT> SpecBuilder<T> from(Class<? extends BeanSpecification<PT>> specification,
+                                        Function<Builder<PT>, Builder<PT>> customerBuilder) {
             return from(customerBuilder.apply(beanContext.getFactorySet().toBuild(specification)));
         }
 
-        <PT> SpecificationBuilder<T> from(Builder<PT> builder) {
+        <PT> SpecBuilder<T> from(Builder<PT> builder) {
             if (beanContext.isPropertyNotSpecified(property)) {
                 BeanContext<PT> subBeanContext = builder.createSubBeanContext(beanContext, property);
                 from(() -> builder.subCreate(subBeanContext));
                 subBeanContext.queryOrCreateReferenceBeans();
                 subBeanContext.collectAllSpecifications();
             }
-            return SpecificationBuilder.this;
+            return SpecBuilder.this;
         }
 
-        public SpecificationBuilder<T> dependsOn(String dependency, Function<Object, Object> dependencyHandler) {
+        public SpecBuilder<T> dependsOn(String dependency, Function<Object, Object> dependencyHandler) {
             return dependsOn(singletonList(dependency), list -> dependencyHandler.apply(list.get(0)));
         }
 
-        public SpecificationBuilder<T> dependsOn(List<String> dependencies, Function<List<Object>, Object> dependencyHandler) {
+        public SpecBuilder<T> dependsOn(List<String> dependencies, Function<List<Object>, Object> dependencyHandler) {
             dependencyPropertyMap.put(property, new DependencyProperty<T>() {
                 @Override
                 public List<String> getDependencyName() {
@@ -94,14 +94,14 @@ public class SpecificationBuilder<T> {
                                     .collect(Collectors.toList())));
                 }
             });
-            return SpecificationBuilder.this;
+            return SpecBuilder.this;
         }
 
-        public SpecificationBuilder<T> type(Class<?> type) {
+        public SpecBuilder<T> type(Class<?> type) {
             return type(type, builder -> builder);
         }
 
-        public <PT> SpecificationBuilder<T> type(Class<PT> type, Function<Builder<PT>, Builder<PT>> customerBuilder) {
+        public <PT> SpecBuilder<T> type(Class<PT> type, Function<Builder<PT>, Builder<PT>> customerBuilder) {
             return from(customerBuilder.apply(customerBuilder.apply(beanContext.getFactorySet().type(type))));
         }
     }

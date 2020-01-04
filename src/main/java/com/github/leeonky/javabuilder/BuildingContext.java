@@ -25,7 +25,7 @@ class BuildingContext {
     }
 
     <T> BeanContext<T> createBeanContext(Factory<T> factory, Map<String, Object> params, Map<String, Object> properties,
-                                         Consumer<SpecificationBuilder<T>> specifications, String[] combinations) {
+                                         Consumer<SpecBuilder<T>> specifications, String[] combinations) {
         return new BeanContext<>(factorySet, factory, factorySet.getSequence(factory.getBeanClass().getType()),
                 params, properties, this, null, null, specifications, combinations);
     }

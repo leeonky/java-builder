@@ -13,16 +13,16 @@ public class BeanContext<T> {
     private final int sequence;
     private final Map<String, Object> params;
     private final Map<String, Object> properties = new LinkedHashMap<>(), originalProperties;
-    private final Consumer<SpecificationBuilder<T>> specifications;
+    private final Consumer<SpecBuilder<T>> specifications;
     private final String[] combinations;
     private final BuildingContext buildingContext;
-    private final SpecificationBuilder<T> specificationBuilder = new SpecificationBuilder<>(this);
+    private final SpecBuilder<T> specBuilder = new SpecBuilder<>(this);
     private final BeanContext<?> parent;
     private final String currentPropertyName;
 
     BeanContext(FactorySet factorySet, Factory<T> factory, int sequence, Map<String, Object> params,
                 Map<String, Object> properties, BuildingContext buildingContext, BeanContext<?> parent, String currentPropertyName,
-                Consumer<SpecificationBuilder<T>> specifications, String[] combinations) {
+                Consumer<SpecBuilder<T>> specifications, String[] combinations) {
         this.sequence = sequence;
         this.params = new LinkedHashMap<>(params);
         this.factory = factory;
@@ -44,15 +44,15 @@ public class BeanContext<T> {
                 Optional<?> queried = builder.query().stream().findFirst();
                 queried.ifPresent(o -> properties.put(propertyWriter.getName(), o));
                 if (!queried.isPresent())
-                    specificationBuilder.property(propertyWriter.getName()).from(builder);
+                    specBuilder.property(propertyWriter.getName()).from(builder);
             } else
                 properties.put(k, v);
         });
     }
 
     void collectAllSpecifications() {
-        factory.collectSpecifications(this, combinations);
-        collectSpecifications(specifications);
+        factory.collectSpecs(this, combinations);
+        collectSpecs(specifications);
     }
 
     public int getCurrentSequence() {
@@ -80,20 +80,20 @@ public class BeanContext<T> {
         return factorySet;
     }
 
-    public SpecificationBuilder<T> getSpecificationBuilder() {
-        return specificationBuilder;
+    public SpecBuilder<T> getSpecBuilder() {
+        return specBuilder;
     }
 
     void assignProperties(T instance) {
         properties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(instance, k, v));
     }
 
-    void collectSpecifications(Consumer<SpecificationBuilder<T>> specifications) {
-        specifications.accept(specificationBuilder);
+    void collectSpecs(Consumer<SpecBuilder<T>> specifications) {
+        specifications.accept(specBuilder);
     }
 
     <T> BeanContext<T> createSubContext(Factory<T> factory, int sequence, Map<String, Object> params, Map<String, Object> properties,
-                                        String propertyName, Consumer<SpecificationBuilder<T>> specifications, String[] combinations) {
+                                        String propertyName, Consumer<SpecBuilder<T>> specifications, String[] combinations) {
         return new BeanContext<>(factorySet, factory, sequence, params, properties, buildingContext, this, propertyName, specifications, combinations);
     }
 
@@ -122,4 +122,7 @@ public class BeanContext<T> {
         return chain;
     }
 
+    BuildingContext getBuildingContext() {
+        return buildingContext;
+    }
 }

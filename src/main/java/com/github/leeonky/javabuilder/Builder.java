@@ -10,7 +10,7 @@ public class Builder<T> {
     private final Map<String, Object> properties = new HashMap<>();
     private final Map<String, Object> params = new HashMap<>();
     private String[] combinations = new String[]{};
-    private Consumer<SpecificationBuilder<T>> specifications = specificationBuilder -> {
+    private Consumer<SpecBuilder<T>> spec = specificationBuilder -> {
     };
 
     Builder(Factory<T> factory, FactorySet factorySet) {
@@ -23,7 +23,7 @@ public class Builder<T> {
         newBuilder.properties.putAll(properties);
         newBuilder.params.putAll(params);
         newBuilder.combinations = Arrays.copyOf(combinations, combinations.length);
-        newBuilder.specifications = specifications;
+        newBuilder.spec = spec;
         return newBuilder;
     }
 
@@ -50,9 +50,9 @@ public class Builder<T> {
         return builder;
     }
 
-    public Builder<T> specifications(Consumer<SpecificationBuilder<T>> specifications) {
+    public Builder<T> spec(Consumer<SpecBuilder<T>> spec) {
         Builder<T> builder = copy();
-        builder.specifications = Objects.requireNonNull(specifications);
+        builder.spec = Objects.requireNonNull(spec);
         return builder;
     }
 
@@ -72,13 +72,20 @@ public class Builder<T> {
         return object;
     }
 
+    T build(BuildingContext buildingContext) {
+        BeanContext<T> beanContext = buildingContext.createBeanContext(factory, params, properties, spec, combinations);
+        beanContext.queryOrCreateReferenceBeans();
+        beanContext.collectAllSpecifications();
+        return build(beanContext);
+    }
+
     public T create() {
         BuildingContext buildingContext = new BuildingContext(factorySet);
-        BeanContext<T> beanContext = buildingContext.createBeanContext(factory, params, properties, specifications, combinations);
+        BeanContext<T> beanContext = buildingContext.createBeanContext(factory, params, properties, spec, combinations);
         beanContext.queryOrCreateReferenceBeans();
         beanContext.collectAllSpecifications();
         T object = build(beanContext);
-        beanContext.getSpecificationBuilder().applySpecifications(object);
+        beanContext.getSpecBuilder().applySpecifications(object);
         buildingContext.applyAllSpecifications(object);
         return factorySet.getDataRepository().save(object);
     }
@@ -86,7 +93,7 @@ public class Builder<T> {
     T subCreate(BeanContext<?> beanContext, String propertyName) {
         BeanContext<T> subContext = beanContext.createSubContext(factory,
                 factorySet.getSequence(factory.getBeanClass().getType()),
-                params, properties, propertyName, specifications, combinations);
+                params, properties, propertyName, spec, combinations);
         subContext.queryOrCreateReferenceBeans();
         subContext.collectAllSpecifications();
         return subCreate(subContext);
@@ -95,12 +102,12 @@ public class Builder<T> {
     public BeanContext<T> createSubBeanContext(BeanContext<?> parent, String propertyName) {
         return parent.createSubContext(factory,
                 factorySet.getSequence(factory.getBeanClass().getType()),
-                params, properties, propertyName, specifications, combinations);
+                params, properties, propertyName, spec, combinations);
     }
 
     public T subCreate(BeanContext<T> subContext) {
         T object = build(subContext);
-        subContext.getSpecificationBuilder().applySpecifications(object);
+        subContext.getSpecBuilder().applySpecifications(object);
         factorySet.getDataRepository().save(object);
         return object;
     }

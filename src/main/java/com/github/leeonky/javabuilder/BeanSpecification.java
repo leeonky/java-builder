@@ -3,7 +3,7 @@ package com.github.leeonky.javabuilder;
 import com.github.leeonky.util.GenericType;
 
 public abstract class BeanSpecification<T> {
-    public void specifications(SpecificationBuilder<T> specificationBuilder) {
+    public void specifications(SpecBuilder<T> specBuilder) {
     }
 
     @SuppressWarnings("unchecked")
