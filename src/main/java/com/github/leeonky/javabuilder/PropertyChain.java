@@ -16,6 +16,10 @@ class PropertyChain {
         setTo(new LinkedList<>(names), object, property);
     }
 
+    Object getFrom(Object object) {
+        return getFrom(new LinkedList<>(names), object);
+    }
+
     @SuppressWarnings("unchecked")
     private void setTo(LinkedList<String> properties, Object object, Object property) {
         String targetPropertyName = properties.removeLast();

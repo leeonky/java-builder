@@ -1,18 +1,13 @@
 package com.github.leeonky.javabuilder;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 
 public class SpecBuilder<T> {
     private final BeanContext<T> beanContext;
-    private final Map<String, DependencyProperty<T>> dependencyPropertyMap = new LinkedHashMap<>();
 
     SpecBuilder(BeanContext<T> beanContext) {
         this.beanContext = beanContext;
@@ -20,24 +15,6 @@ public class SpecBuilder<T> {
 
     public PropertySpecBuilder property(String property) {
         return new PropertySpecBuilder(property);
-    }
-
-    public void applySpecifications(T instance) {
-        LinkedHashSet<String> properties = new LinkedHashSet<>(dependencyPropertyMap.keySet())
-                .stream().filter(beanContext::isPropertyNotSpecified)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        while (properties.size() > 0)
-            assignFromDependency(instance, properties, properties.iterator().next());
-    }
-
-    private void assignFromDependency(T instance, LinkedHashSet<String> properties, String property) {
-        if (properties.contains(property)) {
-            DependencyProperty<T> dependencyProperty = dependencyPropertyMap.get(property);
-            dependencyProperty.getDependencyName()
-                    .forEach(dependencyDependency -> assignFromDependency(instance, properties, dependencyDependency));
-            dependencyProperty.apply(instance);
-            properties.remove(property);
-        }
     }
 
     public class PropertySpecBuilder {
@@ -52,7 +29,7 @@ public class SpecBuilder<T> {
         }
 
         public <E> SpecBuilder<T> from(Supplier<E> supplier) {
-            beanContext.appendValueSpecification(property, supplier);
+            beanContext.appendValueSpec(property, supplier);
             return SpecBuilder.this;
         }
 
@@ -80,20 +57,7 @@ public class SpecBuilder<T> {
         }
 
         public SpecBuilder<T> dependsOn(List<String> dependencies, Function<List<Object>, Object> dependencyHandler) {
-            dependencyPropertyMap.put(property, new DependencyProperty<T>() {
-                @Override
-                public List<String> getDependencyName() {
-                    return dependencies;
-                }
-
-                @Override
-                public void apply(T instance) {
-                    beanContext.getBeanClass().setPropertyValue(instance, property,
-                            dependencyHandler.apply(dependencies.stream()
-                                    .map(dependency -> beanContext.getBeanClass().getPropertyValue(instance, dependency))
-                                    .collect(Collectors.toList())));
-                }
-            });
+            beanContext.appendDependencySpec(property, dependencies, dependencyHandler);
             return SpecBuilder.this;
         }
 

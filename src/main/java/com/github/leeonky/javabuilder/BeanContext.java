@@ -5,7 +5,9 @@ import com.github.leeonky.util.PropertyWriter;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class BeanContext<T> {
     private final Factory<T> factory;
@@ -80,12 +82,13 @@ public class BeanContext<T> {
         return factorySet;
     }
 
-    public SpecBuilder<T> getSpecBuilder() {
+    SpecBuilder<T> getSpecBuilder() {
         return specBuilder;
     }
 
-    void assignProperties(T instance) {
+    T assignProperties(T instance) {
         properties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(instance, k, v));
+        return instance;
     }
 
     void collectSpecs(Consumer<SpecBuilder<T>> specifications) {
@@ -101,10 +104,18 @@ public class BeanContext<T> {
         buildingContext.cacheForSaving(object);
     }
 
-    <E> void appendValueSpecification(String property, Supplier<E> supplier) {
+    <E> void appendValueSpec(String property, Supplier<E> supplier) {
         if (isPropertyNotSpecified(property)) {
             PropertyChain propertyChain = new PropertyChain(propertyChain(property));
-            buildingContext.appendPropertySpecification(propertyChain, new SupplierSpecification(propertyChain, supplier));
+            buildingContext.appendSupplierSpec(propertyChain, new SupplierSpec(propertyChain, supplier));
+        }
+    }
+
+    void appendDependencySpec(String property, List<String> dependencies, Function<List<Object>, ?> supplier) {
+        if (isPropertyNotSpecified(property)) {
+            PropertyChain propertyChain = new PropertyChain(propertyChain(property));
+            buildingContext.appendDependencySpec(propertyChain, new DependencySpec(propertyChain,
+                    dependencies.stream().map(d -> new PropertyChain(propertyChain(d))).collect(Collectors.toList()), supplier));
         }
     }
 

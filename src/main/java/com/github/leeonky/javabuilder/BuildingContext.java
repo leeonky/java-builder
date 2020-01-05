@@ -1,16 +1,14 @@
 package com.github.leeonky.javabuilder;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 class BuildingContext {
     private final FactorySet factorySet;
     @Deprecated
     private List<Object> unSavedObjects = new ArrayList<>();
-    private Map<PropertyChain, SupplierSpecification> propertySpecifications = new LinkedHashMap<>();
+    private Map<PropertyChain, SupplierSpec> supplierSpecs = new LinkedHashMap<>();
+    private Map<PropertyChain, DependencySpec> dependencySpecs = new LinkedHashMap<>();
 
     BuildingContext(FactorySet factorySet) {
         this.factorySet = factorySet;
@@ -30,12 +28,31 @@ class BuildingContext {
                 params, properties, this, null, null, specifications, combinations);
     }
 
-    void appendPropertySpecification(PropertyChain propertyChain, SupplierSpecification propertySpecification) {
-        propertySpecifications.remove(propertyChain);
-        propertySpecifications.put(propertyChain, propertySpecification);
+    void appendSupplierSpec(PropertyChain propertyChain, SupplierSpec propertySpecification) {
+        supplierSpecs.remove(propertyChain);
+        supplierSpecs.put(propertyChain, propertySpecification);
     }
 
-    void applyAllSpecifications(Object object) {
-        propertySpecifications.values().forEach(propertySpecification -> propertySpecification.apply(object));
+    void applyAllSpecs(Object object) {
+        supplierSpecs.values().forEach(propertySpecification -> propertySpecification.apply(object));
+
+        Set<PropertyChain> properties = new LinkedHashSet<>(dependencySpecs.keySet());
+        while (properties.size() > 0)
+            assignFromDependency(object, properties, properties.iterator().next());
+    }
+
+    private void assignFromDependency(Object object, Set<PropertyChain> properties, PropertyChain property) {
+        if (properties.contains(property)) {
+            DependencySpec dependencySpec = dependencySpecs.get(property);
+            dependencySpec.getDependencies()
+                    .forEach(dependencyDependency -> assignFromDependency(object, properties, dependencyDependency));
+            dependencySpec.apply(object);
+            properties.remove(property);
+        }
+    }
+
+    void appendDependencySpec(PropertyChain propertyChain, DependencySpec dependencySpec) {
+        dependencySpecs.remove(propertyChain);
+        dependencySpecs.put(propertyChain, dependencySpec);
     }
 }

@@ -66,10 +66,14 @@ public class Builder<T> {
         return builder;
     }
 
-    T build(BeanContext<T> beanContext) {
-        T object = factory.newInstance(beanContext);
-        beanContext.assignProperties(object);
-        return object;
+    public T create() {
+        BuildingContext buildingContext = new BuildingContext(factorySet);
+        BeanContext<T> beanContext = buildingContext.createBeanContext(factory, params, properties, spec, combinations);
+        beanContext.queryOrCreateReferenceBeans();
+        beanContext.collectAllSpecifications();
+        T object = build(beanContext);
+        buildingContext.applyAllSpecs(object);
+        return factorySet.getDataRepository().save(object);
     }
 
     T build(BuildingContext buildingContext) {
@@ -79,24 +83,8 @@ public class Builder<T> {
         return build(beanContext);
     }
 
-    public T create() {
-        BuildingContext buildingContext = new BuildingContext(factorySet);
-        BeanContext<T> beanContext = buildingContext.createBeanContext(factory, params, properties, spec, combinations);
-        beanContext.queryOrCreateReferenceBeans();
-        beanContext.collectAllSpecifications();
-        T object = build(beanContext);
-        beanContext.getSpecBuilder().applySpecifications(object);
-        buildingContext.applyAllSpecifications(object);
-        return factorySet.getDataRepository().save(object);
-    }
-
-    T subCreate(BeanContext<?> beanContext, String propertyName) {
-        BeanContext<T> subContext = beanContext.createSubContext(factory,
-                factorySet.getSequence(factory.getBeanClass().getType()),
-                params, properties, propertyName, spec, combinations);
-        subContext.queryOrCreateReferenceBeans();
-        subContext.collectAllSpecifications();
-        return subCreate(subContext);
+    private T build(BeanContext<T> beanContext) {
+        return beanContext.assignProperties(factory.newInstance(beanContext));
     }
 
     public BeanContext<T> createSubBeanContext(BeanContext<?> parent, String propertyName) {
@@ -107,7 +95,6 @@ public class Builder<T> {
 
     public T subCreate(BeanContext<T> subContext) {
         T object = build(subContext);
-        subContext.getSpecBuilder().applySpecifications(object);
         factorySet.getDataRepository().save(object);
         return object;
     }
