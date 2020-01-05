@@ -28,17 +28,17 @@ class BuildThroughComplexSpecification {
         public static class ProductWithDiscount extends BeanSpecs<Product> {
 
             @Override
-            public void specs(BeanContext<Product> specBuilder) {
-                specBuilder.property("taxDiscount").dependsOn("tax", (tax) -> ((int) tax) / 100);
-                specBuilder.property("tax").dependsOn("price", (price) -> ((int) price) / 10);
+            public void specs(BeanContext<Product> beanContext) {
+                beanContext.property("taxDiscount").dependsOn("tax", (tax) -> ((int) tax) / 100);
+                beanContext.property("tax").dependsOn("price", (price) -> ((int) price) / 10);
             }
         }
 
         public static class ProductWithMultiDependency extends BeanSpecs<Product> {
 
             @Override
-            public void specs(BeanContext<Product> specBuilder) {
-                specBuilder.property("minPriceWithoutTax").dependsOn(asList("tax", "price"),
+            public void specs(BeanContext<Product> beanContext) {
+                beanContext.property("minPriceWithoutTax").dependsOn(asList("tax", "price"),
                         (args) -> (int) args.get(1) - (int) args.get(0));
             }
         }

@@ -16,18 +16,18 @@ class BuildingContext {
     }
 
     <T> BeanContext<T> createBeanContext(Factory<T> factory, Map<String, Object> params, Map<String, Object> properties,
-                                         Consumer<BeanContext<T>> specifications, String[] combinations) {
-        return new BeanContext<>(factorySet, factory, factorySet.getSequence(factory.getBeanClass().getType()),
-                params, properties, this, null, null, specifications, combinations);
+                                         Consumer<BeanContext<T>> spec, String[] combinations) {
+        return new BeanContext<>(factorySet, factory, null, null, factorySet.getSequence(factory.getBeanClass().getType()),
+                params, properties, this, spec, combinations);
     }
 
-    void appendSupplierSpec(PropertyChain propertyChain, SupplierSpec propertySpecification) {
+    void appendSupplierSpec(PropertyChain propertyChain, SupplierSpec spec) {
         supplierSpecs.remove(propertyChain);
-        supplierSpecs.put(propertyChain, propertySpecification);
+        supplierSpecs.put(propertyChain, spec);
     }
 
     void applyAllSpecs(Object object) {
-        supplierSpecs.values().forEach(propertySpecification -> propertySpecification.apply(object));
+        supplierSpecs.values().forEach(spec -> spec.apply(object));
 
         Set<PropertyChain> properties = new LinkedHashSet<>(dependencySpecs.keySet());
         while (properties.size() > 0)
@@ -44,8 +44,8 @@ class BuildingContext {
         }
     }
 
-    void appendDependencySpec(PropertyChain propertyChain, DependencySpec dependencySpec) {
+    void appendDependencySpec(PropertyChain propertyChain, DependencySpec spec) {
         dependencySpecs.remove(propertyChain);
-        dependencySpecs.put(propertyChain, dependencySpec);
+        dependencySpecs.put(propertyChain, spec);
     }
 }

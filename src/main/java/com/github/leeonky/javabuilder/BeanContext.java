@@ -23,8 +23,8 @@ public class BeanContext<T> {
     private final BeanContext<?> parent;
     private final String currentPropertyName;
 
-    BeanContext(FactorySet factorySet, Factory<T> factory, int sequence, Map<String, Object> params,
-                Map<String, Object> properties, BuildingContext buildingContext, BeanContext<?> parent, String currentPropertyName,
+    BeanContext(FactorySet factorySet, Factory<T> factory, BeanContext<?> parent, String propertyNameInParent,
+                int sequence, Map<String, Object> params, Map<String, Object> properties, BuildingContext buildingContext,
                 Consumer<BeanContext<T>> spec, String[] combinations) {
         this.sequence = sequence;
         this.params = new LinkedHashMap<>(params);
@@ -32,7 +32,7 @@ public class BeanContext<T> {
         this.factorySet = factorySet;
         this.buildingContext = buildingContext;
         this.parent = parent;
-        this.currentPropertyName = currentPropertyName;
+        currentPropertyName = propertyNameInParent;
         this.spec = spec;
         this.combinations = combinations;
         originalProperties = new LinkedHashMap<>(properties);
@@ -85,13 +85,13 @@ public class BeanContext<T> {
         return instance;
     }
 
-    void collectSpecs(Consumer<BeanContext<T>> specifications) {
-        specifications.accept(this);
+    void collectSpecs(Consumer<BeanContext<T>> spec) {
+        spec.accept(this);
     }
 
-    <T> BeanContext<T> createSubContext(Factory<T> factory, int sequence, Map<String, Object> params, Map<String, Object> properties,
-                                        String propertyName, Consumer<BeanContext<T>> specifications, String[] combinations) {
-        return new BeanContext<>(factorySet, factory, sequence, params, properties, buildingContext, this, propertyName, specifications, combinations);
+    <T> BeanContext<T> createSubContext(Factory<T> factory, String propertyName, int sequence, Map<String, Object> params,
+                                        Map<String, Object> properties, Consumer<BeanContext<T>> spec, String[] combinations) {
+        return new BeanContext<>(factorySet, factory, this, propertyName, sequence, params, properties, buildingContext, spec, combinations);
     }
 
     private List<String> absolutePropertyChain(String property) {
@@ -123,7 +123,7 @@ public class BeanContext<T> {
             return from(() -> value);
         }
 
-        public <E> BeanContext<T> from(Supplier<E> supplier) {
+        public BeanContext<T> from(Supplier<?> supplier) {
             if (isPropertyNotSpecified(property)) {
                 PropertyChain propertyChain = new PropertyChain(absolutePropertyChain(property));
                 buildingContext.appendSupplierSpec(propertyChain, new SupplierSpec(propertyChain, supplier));
@@ -131,13 +131,13 @@ public class BeanContext<T> {
             return BeanContext.this;
         }
 
-        public <PT> BeanContext<T> from(Class<? extends BeanSpecs<PT>> specification) {
-            return from(specification, builder -> builder);
+        public <PT> BeanContext<T> from(Class<? extends BeanSpecs<PT>> beanSpecsClass) {
+            return from(beanSpecsClass, builder -> builder);
         }
 
-        public <PT> BeanContext<T> from(Class<? extends BeanSpecs<PT>> specification,
+        public <PT> BeanContext<T> from(Class<? extends BeanSpecs<PT>> beanSpecsClass,
                                         Function<Builder<PT>, Builder<PT>> customerBuilder) {
-            return from(customerBuilder.apply(getFactorySet().toBuild(specification)));
+            return from(customerBuilder.apply(getFactorySet().toBuild(beanSpecsClass)));
         }
 
         <PT> BeanContext<T> from(Builder<PT> builder) {
@@ -149,15 +149,15 @@ public class BeanContext<T> {
             return BeanContext.this;
         }
 
-        public BeanContext<T> dependsOn(String dependency, Function<Object, Object> dependencyHandler) {
-            return dependsOn(singletonList(dependency), list -> dependencyHandler.apply(list.get(0)));
+        public BeanContext<T> dependsOn(String dependency, Function<Object, Object> function) {
+            return dependsOn(singletonList(dependency), list -> function.apply(list.get(0)));
         }
 
-        public BeanContext<T> dependsOn(List<String> dependencies, Function<List<Object>, Object> dependencyHandler) {
+        public BeanContext<T> dependsOn(List<String> dependencies, Function<List<Object>, Object> function) {
             if (isPropertyNotSpecified(property)) {
                 PropertyChain propertyChain = new PropertyChain(absolutePropertyChain(property));
                 buildingContext.appendDependencySpec(propertyChain, new DependencySpec(propertyChain,
-                        dependencies.stream().map(d -> new PropertyChain(absolutePropertyChain(d))).collect(Collectors.toList()), dependencyHandler));
+                        dependencies.stream().map(d -> new PropertyChain(absolutePropertyChain(d))).collect(Collectors.toList()), function));
             }
             return BeanContext.this;
         }

@@ -12,6 +12,4 @@ public interface Factory<T> {
     Factory<T> combinable(String name, Consumer<BeanContext<T>> spec);
 
     void collectSpecs(BeanContext<T> beanContext, String... combinations);
-
-    void spec(Consumer<BeanContext<T>> spec);
 }

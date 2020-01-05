@@ -10,8 +10,6 @@ import java.util.function.Consumer;
 public abstract class AbstractFactory<T> implements Factory<T> {
     private final BeanClass<T> beanClass;
     private final Map<String, Consumer<BeanContext<T>>> definedCombinationSpecs = new HashMap<>();
-    private Consumer<BeanContext<T>> definedSpec = builder -> {
-    };
 
     AbstractFactory(Class<T> type) {
         beanClass = BeanClass.create(type);
@@ -30,7 +28,6 @@ public abstract class AbstractFactory<T> implements Factory<T> {
 
     @Override
     public void collectSpecs(BeanContext<T> beanContext, String... combinations) {
-        beanContext.collectSpecs(definedSpec);
         for (String combination : Objects.requireNonNull(combinations)) {
             Consumer<BeanContext<T>> combinationSpec = definedCombinationSpecs.get(combination);
             if (combinationSpec == null)
@@ -39,8 +36,4 @@ public abstract class AbstractFactory<T> implements Factory<T> {
         }
     }
 
-    @Override
-    public void spec(Consumer<BeanContext<T>> spec) {
-        definedSpec = spec;
-    }
 }

@@ -80,10 +80,10 @@ public class FactorySet {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Builder<T> toBuild(String beanSpecificationName) {
-        Factory<T> factory = (Factory<T>) beanSpecsNameMap.get(beanSpecificationName);
+    public <T> Builder<T> toBuild(String beanSpecsName) {
+        Factory<T> factory = (Factory<T>) beanSpecsNameMap.get(beanSpecsName);
         if (null == factory)
-            throw new IllegalArgumentException(String.format("Specification '%s' not exists", beanSpecificationName));
+            throw new IllegalArgumentException(String.format("Specification '%s' not exists", beanSpecsName));
         return new Builder<>(factory, this);
     }
 

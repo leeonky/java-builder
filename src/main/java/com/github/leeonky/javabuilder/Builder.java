@@ -85,8 +85,8 @@ public class Builder<T> {
 
     BeanContext<T> createSubBeanContext(BeanContext<?> parent, String propertyName) {
         return parent.createSubContext(factory,
-                factorySet.getSequence(factory.getBeanClass().getType()),
-                params, properties, propertyName, spec, combinations);
+                propertyName, factorySet.getSequence(factory.getBeanClass().getType()),
+                params, properties, spec, combinations);
     }
 
     T subCreate(BeanContext<T> subContext) {

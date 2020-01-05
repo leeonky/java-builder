@@ -6,9 +6,11 @@ import java.util.stream.Stream;
 
 class BeanSpecsFactory<T> extends AbstractFactory<T> {
 
+    private final BeanSpecs<T> beanSpecs;
+
     <B extends BeanSpecs<T>> BeanSpecsFactory(B beanSpecs) {
         super(beanSpecs.getType());
-        spec(beanSpecs::specs);
+        this.beanSpecs = beanSpecs;
         Stream.of(beanSpecs.getClass().getMethods())
                 .filter(method -> method.getAnnotation(Combination.class) != null)
                 .forEach(method -> combinable(getCombinationName(method), beanContext -> {
@@ -28,5 +30,11 @@ class BeanSpecsFactory<T> extends AbstractFactory<T> {
     @Override
     public T newInstance(BeanContext<T> beanContext) {
         return beanContext.getFactorySet().type(getBeanClass().getType()).build(beanContext.getBuildingContext());
+    }
+
+    @Override
+    public void collectSpecs(BeanContext<T> beanContext, String... combinations) {
+        beanSpecs.specs(beanContext);
+        super.collectSpecs(beanContext, combinations);
     }
 }

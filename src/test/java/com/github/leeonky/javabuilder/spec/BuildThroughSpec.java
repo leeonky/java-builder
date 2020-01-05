@@ -52,7 +52,10 @@ class BuildThroughSpec {
 
     @Test
     void should_call_default_type_build_as_base_building() {
-        factorySet.onBuild(Objects.Money.class, (m -> m.setAmount(100))).spec(builder -> builder.property("symbol").eq("$"));
+        factorySet.onBuild(Objects.Money.class, ((m, beanContext) -> {
+            m.setAmount(100);
+            beanContext.property("symbol").eq("$");
+        }));
 
         assertThat(factorySet.toBuild(Objects.USD.class).create())
                 .hasFieldOrPropertyWithValue("amount", 100)
@@ -121,18 +124,18 @@ class BuildThroughSpec {
 
         public static class USD extends BeanSpecs<Money> {
             @Override
-            public void specs(BeanContext<Money> specBuilder) {
-                specBuilder.property("currency").eq("USD");
+            public void specs(BeanContext<Money> beanContext) {
+                beanContext.property("currency").eq("USD");
             }
 
             @Combination
-            public void _100(BeanContext<Money> specBuilder) {
-                specBuilder.property("amount").eq(100);
+            public void _100(BeanContext<Money> beanContext) {
+                beanContext.property("amount").eq(100);
             }
 
             @Combination("200")
-            public void combination200(BeanContext<Money> specBuilder) {
-                specBuilder.property("amount").eq(200);
+            public void combination200(BeanContext<Money> beanContext) {
+                beanContext.property("amount").eq(200);
             }
         }
 
@@ -145,29 +148,29 @@ class BuildThroughSpec {
 
         public static class ProductInMoney extends BeanSpecs<Product> {
             @Override
-            public void specs(BeanContext<Product> specBuilder) {
-                specBuilder.property("price").type(Money.class);
+            public void specs(BeanContext<Product> beanContext) {
+                beanContext.property("price").type(Money.class);
             }
         }
 
         public static class ProductInUSD extends BeanSpecs<Product> {
             @Override
-            public void specs(BeanContext<Product> specBuilder) {
-                specBuilder.property("price").from(USD.class);
+            public void specs(BeanContext<Product> beanContext) {
+                beanContext.property("price").from(USD.class);
             }
         }
 
         public static class ProductWithSupplier extends BeanSpecs<Product> {
             @Override
-            public void specs(BeanContext<Product> specBuilder) {
-                specBuilder.property("price").from(() -> new Money().setAmount(100));
+            public void specs(BeanContext<Product> beanContext) {
+                beanContext.property("price").from(() -> new Money().setAmount(100));
             }
         }
 
         public static class ProductOverrideSpecs extends BeanSpecs<Product> {
             @Override
-            public void specs(BeanContext<Product> specBuilder) {
-                specBuilder.property("price").from(USD.class, builder ->
+            public void specs(BeanContext<Product> beanContext) {
+                beanContext.property("price").from(USD.class, builder ->
                         builder.spec(specificationBuilder1 -> {
                             specificationBuilder1.property("currency").eq("CNY");
                         }));
@@ -176,8 +179,8 @@ class BuildThroughSpec {
 
         public static class ProductSkipSupplier extends BeanSpecs<Product> {
             @Override
-            public void specs(BeanContext<Product> specBuilder) {
-                specBuilder.property("price").from(Assertions::fail);
+            public void specs(BeanContext<Product> beanContext) {
+                beanContext.property("price").from(Assertions::fail);
             }
         }
     }
