@@ -33,11 +33,11 @@ public class SpecBuilder<T> {
             return SpecBuilder.this;
         }
 
-        public <PT> SpecBuilder<T> from(Class<? extends BeanSpecification<PT>> specification) {
+        public <PT> SpecBuilder<T> from(Class<? extends BeanSpecs<PT>> specification) {
             return from(specification, builder -> builder);
         }
 
-        public <PT> SpecBuilder<T> from(Class<? extends BeanSpecification<PT>> specification,
+        public <PT> SpecBuilder<T> from(Class<? extends BeanSpecs<PT>> specification,
                                         Function<Builder<PT>, Builder<PT>> customerBuilder) {
             return from(customerBuilder.apply(beanContext.getFactorySet().toBuild(specification)));
         }
@@ -46,8 +46,7 @@ public class SpecBuilder<T> {
             if (beanContext.isPropertyNotSpecified(property)) {
                 BeanContext<PT> subBeanContext = builder.createSubBeanContext(beanContext, property);
                 from(() -> builder.subCreate(subBeanContext));
-                subBeanContext.queryOrCreateReferenceBeans();
-                subBeanContext.collectAllSpecifications();
+                subBeanContext.queryOrCreateReferenceBeansAndCollectAllSpecs();
             }
             return SpecBuilder.this;
         }

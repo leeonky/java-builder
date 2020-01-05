@@ -68,18 +68,14 @@ public class Builder<T> {
 
     public T create() {
         BuildingContext buildingContext = new BuildingContext(factorySet);
-        BeanContext<T> beanContext = buildingContext.createBeanContext(factory, params, properties, spec, combinations);
-        beanContext.queryOrCreateReferenceBeans();
-        beanContext.collectAllSpecifications();
-        T object = build(beanContext);
+        T object = build(buildingContext);
         buildingContext.applyAllSpecs(object);
         return factorySet.getDataRepository().save(object);
     }
 
     T build(BuildingContext buildingContext) {
         BeanContext<T> beanContext = buildingContext.createBeanContext(factory, params, properties, spec, combinations);
-        beanContext.queryOrCreateReferenceBeans();
-        beanContext.collectAllSpecifications();
+        beanContext.queryOrCreateReferenceBeansAndCollectAllSpecs();
         return build(beanContext);
     }
 
@@ -87,13 +83,13 @@ public class Builder<T> {
         return beanContext.assignProperties(factory.newInstance(beanContext));
     }
 
-    public BeanContext<T> createSubBeanContext(BeanContext<?> parent, String propertyName) {
+    BeanContext<T> createSubBeanContext(BeanContext<?> parent, String propertyName) {
         return parent.createSubContext(factory,
                 factorySet.getSequence(factory.getBeanClass().getType()),
                 params, properties, propertyName, spec, combinations);
     }
 
-    public T subCreate(BeanContext<T> subContext) {
+    T subCreate(BeanContext<T> subContext) {
         T object = build(subContext);
         factorySet.getDataRepository().save(object);
         return object;

@@ -1,6 +1,6 @@
 package com.github.leeonky.javabuilder.spec;
 
-import com.github.leeonky.javabuilder.BeanSpecification;
+import com.github.leeonky.javabuilder.BeanSpecs;
 import com.github.leeonky.javabuilder.Combination;
 import com.github.leeonky.javabuilder.FactorySet;
 import com.github.leeonky.javabuilder.SpecBuilder;
@@ -49,9 +49,9 @@ class BuildWithRepository {
         private boolean issued;
     }
 
-    public static class ProgrammeBook extends BeanSpecification<Product> {
+    public static class ProgrammeBook extends BeanSpecs<Product> {
         @Override
-        public void specifications(SpecBuilder<Product> specBuilder) {
+        public void specs(SpecBuilder<Product> specBuilder) {
             specBuilder.property("name").eq("Java");
         }
 

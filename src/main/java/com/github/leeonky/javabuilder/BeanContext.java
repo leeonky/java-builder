@@ -15,7 +15,7 @@ public class BeanContext<T> {
     private final int sequence;
     private final Map<String, Object> params;
     private final Map<String, Object> properties = new LinkedHashMap<>(), originalProperties;
-    private final Consumer<SpecBuilder<T>> specifications;
+    private final Consumer<SpecBuilder<T>> spec;
     private final String[] combinations;
     private final BuildingContext buildingContext;
     private final SpecBuilder<T> specBuilder = new SpecBuilder<>(this);
@@ -24,7 +24,7 @@ public class BeanContext<T> {
 
     BeanContext(FactorySet factorySet, Factory<T> factory, int sequence, Map<String, Object> params,
                 Map<String, Object> properties, BuildingContext buildingContext, BeanContext<?> parent, String currentPropertyName,
-                Consumer<SpecBuilder<T>> specifications, String[] combinations) {
+                Consumer<SpecBuilder<T>> spec, String[] combinations) {
         this.sequence = sequence;
         this.params = new LinkedHashMap<>(params);
         this.factory = factory;
@@ -32,12 +32,12 @@ public class BeanContext<T> {
         this.buildingContext = buildingContext;
         this.parent = parent;
         this.currentPropertyName = currentPropertyName;
-        this.specifications = specifications;
+        this.spec = spec;
         this.combinations = combinations;
         originalProperties = new LinkedHashMap<>(properties);
     }
 
-    void queryOrCreateReferenceBeans() {
+    void queryOrCreateReferenceBeansAndCollectAllSpecs() {
         originalProperties.forEach((k, v) -> {
             if (k.contains(".")) {
                 PropertyQueryChain propertyQueryChain = PropertyQueryChain.parse(k);
@@ -50,11 +50,8 @@ public class BeanContext<T> {
             } else
                 properties.put(k, v);
         });
-    }
-
-    void collectAllSpecifications() {
         factory.collectSpecs(this, combinations);
-        collectSpecs(specifications);
+        collectSpecs(spec);
     }
 
     public int getCurrentSequence() {
@@ -70,7 +67,7 @@ public class BeanContext<T> {
         return factory.getBeanClass();
     }
 
-    boolean isPropertyNotSpecified(String name) {
+    public boolean isPropertyNotSpecified(String name) {
         return !properties.containsKey(name);
     }
 
@@ -80,10 +77,6 @@ public class BeanContext<T> {
 
     public FactorySet getFactorySet() {
         return factorySet;
-    }
-
-    SpecBuilder<T> getSpecBuilder() {
-        return specBuilder;
     }
 
     T assignProperties(T instance) {
@@ -98,10 +91,6 @@ public class BeanContext<T> {
     <T> BeanContext<T> createSubContext(Factory<T> factory, int sequence, Map<String, Object> params, Map<String, Object> properties,
                                         String propertyName, Consumer<SpecBuilder<T>> specifications, String[] combinations) {
         return new BeanContext<>(factorySet, factory, sequence, params, properties, buildingContext, this, propertyName, specifications, combinations);
-    }
-
-    void cacheForSaving(T object) {
-        buildingContext.cacheForSaving(object);
     }
 
     <E> void appendValueSpec(String property, Supplier<E> supplier) {

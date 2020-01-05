@@ -1,25 +1,18 @@
 package com.github.leeonky.javabuilder;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 class BuildingContext {
     private final FactorySet factorySet;
-    @Deprecated
-    private List<Object> unSavedObjects = new ArrayList<>();
     private Map<PropertyChain, SupplierSpec> supplierSpecs = new LinkedHashMap<>();
     private Map<PropertyChain, DependencySpec> dependencySpecs = new LinkedHashMap<>();
 
     BuildingContext(FactorySet factorySet) {
         this.factorySet = factorySet;
-    }
-
-    void cacheForSaving(Object object) {
-        unSavedObjects.add(object);
-    }
-
-    void saveCachedObjects() {
-        unSavedObjects.forEach(o -> factorySet.getDataRepository().save(o));
     }
 
     <T> BeanContext<T> createBeanContext(Factory<T> factory, Map<String, Object> params, Map<String, Object> properties,

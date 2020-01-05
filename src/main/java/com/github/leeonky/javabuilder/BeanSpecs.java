@@ -2,8 +2,8 @@ package com.github.leeonky.javabuilder;
 
 import com.github.leeonky.util.GenericType;
 
-public abstract class BeanSpecification<T> {
-    public void specifications(SpecBuilder<T> specBuilder) {
+public abstract class BeanSpecs<T> {
+    public void specs(SpecBuilder<T> specBuilder) {
     }
 
     @SuppressWarnings("unchecked")

@@ -1,6 +1,6 @@
 package com.github.leeonky.javabuilder.spec;
 
-import com.github.leeonky.javabuilder.BeanSpecification;
+import com.github.leeonky.javabuilder.BeanSpecs;
 import com.github.leeonky.javabuilder.FactorySet;
 import com.github.leeonky.javabuilder.SpecBuilder;
 import lombok.Getter;
@@ -25,19 +25,19 @@ class BuildThroughComplexSpecification {
             private int minPriceWithoutTax;
         }
 
-        public static class ProductWithDiscount extends BeanSpecification<Product> {
+        public static class ProductWithDiscount extends BeanSpecs<Product> {
 
             @Override
-            public void specifications(SpecBuilder<Product> specBuilder) {
+            public void specs(SpecBuilder<Product> specBuilder) {
                 specBuilder.property("taxDiscount").dependsOn("tax", (tax) -> ((int) tax) / 100);
                 specBuilder.property("tax").dependsOn("price", (price) -> ((int) price) / 10);
             }
         }
 
-        public static class ProductWithMultiDependency extends BeanSpecification<Product> {
+        public static class ProductWithMultiDependency extends BeanSpecs<Product> {
 
             @Override
-            public void specifications(SpecBuilder<Product> specBuilder) {
+            public void specs(SpecBuilder<Product> specBuilder) {
                 specBuilder.property("minPriceWithoutTax").dependsOn(asList("tax", "price"),
                         (args) -> (int) args.get(1) - (int) args.get(0));
             }

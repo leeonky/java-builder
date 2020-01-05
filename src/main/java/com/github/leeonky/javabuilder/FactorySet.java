@@ -52,7 +52,7 @@ public class FactorySet {
         return factory;
     }
 
-    public <B extends BeanSpecification<T>, T> FactorySet define(Class<B> beanSpecificationClass) {
+    public <B extends BeanSpecs<T>, T> FactorySet define(Class<B> beanSpecificationClass) {
         B beanDefinition = BeanClass.newInstance(beanSpecificationClass);
         if (beanSpecificationNameMap.containsKey(beanDefinition.getName()))
             throw new IllegalArgumentException(String.format("Specification '%s' already exists", beanDefinition.getName()));
@@ -72,7 +72,7 @@ public class FactorySet {
     }
 
     @SuppressWarnings("unchecked")
-    public <B extends BeanSpecification<T>, T> Builder<T> toBuild(Class<B> beanSpecificationClass) {
+    public <B extends BeanSpecs<T>, T> Builder<T> toBuild(Class<B> beanSpecificationClass) {
         Factory<T> factory = (Factory<T>) beanSpecificationMap.get(beanSpecificationClass);
         if (null == factory)
             return define(beanSpecificationClass).toBuild(beanSpecificationClass);
