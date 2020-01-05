@@ -1,9 +1,9 @@
 package com.github.leeonky.javabuilder.spec;
 
+import com.github.leeonky.javabuilder.BeanContext;
 import com.github.leeonky.javabuilder.BeanSpecs;
 import com.github.leeonky.javabuilder.Combination;
 import com.github.leeonky.javabuilder.FactorySet;
-import com.github.leeonky.javabuilder.SpecBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -51,12 +51,12 @@ class BuildWithRepository {
 
     public static class ProgrammeBook extends BeanSpecs<Product> {
         @Override
-        public void specs(SpecBuilder<Product> specBuilder) {
+        public void specs(BeanContext<Product> specBuilder) {
             specBuilder.property("name").eq("Java");
         }
 
         @Combination("Issued")
-        public void issued(SpecBuilder<Product> specBuilder) {
+        public void issued(BeanContext<Product> specBuilder) {
             specBuilder.property("issued").eq(true);
         }
     }

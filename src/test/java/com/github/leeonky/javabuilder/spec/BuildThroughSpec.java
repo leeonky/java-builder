@@ -1,9 +1,9 @@
 package com.github.leeonky.javabuilder.spec;
 
+import com.github.leeonky.javabuilder.BeanContext;
 import com.github.leeonky.javabuilder.BeanSpecs;
 import com.github.leeonky.javabuilder.Combination;
 import com.github.leeonky.javabuilder.FactorySet;
-import com.github.leeonky.javabuilder.SpecBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class BuildThroughSpecBuilder {
+class BuildThroughSpec {
     private final FactorySet factorySet = new FactorySet();
 
     @Test
@@ -121,17 +121,17 @@ class BuildThroughSpecBuilder {
 
         public static class USD extends BeanSpecs<Money> {
             @Override
-            public void specs(SpecBuilder<Money> specBuilder) {
+            public void specs(BeanContext<Money> specBuilder) {
                 specBuilder.property("currency").eq("USD");
             }
 
             @Combination
-            public void _100(SpecBuilder<Money> specBuilder) {
+            public void _100(BeanContext<Money> specBuilder) {
                 specBuilder.property("amount").eq(100);
             }
 
             @Combination("200")
-            public void combination200(SpecBuilder<Money> specBuilder) {
+            public void combination200(BeanContext<Money> specBuilder) {
                 specBuilder.property("amount").eq(200);
             }
         }
@@ -145,28 +145,28 @@ class BuildThroughSpecBuilder {
 
         public static class ProductInMoney extends BeanSpecs<Product> {
             @Override
-            public void specs(SpecBuilder<Product> specBuilder) {
+            public void specs(BeanContext<Product> specBuilder) {
                 specBuilder.property("price").type(Money.class);
             }
         }
 
         public static class ProductInUSD extends BeanSpecs<Product> {
             @Override
-            public void specs(SpecBuilder<Product> specBuilder) {
+            public void specs(BeanContext<Product> specBuilder) {
                 specBuilder.property("price").from(USD.class);
             }
         }
 
         public static class ProductWithSupplier extends BeanSpecs<Product> {
             @Override
-            public void specs(SpecBuilder<Product> specBuilder) {
+            public void specs(BeanContext<Product> specBuilder) {
                 specBuilder.property("price").from(() -> new Money().setAmount(100));
             }
         }
 
         public static class ProductOverrideSpecs extends BeanSpecs<Product> {
             @Override
-            public void specs(SpecBuilder<Product> specBuilder) {
+            public void specs(BeanContext<Product> specBuilder) {
                 specBuilder.property("price").from(USD.class, builder ->
                         builder.spec(specificationBuilder1 -> {
                             specificationBuilder1.property("currency").eq("CNY");
@@ -176,7 +176,7 @@ class BuildThroughSpecBuilder {
 
         public static class ProductSkipSupplier extends BeanSpecs<Product> {
             @Override
-            public void specs(SpecBuilder<Product> specBuilder) {
+            public void specs(BeanContext<Product> specBuilder) {
                 specBuilder.property("price").from(Assertions::fail);
             }
         }

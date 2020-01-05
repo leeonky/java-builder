@@ -4,16 +4,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
-class BeanSpecificationFactory<T> extends AbstractFactory<T> {
+class BeanSpecsFactory<T> extends AbstractFactory<T> {
 
-    <B extends BeanSpecs<T>> BeanSpecificationFactory(B beanSpecification) {
-        super(beanSpecification.getType());
-        spec(beanSpecification::specs);
-        Stream.of(beanSpecification.getClass().getMethods())
+    <B extends BeanSpecs<T>> BeanSpecsFactory(B beanSpecs) {
+        super(beanSpecs.getType());
+        spec(beanSpecs::specs);
+        Stream.of(beanSpecs.getClass().getMethods())
                 .filter(method -> method.getAnnotation(Combination.class) != null)
-                .forEach(method -> combinable(getCombinationName(method), specificationBuilder -> {
+                .forEach(method -> combinable(getCombinationName(method), beanContext -> {
                     try {
-                        method.invoke(beanSpecification, specificationBuilder);
+                        method.invoke(beanSpecs, beanContext);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         throw new IllegalStateException(e);
                     }

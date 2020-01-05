@@ -10,7 +10,7 @@ public class Builder<T> {
     private final Map<String, Object> properties = new HashMap<>();
     private final Map<String, Object> params = new HashMap<>();
     private String[] combinations = new String[]{};
-    private Consumer<SpecBuilder<T>> spec = specificationBuilder -> {
+    private Consumer<BeanContext<T>> spec = beanContext -> {
     };
 
     Builder(Factory<T> factory, FactorySet factorySet) {
@@ -50,7 +50,7 @@ public class Builder<T> {
         return builder;
     }
 
-    public Builder<T> spec(Consumer<SpecBuilder<T>> spec) {
+    public Builder<T> spec(Consumer<BeanContext<T>> spec) {
         Builder<T> builder = copy();
         builder.spec = Objects.requireNonNull(spec);
         return builder;

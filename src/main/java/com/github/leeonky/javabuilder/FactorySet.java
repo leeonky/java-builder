@@ -12,8 +12,8 @@ import java.util.function.Supplier;
 public class FactorySet {
     private final PropertyBuilder propertyBuilder = PropertyBuilder.createDefaultPropertyBuilder();
     private final Map<Class<?>, Factory<?>> factories = new HashMap<>();
-    private final Map<Class<?>, Factory<?>> beanSpecificationMap = new HashMap<>();
-    private final Map<String, Factory<?>> beanSpecificationNameMap = new HashMap<>();
+    private final Map<Class<?>, Factory<?>> beanSpecsMap = new HashMap<>();
+    private final Map<String, Factory<?>> beanSpecsNameMap = new HashMap<>();
     private final Map<Class<?>, Integer> sequences = new HashMap<>();
     private final DataRepository dataRepository;
 
@@ -54,11 +54,11 @@ public class FactorySet {
 
     public <B extends BeanSpecs<T>, T> FactorySet define(Class<B> beanSpecificationClass) {
         B beanDefinition = BeanClass.newInstance(beanSpecificationClass);
-        if (beanSpecificationNameMap.containsKey(beanDefinition.getName()))
+        if (beanSpecsNameMap.containsKey(beanDefinition.getName()))
             throw new IllegalArgumentException(String.format("Specification '%s' already exists", beanDefinition.getName()));
-        BeanSpecificationFactory<T> beanSpecificationFactory = new BeanSpecificationFactory<>(beanDefinition);
-        beanSpecificationMap.put(beanSpecificationClass, beanSpecificationFactory);
-        beanSpecificationNameMap.put(beanDefinition.getName(), beanSpecificationFactory);
+        BeanSpecsFactory<T> beanSpecsFactory = new BeanSpecsFactory<>(beanDefinition);
+        beanSpecsMap.put(beanSpecificationClass, beanSpecsFactory);
+        beanSpecsNameMap.put(beanDefinition.getName(), beanSpecsFactory);
         return this;
     }
 
@@ -72,16 +72,16 @@ public class FactorySet {
     }
 
     @SuppressWarnings("unchecked")
-    public <B extends BeanSpecs<T>, T> Builder<T> toBuild(Class<B> beanSpecificationClass) {
-        Factory<T> factory = (Factory<T>) beanSpecificationMap.get(beanSpecificationClass);
+    public <B extends BeanSpecs<T>, T> Builder<T> toBuild(Class<B> beanSpecsClass) {
+        Factory<T> factory = (Factory<T>) beanSpecsMap.get(beanSpecsClass);
         if (null == factory)
-            return define(beanSpecificationClass).toBuild(beanSpecificationClass);
+            return define(beanSpecsClass).toBuild(beanSpecsClass);
         return new Builder<>(factory, this);
     }
 
     @SuppressWarnings("unchecked")
     public <T> Builder<T> toBuild(String beanSpecificationName) {
-        Factory<T> factory = (Factory<T>) beanSpecificationNameMap.get(beanSpecificationName);
+        Factory<T> factory = (Factory<T>) beanSpecsNameMap.get(beanSpecificationName);
         if (null == factory)
             throw new IllegalArgumentException(String.format("Specification '%s' not exists", beanSpecificationName));
         return new Builder<>(factory, this);
