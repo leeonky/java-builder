@@ -76,23 +76,23 @@ public class FactorySet {
     }
 
     public <T> Builder<T> toBuild(Class<? extends BeanSpecs<T>> beanSpecsClass) {
-        Factory<T> factory = spec(beanSpecsClass);
+        Factory<T> factory = specs(beanSpecsClass);
         if (null == factory)
             return define(beanSpecsClass).toBuild(beanSpecsClass);
         return new Builder<>(factory, this);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> Factory<T> spec(Class<? extends BeanSpecs<T>> beanSpecsClass) {
+    public <T> Factory<T> specs(Class<? extends BeanSpecs<T>> beanSpecsClass) {
         return (Factory<T>) beanSpecsMap.get(beanSpecsClass);
     }
 
     public <T> Builder<T> toBuild(String beanSpecsName) {
-        return new Builder<>(spec(beanSpecsName), this);
+        return new Builder<>(specs(beanSpecsName), this);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> Factory<T> spec(String beanSpecsName) {
+    public <T> Factory<T> specs(String beanSpecsName) {
         Factory<T> factory = (Factory<T>) beanSpecsNameMap.get(beanSpecsName);
         if (null == factory)
             throw new IllegalArgumentException(String.format("Specification '%s' not exists", beanSpecsName));
