@@ -91,7 +91,6 @@ public class Builder<T> {
 
     T subCreate(BeanContext<T> subContext) {
         T object = build(subContext);
-        factorySet.getDataRepository().save(object);
-        return object;
+        return factorySet.getDataRepository().save(object);
     }
 }
