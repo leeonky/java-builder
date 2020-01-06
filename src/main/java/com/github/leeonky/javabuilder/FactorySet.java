@@ -21,6 +21,10 @@ public class FactorySet {
         dataRepository = new HashMapDataRepository();
     }
 
+    public FactorySet(DataRepository dataRepository) {
+        this.dataRepository = dataRepository;
+    }
+
     public PropertyBuilder getPropertyBuilder() {
         return propertyBuilder;
     }
