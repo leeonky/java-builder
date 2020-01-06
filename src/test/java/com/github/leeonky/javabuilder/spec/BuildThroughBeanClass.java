@@ -120,13 +120,13 @@ class BuildThroughBeanClass {
 
         @Test
         void support_specify_specifications_in_build() {
-            assertThat(factorySet.type(Bean.class).spec(specificationBuilder -> specificationBuilder.property("stringValue").eq("hello")).create())
+            assertThat(factorySet.type(Bean.class).spec(specificationBuilder -> specificationBuilder.property("stringValue").value("hello")).create())
                     .hasFieldOrPropertyWithValue("stringValue", "hello");
         }
 
         @Test
         void support_define_combination() {
-            factorySet.factory(Bean.class).combinable("com", specificationBuilder -> specificationBuilder.property("stringValue").eq("hello"));
+            factorySet.factory(Bean.class).combinable("com", specificationBuilder -> specificationBuilder.property("stringValue").value("hello"));
 
             assertThat(factorySet.type(Bean.class).combine("com").create())
                     .hasFieldOrPropertyWithValue("stringValue", "hello");

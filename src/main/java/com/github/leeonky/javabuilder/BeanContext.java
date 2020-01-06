@@ -119,7 +119,7 @@ public class BeanContext<T> {
             this.property = property;
         }
 
-        public BeanContext<T> eq(Object value) {
+        public BeanContext<T> value(Object value) {
             return from(() -> value);
         }
 

@@ -54,7 +54,7 @@ class BuildThroughSpec {
     void should_call_default_type_build_as_base_building() {
         factorySet.onBuild(Objects.Money.class, ((m, beanContext) -> {
             m.setAmount(100);
-            beanContext.property("symbol").eq("$");
+            beanContext.property("symbol").value("$");
         }));
 
         assertThat(factorySet.toBuild(Objects.USD.class).create())
@@ -125,17 +125,17 @@ class BuildThroughSpec {
         public static class USD extends BeanSpecs<Money> {
             @Override
             public void specs(BeanContext<Money> beanContext) {
-                beanContext.property("currency").eq("USD");
+                beanContext.property("currency").value("USD");
             }
 
             @Combination
             public void _100(BeanContext<Money> beanContext) {
-                beanContext.property("amount").eq(100);
+                beanContext.property("amount").value(100);
             }
 
             @Combination("200")
             public void combination200(BeanContext<Money> beanContext) {
-                beanContext.property("amount").eq(200);
+                beanContext.property("amount").value(200);
             }
         }
 
@@ -172,7 +172,7 @@ class BuildThroughSpec {
             public void specs(BeanContext<Product> beanContext) {
                 beanContext.property("price").from(USD.class, builder ->
                         builder.spec(specificationBuilder1 -> {
-                            specificationBuilder1.property("currency").eq("CNY");
+                            specificationBuilder1.property("currency").value("CNY");
                         }));
             }
         }
