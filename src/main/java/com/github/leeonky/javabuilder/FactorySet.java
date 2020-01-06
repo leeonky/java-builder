@@ -56,12 +56,12 @@ public class FactorySet {
         return factory;
     }
 
-    public <B extends BeanSpecs<T>, T> FactorySet define(Class<B> beanSpecificationClass) {
-        B beanDefinition = BeanClass.newInstance(beanSpecificationClass);
+    public FactorySet define(Class<? extends BeanSpecs<?>> beanSpecsClass) {
+        BeanSpecs<?> beanDefinition = BeanClass.newInstance(beanSpecsClass);
         if (beanSpecsNameMap.containsKey(beanDefinition.getName()))
             throw new IllegalArgumentException(String.format("Specification '%s' already exists", beanDefinition.getName()));
-        BeanSpecsFactory<T> beanSpecsFactory = new BeanSpecsFactory<>(beanDefinition);
-        beanSpecsMap.put(beanSpecificationClass, beanSpecsFactory);
+        BeanSpecsFactory<?> beanSpecsFactory = new BeanSpecsFactory<>(beanDefinition);
+        beanSpecsMap.put(beanSpecsClass, beanSpecsFactory);
         beanSpecsNameMap.put(beanDefinition.getName(), beanSpecsFactory);
         return this;
     }
@@ -75,20 +75,28 @@ public class FactorySet {
         return new Builder<>(factory(type), this);
     }
 
-    @SuppressWarnings("unchecked")
-    public <B extends BeanSpecs<T>, T> Builder<T> toBuild(Class<B> beanSpecsClass) {
-        Factory<T> factory = (Factory<T>) beanSpecsMap.get(beanSpecsClass);
+    public <T> Builder<T> toBuild(Class<? extends BeanSpecs<T>> beanSpecsClass) {
+        Factory<T> factory = spec(beanSpecsClass);
         if (null == factory)
             return define(beanSpecsClass).toBuild(beanSpecsClass);
         return new Builder<>(factory, this);
     }
 
     @SuppressWarnings("unchecked")
+    private <T> Factory<T> spec(Class<? extends BeanSpecs<T>> beanSpecsClass) {
+        return (Factory<T>) beanSpecsMap.get(beanSpecsClass);
+    }
+
     public <T> Builder<T> toBuild(String beanSpecsName) {
+        return new Builder<>(spec(beanSpecsName), this);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> Factory<T> spec(String beanSpecsName) {
         Factory<T> factory = (Factory<T>) beanSpecsNameMap.get(beanSpecsName);
         if (null == factory)
             throw new IllegalArgumentException(String.format("Specification '%s' not exists", beanSpecsName));
-        return new Builder<>(factory, this);
+        return factory;
     }
 
     int getSequence(Class<?> type) {

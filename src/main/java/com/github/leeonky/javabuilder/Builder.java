@@ -34,13 +34,13 @@ public class Builder<T> {
         return builder;
     }
 
-    public Builder<T> properties(Map<String, Object> properties) {
+    public Builder<T> properties(Map<String, ?> properties) {
         Builder<T> builder = copy();
         builder.properties.putAll(properties);
         return builder;
     }
 
-    public Stream<Builder<T>> properties(Collection<Map<String, Object>> properties) {
+    public Stream<Builder<T>> properties(Collection<Map<String, ?>> properties) {
         return properties.stream().map(this::properties);
     }
 
