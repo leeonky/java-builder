@@ -67,10 +67,14 @@ public class Builder<T> {
     }
 
     public T create() {
+        return factorySet.getDataRepository().save(build());
+    }
+
+    public T build() {
         BuildingContext buildingContext = new BuildingContext(factorySet);
         T object = build(buildingContext);
         buildingContext.applyAllSpecs(object);
-        return factorySet.getDataRepository().save(object);
+        return object;
     }
 
     T build(BuildingContext buildingContext) {
