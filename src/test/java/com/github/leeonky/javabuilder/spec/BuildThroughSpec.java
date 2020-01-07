@@ -103,6 +103,12 @@ class BuildThroughSpec {
                 .isEqualTo(200);
     }
 
+    @Test
+    void property_build_has_higher_priority_then_spec_in_specs() {
+        assertThat(factorySet.toBuild(Objects.ProductInUSD.class).property("price.currency", "CNY").create().getPrice())
+                .hasFieldOrPropertyWithValue("currency", "CNY");
+    }
+
     public static class Objects {
 
         @Getter

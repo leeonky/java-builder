@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface DataRepository {
-    <T> T save(T object);
+    void save(Object object);
 
     <T> List<T> query(BeanClass<T> beanClass, Map<String, Object> criteria);
 

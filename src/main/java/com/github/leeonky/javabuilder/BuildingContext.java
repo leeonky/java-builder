@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 
 class BuildingContext {
     private final FactorySet factorySet;
+    private Map<PropertyChain, SupplierSpec> propertiesSpecs = new LinkedHashMap<>();
     private Map<PropertyChain, SupplierSpec> supplierSpecs = new LinkedHashMap<>();
     private Map<PropertyChain, DependencySpec> dependencySpecs = new LinkedHashMap<>();
 
@@ -26,7 +27,13 @@ class BuildingContext {
         supplierSpecs.put(propertyChain, spec);
     }
 
+    void appendPropertiesSpec(PropertyChain propertyChain, SupplierSpec spec) {
+        propertiesSpecs.remove(propertyChain);
+        propertiesSpecs.put(propertyChain, spec);
+    }
+
     void applyAllSpecs(Object object) {
+        propertiesSpecs.values().forEach(spec -> spec.apply(object));
         supplierSpecs.values().forEach(spec -> spec.apply(object));
 
         Set<PropertyChain> properties = new LinkedHashSet<>(dependencySpecs.keySet());

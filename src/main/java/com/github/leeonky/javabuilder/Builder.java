@@ -67,7 +67,9 @@ public class Builder<T> {
     }
 
     public T create() {
-        return factorySet.getDataRepository().save(build());
+        T object = build();
+        factorySet.getDataRepository().save(object);
+        return object;
     }
 
     public T build() {
@@ -95,6 +97,7 @@ public class Builder<T> {
 
     T subCreate(BeanContext<T> subContext) {
         T object = build(subContext);
-        return factorySet.getDataRepository().save(object);
+        factorySet.getDataRepository().save(object);
+        return object;
     }
 }

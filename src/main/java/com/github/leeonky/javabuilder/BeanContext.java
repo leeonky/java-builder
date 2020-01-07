@@ -16,12 +16,13 @@ public class BeanContext<T> {
     private final FactorySet factorySet;
     private final int sequence;
     private final Map<String, Object> params;
-    private final Map<String, Object> properties = new LinkedHashMap<>(), originalProperties;
+    private final Map<String, Object> specifiedProperties = new LinkedHashMap<>(), originalProperties;
     private final Consumer<BeanContext<T>> spec;
     private final String[] combinations;
     private final BuildingContext buildingContext;
     private final BeanContext<?> parent;
     private final String currentPropertyName;
+    private final Set<String> propertyNames = new HashSet<>();
 
     BeanContext(FactorySet factorySet, Factory<T> factory, BeanContext<?> parent, String propertyNameInParent,
                 int sequence, Map<String, Object> params, Map<String, Object> properties, BuildingContext buildingContext,
@@ -38,6 +39,7 @@ public class BeanContext<T> {
         originalProperties = new LinkedHashMap<>(properties);
     }
 
+    @SuppressWarnings("unchecked")
     void queryOrCreateReferenceBeansAndCollectAllSpecs() {
         originalProperties.forEach((k, v) -> {
             if (k.contains(".")) {
@@ -45,11 +47,16 @@ public class BeanContext<T> {
                 PropertyWriter<T> propertyWriter = factory.getBeanClass().getPropertyWriter(propertyQueryChain.getBaseName());
                 Builder<?> builder = propertyQueryChain.toBuilder(factorySet, propertyWriter.getPropertyType(), v);
                 Optional<?> queried = builder.query().stream().findFirst();
-                queried.ifPresent(o -> properties.put(propertyWriter.getName(), o));
-                if (!queried.isPresent())
-                    property(propertyWriter.getName()).from(builder);
+                queried.ifPresent(o -> specifiedProperties.put(propertyWriter.getName(), o));
+                if (!queried.isPresent()) {
+                    BeanContext subBeanContext = builder.createSubBeanContext(this, propertyWriter.getName());
+                    PropertyChain propertyChain = new PropertyChain(absolutePropertyChain(propertyWriter.getName()));
+                    buildingContext.appendPropertiesSpec(propertyChain, new SupplierSpec(propertyChain, () -> builder.subCreate(subBeanContext)));
+                    subBeanContext.queryOrCreateReferenceBeansAndCollectAllSpecs();
+                    propertyNames.add(propertyWriter.getName());
+                }
             } else
-                properties.put(k, v);
+                specifiedProperties.put(k, v);
         });
         factory.collectSpecs(this, combinations);
         collectSpecs(spec);
@@ -69,7 +76,7 @@ public class BeanContext<T> {
     }
 
     public boolean isPropertyNotSpecified(String name) {
-        return !properties.containsKey(name);
+        return !specifiedProperties.containsKey(name) && !propertyNames.contains(name);
     }
 
     void assignDefaultValueToUnSpecifiedProperties(T object) {
@@ -81,7 +88,7 @@ public class BeanContext<T> {
     }
 
     T assignProperties(T instance) {
-        properties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(instance, k, v));
+        specifiedProperties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(instance, k, v));
         return instance;
     }
 
