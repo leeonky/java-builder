@@ -23,6 +23,7 @@ public class BeanContext<T> {
     private final BeanContext<?> parent;
     private final String currentPropertyName;
     private final Set<String> propertyNames = new HashSet<>();
+    private T built;
 
     BeanContext(FactorySet factorySet, Factory<T> factory, BeanContext<?> parent, String propertyNameInParent,
                 int sequence, Map<String, Object> params, Map<String, Object> properties, BuildingContext buildingContext,
@@ -89,6 +90,7 @@ public class BeanContext<T> {
 
     T assignProperties(T instance) {
         specifiedProperties.forEach((k, v) -> factory.getBeanClass().setPropertyValue(instance, k, v));
+        built = instance;
         return instance;
     }
 
@@ -106,7 +108,7 @@ public class BeanContext<T> {
     }
 
     private List<String> absolutePropertyChain(BeanContext<?> parent, String property) {
-        List<String> chain = parent == null ? new ArrayList<>() : absolutePropertyChain(parent.parent, currentPropertyName);
+        List<String> chain = parent == null ? new ArrayList<>() : parent.absolutePropertyChain(parent.parent, currentPropertyName);
         chain.add(property);
         return chain;
     }
@@ -117,6 +119,10 @@ public class BeanContext<T> {
 
     public PropertySpecBuilder property(String property) {
         return new PropertySpecBuilder(property);
+    }
+
+    public void cacheSave(T object) {
+        buildingContext.cacheSave(parent.built, object);
     }
 
     public class PropertySpecBuilder {

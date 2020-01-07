@@ -75,7 +75,7 @@ public class Builder<T> {
     public T build() {
         BuildingContext buildingContext = new BuildingContext(factorySet);
         T object = build(buildingContext);
-        buildingContext.applyAllSpecs(object);
+        buildingContext.applyAllSpecsAndSaveCached(object);
         return object;
     }
 
@@ -97,7 +97,7 @@ public class Builder<T> {
 
     T subCreate(BeanContext<T> subContext) {
         T object = build(subContext);
-        factorySet.getDataRepository().save(object);
+        subContext.cacheSave(object);
         return object;
     }
 }

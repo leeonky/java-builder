@@ -1,14 +1,14 @@
 package com.github.leeonky.javabuilder.spec;
 
-import com.github.leeonky.javabuilder.BeanContext;
-import com.github.leeonky.javabuilder.BeanSpecs;
-import com.github.leeonky.javabuilder.Combination;
-import com.github.leeonky.javabuilder.FactorySet;
+import com.github.leeonky.javabuilder.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -109,6 +109,24 @@ class BuildThroughSpec {
                 .hasFieldOrPropertyWithValue("currency", "CNY");
     }
 
+    @Test
+    void should_save_object_in_right_sequence() {
+        List<Object> buffer = new ArrayList<>();
+        FactorySet factorySet = new FactorySet(new HashMapDataRepository() {
+            @Override
+            public void save(Object object) {
+                super.save(object);
+                buffer.add(object);
+            }
+        });
+
+        Objects.ShoppingList shoppingList = factorySet.toBuild(Objects.ShoppingListInUSD.class).create();
+
+        assertThat(buffer.get(0)).isEqualTo(shoppingList.getProduct().getPrice());
+        assertThat(buffer.get(1)).isEqualTo(shoppingList.getProduct());
+        assertThat(buffer.get(2)).isEqualTo(shoppingList);
+    }
+
     public static class Objects {
 
         @Getter
@@ -126,6 +144,13 @@ class BuildThroughSpec {
         public static class Product {
             private String name;
             private Money price;
+        }
+
+        @Getter
+        @Setter
+        @Accessors(chain = true)
+        public static class ShoppingList {
+            private Product product;
         }
 
         public static class USD extends BeanSpecs<Money> {
@@ -170,6 +195,13 @@ class BuildThroughSpec {
             @Override
             public void specs(BeanContext<Product> beanContext) {
                 beanContext.property("price").from(() -> new Money().setAmount(100));
+            }
+        }
+
+        public static class ShoppingListInUSD extends BeanSpecs<ShoppingList> {
+            @Override
+            public void specs(BeanContext<ShoppingList> beanContext) {
+                beanContext.property("product").from(ProductInUSD.class);
             }
         }
 
