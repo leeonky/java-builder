@@ -42,6 +42,28 @@ class BuildThroughComplexSpecification {
                         (args) -> (int) args.get(1) - (int) args.get(0));
             }
         }
+
+        public static class SkipSupplierWhenHasDependency extends BeanSpecs<Product> {
+
+            @Override
+            public void specs(BeanContext<Product> beanContext) {
+                beanContext.property("tax").dependsOn("price", (price) -> ((int) price) / 10);
+                beanContext.property("tax").from(() -> {
+                    throw new RuntimeException();
+                });
+            }
+        }
+
+        public static class OverrideSupplierWhenDefineDependency extends BeanSpecs<Product> {
+
+            @Override
+            public void specs(BeanContext<Product> beanContext) {
+                beanContext.property("tax").from(() -> {
+                    throw new RuntimeException();
+                });
+                beanContext.property("tax").dependsOn("price", (price) -> ((int) price) / 10);
+            }
+        }
     }
 
     @Nested
@@ -69,6 +91,18 @@ class BuildThroughComplexSpecification {
                     .create())
                     .hasFieldOrPropertyWithValue("minPriceWithoutTax", 1900)
             ;
+        }
+
+        @Test
+        void should_skip_supplier_value_when_has_dependency_spec() {
+            assertThat(factorySet.toBuild(Objects.SkipSupplierWhenHasDependency.class).property("price", 10000).create())
+                    .hasFieldOrPropertyWithValue("tax", 1000);
+        }
+
+        @Test
+        void should_override_supplier_value_when_add_dependency_spec() {
+            assertThat(factorySet.toBuild(Objects.OverrideSupplierWhenDefineDependency.class).property("price", 10000).create())
+                    .hasFieldOrPropertyWithValue("tax", 1000);
         }
     }
 }

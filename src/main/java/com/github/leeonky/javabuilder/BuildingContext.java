@@ -24,6 +24,8 @@ class BuildingContext {
     }
 
     void appendSupplierSpec(PropertyChain propertyChain, SupplierSpec spec) {
+        if (dependencySpecs.containsKey(propertyChain))
+            return;
         supplierSpecs.remove(propertyChain);
         supplierSpecs.put(propertyChain, spec);
     }
@@ -55,6 +57,7 @@ class BuildingContext {
     }
 
     void appendDependencySpec(PropertyChain propertyChain, DependencySpec spec) {
+        supplierSpecs.remove(propertyChain);
         dependencySpecs.remove(propertyChain);
         dependencySpecs.put(propertyChain, spec);
     }
