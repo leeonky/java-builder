@@ -52,7 +52,8 @@ public class BeanContext<T> {
                 if (!queried.isPresent()) {
                     BeanContext subBeanContext = builder.createSubBeanContext(this, propertyWriter.getName());
                     PropertyChain propertyChain = new PropertyChain(absolutePropertyChain(propertyWriter.getName()));
-                    buildingContext.appendPropertiesSpec(propertyChain, new SupplierSpec(propertyChain, () -> builder.subCreate(subBeanContext)));
+                    buildingContext.appendPropertiesSpec(propertyChain, new PropertySpec(propertyWriter.getPropertyType(), propertyChain,
+                            () -> builder.subCreate(subBeanContext), k, v));
                     subBeanContext.queryOrCreateReferenceBeansAndCollectAllSpecs();
                     propertyNames.add(propertyWriter.getName());
                 }

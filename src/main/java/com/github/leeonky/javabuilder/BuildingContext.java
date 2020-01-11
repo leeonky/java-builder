@@ -1,15 +1,12 @@
 package com.github.leeonky.javabuilder;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 class BuildingContext {
     private final FactorySet factorySet;
     private final ObjectTree objectTree = new ObjectTree();
-    private Map<PropertyChain, SupplierSpec> propertiesSpecs = new LinkedHashMap<>();
+    private Map<PropertyChain, PropertySpec> propertiesSpecs = new LinkedHashMap<>();
     private Map<PropertyChain, SupplierSpec> supplierSpecs = new LinkedHashMap<>();
     private Map<PropertyChain, DependencySpec> dependencySpecs = new LinkedHashMap<>();
 
@@ -30,13 +27,17 @@ class BuildingContext {
         supplierSpecs.put(propertyChain, spec);
     }
 
-    void appendPropertiesSpec(PropertyChain propertyChain, SupplierSpec spec) {
+    void appendPropertiesSpec(PropertyChain propertyChain, PropertySpec spec) {
         propertiesSpecs.remove(propertyChain);
         propertiesSpecs.put(propertyChain, spec);
     }
 
     void applyAllSpecsAndSaveCached(Object object) {
-        propertiesSpecs.values().forEach(spec -> spec.apply(object));
+        ArrayList<PropertySpec> propertiesSpecList = new ArrayList<>(propertiesSpecs.values());
+        for (int i = 0; i < propertiesSpecList.size(); ++i)
+            for (int j = i + 1; j < propertiesSpecList.size(); ++j)
+                propertiesSpecList.get(j).tryMerge(propertiesSpecList.get(i));
+        propertiesSpecList.forEach(spec -> spec.apply(object));
         supplierSpecs.values().forEach(spec -> spec.apply(object));
 
         Set<PropertyChain> properties = new LinkedHashSet<>(dependencySpecs.keySet());

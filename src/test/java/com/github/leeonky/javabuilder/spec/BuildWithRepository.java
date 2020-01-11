@@ -49,6 +49,16 @@ class BuildWithRepository {
         private boolean issued;
     }
 
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class CategoryRange {
+        private Category from, to;
+    }
+
+    public static class CategorySpec extends BeanSpecs<Category> {
+    }
+
     public static class ProgrammeBook extends BeanSpecs<Product> {
         @Override
         public void specs(BeanContext<Product> specBuilder) {
@@ -160,6 +170,15 @@ class BuildWithRepository {
 
             assertThat(order).isInstanceOf(Order.class);
             assertThat(order.getProduct()).isNotEqualTo(product);
+        }
+
+        @Test
+        void should_use_caching_object_in_the_same_property_build() {
+            factorySet.define(CategorySpec.class);
+
+            CategoryRange categoryRange = factorySet.type(CategoryRange.class).property("from(CategorySpec).name", "A").property("to.name", "A").create();
+
+            assertThat(categoryRange.from).isEqualTo(categoryRange.to);
         }
     }
 }
