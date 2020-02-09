@@ -157,7 +157,7 @@ class BuildWithRepository {
         void support_build_property_with_factory_name_and_combination() {
             factorySet.define(ProgrammeBook.class);
 
-            Order order = factorySet.type(Order.class).property("product(Issued, ProgrammeBook).category.name", "book").create();
+            Order order = factorySet.type(Order.class).property("product(Issued ProgrammeBook).category.name", "book").create();
 
             assertThat(order.getProduct().isIssued()).isTrue();
         }

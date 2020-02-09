@@ -13,7 +13,7 @@ class PropertyQueryChain {
         if (propertyName.contains("(")) {
             String[] propertyFactory = propertyName.split("\\(");
             propertyName = propertyFactory[0];
-            String[] combinedSpecificationName = propertyFactory[1].split("\\)")[0].split(",");
+            String[] combinedSpecificationName = propertyFactory[1].split("\\)")[0].split("[,\\ ]");
             combinations = Stream.of(combinedSpecificationName)
                     .limit(combinedSpecificationName.length - 1)
                     .map(String::trim)
