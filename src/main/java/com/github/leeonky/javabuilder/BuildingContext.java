@@ -33,11 +33,8 @@ class BuildingContext {
     }
 
     void applyAllSpecsAndSaveCached(Object object) {
-        ArrayList<PropertySpec> propertiesSpecList = new ArrayList<>(propertiesSpecs.values());
-        for (int i = 0; i < propertiesSpecList.size(); ++i)
-            for (int j = i + 1; j < propertiesSpecList.size(); ++j)
-                propertiesSpecList.get(j).tryMerge(propertiesSpecList.get(i));
-        propertiesSpecList.forEach(spec -> spec.apply(object));
+        mergePropertySpecs(object);
+
         supplierSpecs.values().forEach(spec -> spec.apply(object));
 
         Set<PropertyChain> properties = new LinkedHashSet<>(dependencySpecs.keySet());
@@ -45,6 +42,14 @@ class BuildingContext {
             assignFromDependency(object, properties, properties.iterator().next());
 
         objectTree.foreach(object, o -> factorySet.getDataRepository().save(o));
+    }
+
+    private void mergePropertySpecs(Object object) {
+        ArrayList<PropertySpec> propertiesSpecList = new ArrayList<>(propertiesSpecs.values());
+        for (int i = 0; i < propertiesSpecList.size(); ++i)
+            for (int j = i + 1; j < propertiesSpecList.size(); ++j)
+                propertiesSpecList.get(j).tryMerge(propertiesSpecList.get(i));
+        propertiesSpecList.forEach(spec -> spec.apply(object));
     }
 
     private void assignFromDependency(Object object, Set<PropertyChain> properties, PropertyChain property) {

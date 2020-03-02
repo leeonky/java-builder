@@ -64,6 +64,41 @@ class BuildThroughComplexSpecification {
                 beanContext.property("tax").dependsOn("price", (price) -> ((int) price) / 10);
             }
         }
+
+        @Getter
+        @Setter
+        @Accessors(chain = true)
+        public static class Father {
+            private String familyName;
+            private int age;
+            private Son son;
+        }
+
+        @Getter
+        @Setter
+        @Accessors(chain = true)
+        public static class Son {
+            private String familyName;
+            private int age;
+        }
+
+        public static class AFather extends BeanSpecs<Father> {
+
+            @Override
+            public void specs(BeanContext<Father> beanContext) {
+                beanContext.property("son").from(ASon.class);
+                beanContext.property("son.familyName").dependsOn("familyName", name -> name);
+            }
+        }
+
+        public static class ASon extends BeanSpecs<Son> {
+            @Override
+            public void specs(BeanContext<Son> beanContext) {
+                beanContext.property("familyName").from(() -> {
+                    throw new RuntimeException("Should not run to here");
+                });
+            }
+        }
     }
 
     @Nested
@@ -103,6 +138,25 @@ class BuildThroughComplexSpecification {
         void should_override_supplier_value_when_add_dependency_spec() {
             assertThat(factorySet.toBuild(Objects.OverrideSupplierWhenDefineDependency.class).property("price", 10000).create())
                     .hasFieldOrPropertyWithValue("tax", 1000);
+        }
+    }
+
+    @Nested
+    class SubValueDependent {
+
+        @Test
+        void should_set_via_dependency() {
+            Objects.Father father = factorySet.toBuild(Objects.AFather.class).property("familyName", "Zhang").create();
+            assertThat(father.getFamilyName()).isEqualTo(father.getSon().getFamilyName());
+        }
+
+        @Test
+        void should_ignore_when_specify_in_property() {
+            Objects.Father father = factorySet.toBuild(Objects.AFather.class)
+                    .property("familyName", "Zhang")
+                    .property("son", new Objects.Son().setFamilyName("Wang"))
+                    .create();
+            assertThat(father.getSon().getFamilyName()).isEqualTo("Wang");
         }
     }
 }

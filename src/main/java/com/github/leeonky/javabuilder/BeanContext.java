@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 public class BeanContext<T> {
@@ -110,7 +111,7 @@ public class BeanContext<T> {
 
     private List<String> absolutePropertyChain(BeanContext<?> parent, String property) {
         List<String> chain = parent == null ? new ArrayList<>() : parent.absolutePropertyChain(parent.parent, currentPropertyName);
-        chain.add(property);
+        chain.addAll(asList(property.split("\\.")));
         return chain;
     }
 
@@ -168,7 +169,7 @@ public class BeanContext<T> {
         }
 
         public BeanContext<T> dependsOn(List<String> dependencies, Function<List<Object>, Object> function) {
-            if (isPropertyNotSpecified(property)) {
+            if (isPropertyNotSpecified(property.split("\\.")[0])) {
                 PropertyChain propertyChain = new PropertyChain(absolutePropertyChain(property));
                 buildingContext.appendDependencySpec(propertyChain, new DependencySpec(propertyChain,
                         dependencies.stream().map(d -> new PropertyChain(absolutePropertyChain(d))).collect(Collectors.toList()), function));
