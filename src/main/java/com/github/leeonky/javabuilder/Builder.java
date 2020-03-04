@@ -74,8 +74,10 @@ public class Builder<T> {
 
     public T build() {
         BuildingContext buildingContext = new BuildingContext(factorySet);
-        T object = build(buildingContext);
-        buildingContext.applyAllSpecsAndSaveCached(object);
+        BeanContext<T> beanContext = buildingContext.createBeanContext(factory, params, properties, spec, combinations);
+        beanContext.queryOrCreateReferenceBeansAndCollectAllSpecs();
+        T object = build(beanContext);
+        buildingContext.applyAllSpecsAndSaveCached(object, beanContext);
         return object;
     }
 

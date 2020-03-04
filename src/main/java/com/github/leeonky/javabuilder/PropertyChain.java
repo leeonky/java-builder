@@ -35,6 +35,10 @@ class PropertyChain {
         return getFrom(properties, BeanClass.create((Class) object.getClass()).getPropertyValue(object, firstProperty));
     }
 
+    public String getRootName() {
+        return names.get(0);
+    }
+
     @Override
     public int hashCode() {
         return names.hashCode();

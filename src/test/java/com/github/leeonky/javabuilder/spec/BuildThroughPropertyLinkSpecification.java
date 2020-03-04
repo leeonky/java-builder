@@ -61,5 +61,12 @@ class BuildThroughPropertyLinkSpecification {
 
             assertThat(address.getProvince()).isEqualTo(address.getCity());
         }
+
+        @Test
+        void support_link_property_with_specific_value() {
+            Objects.Address address = factorySet.toBuild(Objects.Municipality.class).property("city", "City").create();
+
+            assertThat(address.getProvince()).isEqualTo("City");
+        }
     }
 }

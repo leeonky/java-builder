@@ -33,7 +33,7 @@ class BuildingContext {
         propertiesSpecs.put(propertyChain, spec);
     }
 
-    void applyAllSpecsAndSaveCached(Object object) {
+    void applyAllSpecsAndSaveCached(Object object, BeanContext<?> beanContext) {
         mergePropertySpecs(object);
 
         supplierSpecs.values().forEach(spec -> spec.apply(object));
@@ -42,7 +42,7 @@ class BuildingContext {
         while (properties.size() > 0)
             assignFromDependency(object, properties, properties.iterator().next());
 
-        linkSpecs.forEach(linkSpec -> linkSpec.apply(object));
+        linkSpecs.forEach(linkSpec -> linkSpec.apply(object, beanContext));
 
         objectTree.foreach(object, o -> factorySet.getDataRepository().save(o));
     }

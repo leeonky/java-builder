@@ -83,6 +83,10 @@ public class BeanContext<T> {
         return !specifiedProperties.containsKey(name) && !propertyNames.contains(name);
     }
 
+    public boolean isPropertyNotSpecified(PropertyChain propertyChain) {
+        return isPropertyNotSpecified(propertyChain.getRootName());
+    }
+
     void assignDefaultValueToUnSpecifiedProperties(T object) {
         factorySet.getPropertyBuilder().assignDefaultValueToProperties(object, this);
     }
