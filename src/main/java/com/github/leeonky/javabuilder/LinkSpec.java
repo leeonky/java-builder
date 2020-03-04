@@ -10,17 +10,39 @@ class LinkSpec {
         this.propertyChains = propertyChains;
     }
 
+    public void preApply(Object object, BeanContext<?> beanContext) {
+        List<PropertyChain> specified = filterSpecifiedPropertyChains(beanContext);
+        if (specified.size() > 0) {
+            filterUnspecifiedPropertyChains(beanContext)
+                    .forEach(propertyChain -> beanContext.getBuildingContext().removeSupplierSpec(propertyChain));
+            return;
+        }
+    }
+
     void apply(Object object, BeanContext<?> beanContext) {
         List<PropertyChain> specified = filterSpecifiedPropertyChains(beanContext);
-        List<PropertyChain> frees = propertyChains.stream()
-                .filter(beanContext::isPropertyNotSpecified)
-                .collect(Collectors.toList());
         if (specified.size() > 0) {
             Object value = specified.get(0).getFrom(object);
-            frees.forEach(propertyChain -> propertyChain.setTo(object, value));
-        } else {
-            linkPropertyByFirstDefaultValue(object);
+            filterUnspecifiedPropertyChains(beanContext)
+                    .forEach(propertyChain -> propertyChain.setTo(object, value));
+            return;
         }
+        List<PropertyChain> supplierSpecs = propertyChains.stream()
+                .filter(propertyChain -> beanContext.getBuildingContext().isSupplierSpec(propertyChain))
+                .collect(Collectors.toList());
+        if (supplierSpecs.size() > 0) {
+            Object value = supplierSpecs.get(0).getFrom(object);
+            propertyChains.stream()
+                    .filter(propertyChain -> !beanContext.getBuildingContext().isSupplierSpec(propertyChain))
+                    .forEach(propertyChain -> propertyChain.setTo(object, value));
+        }
+        linkPropertyByFirstDefaultValue(object);
+    }
+
+    private List<PropertyChain> filterUnspecifiedPropertyChains(BeanContext<?> beanContext) {
+        return propertyChains.stream()
+                .filter(beanContext::isPropertyNotSpecified)
+                .collect(Collectors.toList());
     }
 
     private List<PropertyChain> filterSpecifiedPropertyChains(BeanContext<?> beanContext) {

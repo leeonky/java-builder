@@ -50,6 +50,24 @@ class BuildThroughPropertyLinkSpecification {
                 beanContext.link("province", "city");
             }
         }
+
+        public static class Capital extends BeanSpecs<Address> {
+            @Override
+            public void specs(BeanContext<Address> beanContext) {
+                beanContext.property("city").value("Beijing");
+                beanContext.link("province", "city");
+            }
+        }
+
+        public static class IgnoreSupplierCapital extends BeanSpecs<Address> {
+            @Override
+            public void specs(BeanContext<Address> beanContext) {
+                beanContext.property("city").from(() -> {
+                    throw new RuntimeException();
+                });
+                beanContext.link("province", "city");
+            }
+        }
     }
 
     @Nested
@@ -63,10 +81,24 @@ class BuildThroughPropertyLinkSpecification {
         }
 
         @Test
+        void support_link_property_with_spec_value() {
+            Objects.Address address = factorySet.toBuild(Objects.Capital.class).create();
+
+            assertThat(address.getProvince()).isEqualTo("Beijing");
+        }
+
+        @Test
         void support_link_property_with_specific_value() {
             Objects.Address address = factorySet.toBuild(Objects.Municipality.class).property("city", "City").create();
 
             assertThat(address.getProvince()).isEqualTo("City");
+        }
+
+        @Test
+        void should_ignore_spec_when_specify_in_property() {
+            Objects.Address address = factorySet.toBuild(Objects.IgnoreSupplierCapital.class).property("province", "Shanghai").create();
+
+            assertThat(address.getCity()).isEqualTo("Shanghai");
         }
     }
 }

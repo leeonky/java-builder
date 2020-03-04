@@ -34,6 +34,8 @@ class BuildingContext {
     }
 
     void applyAllSpecsAndSaveCached(Object object, BeanContext<?> beanContext) {
+        linkSpecs.forEach(linkSpec -> linkSpec.preApply(object, beanContext));
+
         mergePropertySpecs(object);
 
         supplierSpecs.values().forEach(spec -> spec.apply(object));
@@ -77,5 +79,13 @@ class BuildingContext {
 
     void appendLinkSpec(LinkSpec linkSpec) {
         linkSpecs.add(linkSpec);
+    }
+
+    boolean isSupplierSpec(PropertyChain propertyChain) {
+        return supplierSpecs.containsKey(propertyChain);
+    }
+
+    void removeSupplierSpec(PropertyChain propertyChain) {
+        supplierSpecs.remove(propertyChain);
     }
 }
