@@ -1,22 +1,22 @@
-package com.github.leeonky.javabuilder;
+package com.github.leeonky.javabuilder.spec;
 
 import com.github.leeonky.util.BeanClass;
 
 import java.util.LinkedList;
 import java.util.List;
 
-class PropertyChain {
+public class PropertyChain {
     private final List<String> names;
 
-    PropertyChain(List<String> names) {
+    public PropertyChain(List<String> names) {
         this.names = names;
     }
 
-    void setTo(Object object, Object property) {
+    public void setTo(Object object, Object property) {
         setTo(new LinkedList<>(names), object, property);
     }
 
-    Object getFrom(Object object) {
+    public Object getFrom(Object object) {
         return getFrom(new LinkedList<>(names), object);
     }
 

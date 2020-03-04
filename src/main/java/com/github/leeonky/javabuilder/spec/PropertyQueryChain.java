@@ -1,8 +1,11 @@
-package com.github.leeonky.javabuilder;
+package com.github.leeonky.javabuilder.spec;
+
+import com.github.leeonky.javabuilder.Builder;
+import com.github.leeonky.javabuilder.FactorySet;
 
 import java.util.stream.Stream;
 
-class PropertyQueryChain {
+public class PropertyQueryChain {
     private final String baseName, condition, specificationName;
     private final String[] combinations;
 
@@ -26,7 +29,7 @@ class PropertyQueryChain {
         baseName = propertyName;
     }
 
-    static PropertyQueryChain parse(String chain) {
+    public static PropertyQueryChain parse(String chain) {
         return new PropertyQueryChain(chain);
     }
 
@@ -38,7 +41,7 @@ class PropertyQueryChain {
         return condition;
     }
 
-    Builder<?> toBuilder(FactorySet factorySet, Class<?> type, Object param) {
+    public Builder<?> toBuilder(FactorySet factorySet, Class<?> type, Object param) {
         return (specificationName != null ? factorySet.toBuild(specificationName) : factorySet.type(type))
                 .combine(combinations)
                 .property(getCondition(), param);

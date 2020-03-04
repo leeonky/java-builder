@@ -95,7 +95,7 @@ class BuildThroughDefaultFactory {
     @Test
     void default_build_for_skip_special_method() {
         factorySet.getPropertyBuilder()
-                .skipProperty(m -> m.getName().equals("intValue"));
+                .ignoredWhen(m -> m.getName().equals("intValue"));
 
         assertThat(factorySet.type(Bean.class).create())
                 .hasFieldOrPropertyWithValue("intValue", 0);

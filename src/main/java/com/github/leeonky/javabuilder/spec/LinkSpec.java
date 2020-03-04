@@ -1,16 +1,18 @@
-package com.github.leeonky.javabuilder;
+package com.github.leeonky.javabuilder.spec;
+
+import com.github.leeonky.javabuilder.BeanContext;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-class LinkSpec {
+public class LinkSpec {
     private final List<PropertyChain> propertyChains;
 
-    LinkSpec(List<PropertyChain> propertyChains) {
+    public LinkSpec(List<PropertyChain> propertyChains) {
         this.propertyChains = propertyChains;
     }
 
-    public void preApply(Object object, BeanContext<?> beanContext) {
+    public void preApply(BeanContext<?> beanContext) {
         List<PropertyChain> specified = filterSpecifiedPropertyChains(beanContext);
         if (specified.size() > 0) {
             filterUnspecifiedPropertyChains(beanContext)
@@ -19,7 +21,7 @@ class LinkSpec {
         }
     }
 
-    void apply(Object object, BeanContext<?> beanContext) {
+    public void apply(Object object, BeanContext<?> beanContext) {
         List<PropertyChain> specified = filterSpecifiedPropertyChains(beanContext);
         if (specified.size() > 0) {
             Object value = specified.get(0).getFrom(object);

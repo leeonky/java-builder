@@ -1,5 +1,6 @@
 package com.github.leeonky.javabuilder;
 
+import com.github.leeonky.javabuilder.spec.*;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyWriter;
 
@@ -120,7 +121,7 @@ public class BeanContext<T> {
         return chain;
     }
 
-    BuildingContext getBuildingContext() {
+    public BuildingContext getBuildingContext() {
         return buildingContext;
     }
 

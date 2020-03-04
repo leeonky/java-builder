@@ -16,7 +16,11 @@ class BeanSpecsFactory<T> extends AbstractFactory<T> {
                 .forEach(method -> combinable(getCombinationName(method), beanContext -> {
                     try {
                         method.invoke(beanSpecs, beanContext);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
+                    } catch (IllegalAccessException e) {
+                        throw new IllegalStateException(e);
+                    } catch (InvocationTargetException e) {
+                        if (e.getTargetException() instanceof RuntimeException)
+                            throw (RuntimeException) e.getTargetException();
                         throw new IllegalStateException(e);
                     }
                 }));

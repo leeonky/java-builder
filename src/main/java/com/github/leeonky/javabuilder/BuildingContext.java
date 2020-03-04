@@ -1,9 +1,11 @@
 package com.github.leeonky.javabuilder;
 
+import com.github.leeonky.javabuilder.spec.*;
+
 import java.util.*;
 import java.util.function.Consumer;
 
-class BuildingContext {
+public class BuildingContext {
     private final FactorySet factorySet;
     private final ObjectTree objectTree = new ObjectTree();
     private final List<LinkSpec> linkSpecs = new ArrayList<>();
@@ -11,30 +13,30 @@ class BuildingContext {
     private final Map<PropertyChain, SupplierSpec> supplierSpecs = new LinkedHashMap<>();
     private final Map<PropertyChain, DependencySpec> dependencySpecs = new LinkedHashMap<>();
 
-    BuildingContext(FactorySet factorySet) {
+    public BuildingContext(FactorySet factorySet) {
         this.factorySet = factorySet;
     }
 
-    <T> BeanContext<T> createBeanContext(Factory<T> factory, Map<String, Object> params, Map<String, Object> properties,
-                                         Consumer<BeanContext<T>> spec, String[] combinations) {
+    public <T> BeanContext<T> createBeanContext(Factory<T> factory, Map<String, Object> params, Map<String, Object> properties,
+                                                Consumer<BeanContext<T>> spec, String[] combinations) {
         return new BeanContext<>(factorySet, factory, null, null, factorySet.getSequence(factory.getBeanClass().getType()),
                 params, properties, this, spec, combinations);
     }
 
-    void appendSupplierSpec(PropertyChain propertyChain, SupplierSpec spec) {
+    public void appendSupplierSpec(PropertyChain propertyChain, SupplierSpec spec) {
         if (dependencySpecs.containsKey(propertyChain))
             return;
         supplierSpecs.remove(propertyChain);
         supplierSpecs.put(propertyChain, spec);
     }
 
-    void appendPropertiesSpec(PropertyChain propertyChain, PropertySpec spec) {
+    public void appendPropertiesSpec(PropertyChain propertyChain, PropertySpec spec) {
         propertiesSpecs.remove(propertyChain);
         propertiesSpecs.put(propertyChain, spec);
     }
 
-    void applyAllSpecsAndSaveCached(Object object, BeanContext<?> beanContext) {
-        linkSpecs.forEach(linkSpec -> linkSpec.preApply(object, beanContext));
+    public void applyAllSpecsAndSaveCached(Object object, BeanContext<?> beanContext) {
+        linkSpecs.forEach(linkSpec -> linkSpec.preApply(beanContext));
 
         mergePropertySpecs(object);
 
@@ -67,25 +69,25 @@ class BuildingContext {
         }
     }
 
-    void appendDependencySpec(PropertyChain propertyChain, DependencySpec spec) {
+    public void appendDependencySpec(PropertyChain propertyChain, DependencySpec spec) {
         supplierSpecs.remove(propertyChain);
         dependencySpecs.remove(propertyChain);
         dependencySpecs.put(propertyChain, spec);
     }
 
-    void cacheSave(Object parent, Object node) {
+    public void cacheSave(Object parent, Object node) {
         objectTree.addNode(parent, node);
     }
 
-    void appendLinkSpec(LinkSpec linkSpec) {
+    public void appendLinkSpec(LinkSpec linkSpec) {
         linkSpecs.add(linkSpec);
     }
 
-    boolean isSupplierSpec(PropertyChain propertyChain) {
+    public boolean isSupplierSpec(PropertyChain propertyChain) {
         return supplierSpecs.containsKey(propertyChain);
     }
 
-    void removeSupplierSpec(PropertyChain propertyChain) {
+    public void removeSupplierSpec(PropertyChain propertyChain) {
         supplierSpecs.remove(propertyChain);
     }
 }

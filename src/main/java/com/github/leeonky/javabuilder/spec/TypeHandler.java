@@ -1,24 +1,24 @@
-package com.github.leeonky.javabuilder;
+package com.github.leeonky.javabuilder.spec;
 
 public class TypeHandler<F> {
     private final Class<?> type;
 
     private final F handler;
 
-    TypeHandler(Class<?> type, F handler) {
+    public TypeHandler(Class<?> type, F handler) {
         this.type = type;
         this.handler = handler;
     }
 
-    F getHandler() {
+    public F getHandler() {
         return handler;
     }
 
-    boolean isBaseType(Class<?> type) {
+    public boolean isBaseType(Class<?> type) {
         return this.type.isAssignableFrom(type);
     }
 
-    boolean isPreciseType(Class<?> type) {
+    public boolean isPreciseType(Class<?> type) {
         return this.type.equals(type);
     }
 }

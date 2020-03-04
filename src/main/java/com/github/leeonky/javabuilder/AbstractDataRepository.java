@@ -1,5 +1,6 @@
 package com.github.leeonky.javabuilder;
 
+import com.github.leeonky.javabuilder.spec.PropertyQueryChain;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyReader;
 
@@ -16,8 +17,12 @@ public abstract class AbstractDataRepository implements DataRepository {
     @Override
     public <T> List<T> query(BeanClass<T> beanClass, Map<String, Object> criteria) {
         return queryAll(beanClass.getType()).stream()
-                .filter(o -> criteria.entrySet().stream().allMatch(e -> isPropertyValueMatched(beanClass, o, e.getKey(), e.getValue())))
+                .filter(o -> criteriaMatches(o, beanClass, criteria))
                 .collect(Collectors.toList());
+    }
+
+    private <T> boolean criteriaMatches(T object, BeanClass<T> beanClass, Map<String, Object> criteria) {
+        return criteria.entrySet().stream().allMatch(e -> isPropertyValueMatched(beanClass, object, e.getKey(), e.getValue()));
     }
 
     @SuppressWarnings("unchecked")

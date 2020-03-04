@@ -1,16 +1,16 @@
-package com.github.leeonky.javabuilder;
+package com.github.leeonky.javabuilder.spec;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-class ObjectTree {
+public class ObjectTree {
     private Map<Object, List<Object>> nodes = new HashMap<>();
 
-    void addNode(Object parent, Object node) {
+    public void addNode(Object parent, Object node) {
         nodes.computeIfAbsent(parent, k -> new ArrayList<>()).add(node);
     }
 
-    void foreach(Object root, Consumer<Object> consumer) {
+    public void foreach(Object root, Consumer<Object> consumer) {
         nodes.getOrDefault(root, Collections.emptyList()).forEach(o -> consume(consumer, o));
     }
 

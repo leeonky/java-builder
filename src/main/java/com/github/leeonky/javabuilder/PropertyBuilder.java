@@ -1,5 +1,7 @@
 package com.github.leeonky.javabuilder;
 
+import com.github.leeonky.javabuilder.spec.TriFunction;
+import com.github.leeonky.javabuilder.spec.TypeHandler;
 import com.github.leeonky.util.PropertyWriter;
 
 import java.math.BigDecimal;
@@ -11,12 +13,12 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class PropertyBuilder {
-    public static final LocalDate LOCAL_DATE_START = LocalDate.parse("1996-01-23");
-    public static final LocalDateTime LOCAL_DATE_TIME_START = LocalDateTime.parse("1996-01-23T00:00:00");
+    private static final LocalDate LOCAL_DATE_START = LocalDate.parse("1996-01-23");
+    private static final LocalDateTime LOCAL_DATE_TIME_START = LocalDateTime.parse("1996-01-23T00:00:00");
     private static final LocalTime LOCAL_TIME_START = LocalTime.parse("00:00:00");
     private static final Instant INSTANT_START = Instant.parse("1996-01-23T00:00:00Z");
     private List<TypeHandler<TriFunction>> setters = new ArrayList<>();
-    private List<Predicate> skipper = new ArrayList<>();
+    private List<Predicate> ignored = new ArrayList<>();
     private Map<Predicate, TriFunction> propertyBuilders = new LinkedHashMap<>();
 
     public static PropertyBuilder createDefaultPropertyBuilder() {
@@ -64,8 +66,8 @@ public class PropertyBuilder {
         return this;
     }
 
-    public PropertyBuilder skipProperty(Predicate<PropertyWriter<?>> predicate) {
-        skipper.add(predicate);
+    public PropertyBuilder ignoredWhen(Predicate<PropertyWriter<?>> predicate) {
+        ignored.add(predicate);
         return this;
     }
 
@@ -73,7 +75,7 @@ public class PropertyBuilder {
     public <T> void assignDefaultValueToProperties(T object, BeanContext<T> beanContext) {
         beanContext.getBeanClass().getPropertyWriters()
                 .values().stream()
-                .filter(propertyWriter -> skipper.stream().noneMatch(p -> p.test(propertyWriter)))
+                .filter(propertyWriter -> ignored.stream().noneMatch(p -> p.test(propertyWriter)))
                 .filter(propertyWriter -> beanContext.isPropertyNotSpecified(propertyWriter.getName()))
                 .forEach(propertyWriter -> assignDefaultValueToProperty(object, propertyWriter, beanContext));
     }

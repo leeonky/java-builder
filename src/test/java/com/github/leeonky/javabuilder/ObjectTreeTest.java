@@ -1,5 +1,6 @@
 package com.github.leeonky.javabuilder;
 
+import com.github.leeonky.javabuilder.spec.ObjectTree;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
