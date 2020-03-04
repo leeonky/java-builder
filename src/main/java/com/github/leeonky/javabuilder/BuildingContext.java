@@ -6,9 +6,10 @@ import java.util.function.Consumer;
 class BuildingContext {
     private final FactorySet factorySet;
     private final ObjectTree objectTree = new ObjectTree();
-    private Map<PropertyChain, PropertySpec> propertiesSpecs = new LinkedHashMap<>();
-    private Map<PropertyChain, SupplierSpec> supplierSpecs = new LinkedHashMap<>();
-    private Map<PropertyChain, DependencySpec> dependencySpecs = new LinkedHashMap<>();
+    private final List<LinkSpec> linkSpecs = new ArrayList<>();
+    private final Map<PropertyChain, PropertySpec> propertiesSpecs = new LinkedHashMap<>();
+    private final Map<PropertyChain, SupplierSpec> supplierSpecs = new LinkedHashMap<>();
+    private final Map<PropertyChain, DependencySpec> dependencySpecs = new LinkedHashMap<>();
 
     BuildingContext(FactorySet factorySet) {
         this.factorySet = factorySet;
@@ -41,6 +42,8 @@ class BuildingContext {
         while (properties.size() > 0)
             assignFromDependency(object, properties, properties.iterator().next());
 
+        linkSpecs.forEach(linkSpec -> linkSpec.apply(object));
+
         objectTree.foreach(object, o -> factorySet.getDataRepository().save(o));
     }
 
@@ -70,5 +73,9 @@ class BuildingContext {
 
     void cacheSave(Object parent, Object node) {
         objectTree.addNode(parent, node);
+    }
+
+    void appendLinkSpec(LinkSpec linkSpec) {
+        linkSpecs.add(linkSpec);
     }
 }

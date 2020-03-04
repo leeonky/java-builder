@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -125,6 +126,12 @@ public class BeanContext<T> {
 
     public void cacheSave(T object) {
         buildingContext.cacheSave(parent.built, object);
+    }
+
+    public BeanContext<T> link(String... properties) {
+        buildingContext.appendLinkSpec(new LinkSpec(Stream.of(properties)
+                .map(p -> new PropertyChain(absolutePropertyChain(p))).collect(Collectors.toList())));
+        return this;
     }
 
     public class PropertySpecBuilder {
