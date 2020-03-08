@@ -32,7 +32,7 @@ public abstract class AbstractFactory<T> implements Factory<T> {
             Consumer<BeanContext<T>> combinationSpec = definedCombinationSpecs.get(combination);
             if (combinationSpec == null)
                 throw new IllegalArgumentException(String.format("Combination '%s' not exist", combination));
-            beanContext.collectSpecs(combinationSpec);
+            combinationSpec.accept(beanContext);
         }
     }
 

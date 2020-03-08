@@ -33,7 +33,7 @@ class BeanSpecsFactory<T> extends AbstractFactory<T> {
 
     @Override
     public T newInstance(BeanContext<T> beanContext) {
-        return beanContext.getFactorySet().type(getBeanClass().getType()).build(beanContext.getBuildingContext());
+        return beanContext.getFactorySet().factory(getBeanClass().getType()).newInstance(beanContext);
     }
 
     @Override

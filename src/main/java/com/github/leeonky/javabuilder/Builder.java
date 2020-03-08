@@ -5,12 +5,12 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class Builder<T> {
-    private final Factory<T> factory;
-    private final FactorySet factorySet;
-    private final Map<String, Object> properties = new HashMap<>();
-    private final Map<String, Object> params = new HashMap<>();
-    private String[] combinations = new String[]{};
-    private Consumer<BeanContext<T>> spec = beanContext -> {
+    final Factory<T> factory;
+    final FactorySet factorySet;
+    final Map<String, Object> properties = new HashMap<>();
+    final Map<String, Object> params = new HashMap<>();
+    String[] combinations = new String[]{};
+    Consumer<BeanContext<T>> spec = beanContext -> {
     };
 
     Builder(Factory<T> factory, FactorySet factorySet) {
@@ -18,7 +18,7 @@ public class Builder<T> {
         this.factorySet = factorySet;
     }
 
-    private Builder<T> copy() {
+    public Builder<T> copy() {
         Builder<T> newBuilder = new Builder<>(factory, factorySet);
         newBuilder.properties.putAll(properties);
         newBuilder.params.putAll(params);
@@ -67,39 +67,14 @@ public class Builder<T> {
     }
 
     public T create() {
-        T object = build();
+        BuildingContext buildingContext = new BuildingContext(factorySet);
+        T object = new BeanContext<>(buildingContext, null, null, this).build();
+        buildingContext.submitCached(object);
         factorySet.getDataRepository().save(object);
         return object;
     }
 
     public T build() {
-        BuildingContext buildingContext = new BuildingContext(factorySet);
-        BeanContext<T> beanContext = buildingContext.createBeanContext(factory, params, properties, spec, combinations);
-        beanContext.queryOrCreateReferenceBeansAndCollectAllSpecs();
-        T object = build(beanContext);
-        buildingContext.applyAllSpecsAndSaveCached(object, beanContext);
-        return object;
-    }
-
-    T build(BuildingContext buildingContext) {
-        BeanContext<T> beanContext = buildingContext.createBeanContext(factory, params, properties, spec, combinations);
-        beanContext.queryOrCreateReferenceBeansAndCollectAllSpecs();
-        return build(beanContext);
-    }
-
-    private T build(BeanContext<T> beanContext) {
-        return beanContext.assignProperties(factory.newInstance(beanContext));
-    }
-
-    BeanContext<T> createSubBeanContext(BeanContext<?> parent, String propertyName) {
-        return parent.createSubContext(factory,
-                propertyName, factorySet.getSequence(factory.getBeanClass().getType()),
-                params, properties, spec, combinations);
-    }
-
-    T subCreate(BeanContext<T> subContext) {
-        T object = build(subContext);
-        subContext.cacheSave(object);
-        return object;
+        return new BeanContext<>(new BuildingContext(factorySet), null, null, this).build();
     }
 }

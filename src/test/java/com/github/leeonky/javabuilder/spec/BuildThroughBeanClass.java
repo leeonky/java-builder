@@ -42,9 +42,9 @@ class BuildThroughBeanClass {
 
         @Test
         void with_sequence_and_params() {
-            factorySet.register(BeanWithNoDefaultConstructor.class, (buildingContext) -> {
-                BeanWithNoDefaultConstructor bean = new BeanWithNoDefaultConstructor(buildingContext.getCurrentSequence());
-                bean.setStringValue(buildingContext.param("stringValue"));
+            factorySet.register(BeanWithNoDefaultConstructor.class, (beanContext) -> {
+                BeanWithNoDefaultConstructor bean = new BeanWithNoDefaultConstructor(beanContext.getCurrentSequence());
+                bean.setStringValue(beanContext.param("stringValue"));
                 return bean;
             });
 
@@ -76,7 +76,7 @@ class BuildThroughBeanClass {
 
         @Test
         void register_with_sequence() {
-            factorySet.onBuild(Bean.class, (bean, buildContext) -> bean.setStringValue("Hello" + buildContext.getCurrentSequence()));
+            factorySet.onBuild(Bean.class, (bean, beanContext) -> bean.setStringValue("Hello" + beanContext.getCurrentSequence()));
             Builder<Bean> builder = factorySet.type(Bean.class);
 
             assertThat(builder.create().getStringValue()).isEqualTo("Hello1");
@@ -85,7 +85,7 @@ class BuildThroughBeanClass {
 
         @Test
         void register_with_params() {
-            factorySet.onBuild(Bean.class, (bean, buildContext) -> bean.setStringValue(buildContext.param("message")));
+            factorySet.onBuild(Bean.class, (bean, beanContext) -> bean.setStringValue(beanContext.param("message")));
             Builder<Bean> builder = factorySet.type(Bean.class);
 
             assertThat(builder.param("message", "hello").create().getStringValue()).isEqualTo("hello");

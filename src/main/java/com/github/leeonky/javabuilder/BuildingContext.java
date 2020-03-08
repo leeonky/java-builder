@@ -3,7 +3,6 @@ package com.github.leeonky.javabuilder;
 import com.github.leeonky.javabuilder.spec.*;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class BuildingContext {
     private final FactorySet factorySet;
@@ -15,12 +14,6 @@ public class BuildingContext {
 
     public BuildingContext(FactorySet factorySet) {
         this.factorySet = factorySet;
-    }
-
-    public <T> BeanContext<T> createBeanContext(Factory<T> factory, Map<String, Object> params, Map<String, Object> properties,
-                                                Consumer<BeanContext<T>> spec, String[] combinations) {
-        return new BeanContext<>(factorySet, factory, null, null, factorySet.getSequence(factory.getBeanClass().getType()),
-                params, properties, this, spec, combinations);
     }
 
     public void appendSupplierSpec(PropertyChain propertyChain, SupplierSpec spec) {
@@ -35,7 +28,7 @@ public class BuildingContext {
         propertiesSpecs.put(propertyChain, spec);
     }
 
-    public void applyAllSpecsAndSaveCached(Object object, BeanContext<?> beanContext) {
+    public void applySpecs(Object object, BeanContext<?> beanContext) {
         linkSpecs.forEach(linkSpec -> linkSpec.preApply(beanContext));
 
         mergePropertySpecs(object);
@@ -47,7 +40,9 @@ public class BuildingContext {
             assignFromDependency(object, properties, properties.iterator().next());
 
         linkSpecs.forEach(linkSpec -> linkSpec.apply(object, beanContext));
+    }
 
+    public void submitCached(Object object) {
         objectTree.foreach(object, o -> factorySet.getDataRepository().save(o));
     }
 

@@ -43,13 +43,13 @@ public class LinkSpec {
 
     private List<PropertyChain> filterUnspecifiedPropertyChains(BeanContext<?> beanContext) {
         return propertyChains.stream()
-                .filter(beanContext::isPropertyNotSpecified)
+                .filter(propertyChain -> beanContext.isPropertyNotSpecified(propertyChain.getRootName()))
                 .collect(Collectors.toList());
     }
 
     private List<PropertyChain> filterSpecifiedPropertyChains(BeanContext<?> beanContext) {
         return propertyChains.stream()
-                .filter(propertyChain -> !beanContext.isPropertyNotSpecified(propertyChain))
+                .filter(propertyChain -> !beanContext.isPropertyNotSpecified(propertyChain.getRootName()))
                 .collect(Collectors.toList());
     }
 
