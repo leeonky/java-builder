@@ -47,6 +47,7 @@ class BuildWithRepository {
         private String name;
         private Category category;
         private boolean issued;
+        private Boolean isNew;
     }
 
     @Getter
@@ -68,6 +69,16 @@ class BuildWithRepository {
         @Combination("Issued")
         public void issued(BeanContext<Product> specBuilder) {
             specBuilder.property("issued").value(true);
+        }
+
+        @Combination("Cpp")
+        public void cpp(BeanContext<Product> specBuilder) {
+            specBuilder.property("name").value("cpp");
+        }
+
+        @Combination("New")
+        public void newBook(BeanContext<Product> specBuilder) {
+            specBuilder.property("isNew").value(true);
         }
     }
 
@@ -157,9 +168,10 @@ class BuildWithRepository {
         void support_build_property_with_factory_name_and_combination() {
             factorySet.define(ProgrammeBook.class);
 
-            Order order = factorySet.type(Order.class).property("product(Issued ProgrammeBook).category.name", "book").create();
+            Order order = factorySet.type(Order.class).property("product(New, Issued Cpp ProgrammeBook).category.name", "book").create();
 
             assertThat(order.getProduct().isIssued()).isTrue();
+            assertThat(order.getProduct().getName()).isEqualTo("cpp");
         }
 
 

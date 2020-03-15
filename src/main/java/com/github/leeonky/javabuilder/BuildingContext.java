@@ -23,7 +23,8 @@ public class BuildingContext {
         supplierSpecs.put(propertyChain, spec);
     }
 
-    public void appendPropertiesSpec(PropertyChain propertyChain, PropertySpec spec) {
+    public void appendPropertiesSpec(PropertySpec spec) {
+        PropertyChain propertyChain = spec.getPropertyChain();
         propertiesSpecs.remove(propertyChain);
         propertiesSpecs.put(propertyChain, spec);
     }
@@ -70,8 +71,8 @@ public class BuildingContext {
         dependencySpecs.put(propertyChain, spec);
     }
 
-    public void cacheSave(Object parent, Object node) {
-        objectTree.addNode(parent, node);
+    public <T> T cacheSave(Object parent, T node) {
+        return objectTree.addNode(parent, node);
     }
 
     public void appendLinkSpec(LinkSpec linkSpec) {

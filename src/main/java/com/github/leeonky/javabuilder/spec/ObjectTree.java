@@ -6,8 +6,9 @@ import java.util.function.Consumer;
 public class ObjectTree {
     private Map<Object, List<Object>> nodes = new HashMap<>();
 
-    public void addNode(Object parent, Object node) {
+    public <T> T addNode(Object parent, T node) {
         nodes.computeIfAbsent(parent, k -> new ArrayList<>()).add(node);
+        return node;
     }
 
     public void foreach(Object root, Consumer<Object> consumer) {

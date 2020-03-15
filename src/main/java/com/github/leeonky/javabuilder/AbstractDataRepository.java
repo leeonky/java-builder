@@ -1,6 +1,6 @@
 package com.github.leeonky.javabuilder;
 
-import com.github.leeonky.javabuilder.spec.PropertyQueryChain;
+import com.github.leeonky.javabuilder.spec.QueryExpression;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyReader;
 
@@ -30,9 +30,9 @@ public abstract class AbstractDataRepository implements DataRepository {
         if (o == null)
             return false;
         if (key.contains(".")) {
-            PropertyQueryChain propertyQueryChain = PropertyQueryChain.parse(key);
-            PropertyReader propertyReader = beanClass.getPropertyReader(propertyQueryChain.getBaseName());
-            return isPropertyValueMatched(propertyReader.getPropertyTypeWrapper(), propertyReader.getValue(o), propertyQueryChain.getCondition(), target);
+            QueryExpression queryExpression = new QueryExpression<>(beanClass, key, null);
+            PropertyReader propertyReader = beanClass.getPropertyReader(queryExpression.getBaseName());
+            return isPropertyValueMatched(propertyReader.getPropertyTypeWrapper(), propertyReader.getValue(o), queryExpression.getCondition(), target);
         }
         PropertyReader propertyReader = beanClass.getPropertyReader(key);
         return Objects.equals(propertyReader.getValue(o), propertyReader.tryConvert(target));

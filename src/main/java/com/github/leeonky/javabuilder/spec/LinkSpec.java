@@ -1,14 +1,17 @@
 package com.github.leeonky.javabuilder.spec;
 
 import com.github.leeonky.javabuilder.BeanContext;
+import com.github.leeonky.javabuilder.BuildingContext;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class LinkSpec {
     private final List<PropertyChain> propertyChains;
+    private final BuildingContext buildingContext;
 
-    public LinkSpec(List<PropertyChain> propertyChains) {
+    public LinkSpec(BuildingContext buildingContext, List<PropertyChain> propertyChains) {
+        this.buildingContext = buildingContext;
         this.propertyChains = propertyChains;
     }
 
@@ -16,7 +19,7 @@ public class LinkSpec {
         List<PropertyChain> specified = filterSpecifiedPropertyChains(beanContext);
         if (specified.size() > 0) {
             filterUnspecifiedPropertyChains(beanContext)
-                    .forEach(propertyChain -> beanContext.getBuildingContext().removeSupplierSpec(propertyChain));
+                    .forEach(propertyChain -> buildingContext.removeSupplierSpec(propertyChain));
             return;
         }
     }
@@ -30,12 +33,12 @@ public class LinkSpec {
             return;
         }
         List<PropertyChain> supplierSpecs = propertyChains.stream()
-                .filter(propertyChain -> beanContext.getBuildingContext().isSupplierSpec(propertyChain))
+                .filter(propertyChain -> buildingContext.isSupplierSpec(propertyChain))
                 .collect(Collectors.toList());
         if (supplierSpecs.size() > 0) {
             Object value = supplierSpecs.get(0).getFrom(object);
             propertyChains.stream()
-                    .filter(propertyChain -> !beanContext.getBuildingContext().isSupplierSpec(propertyChain))
+                    .filter(propertyChain -> !buildingContext.isSupplierSpec(propertyChain))
                     .forEach(propertyChain -> propertyChain.setTo(object, value));
         }
         linkPropertyByFirstDefaultValue(object);

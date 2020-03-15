@@ -2,7 +2,6 @@ package com.github.leeonky.javabuilder;
 
 import com.github.leeonky.javabuilder.spec.*;
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.PropertyWriter;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -20,7 +19,7 @@ public class BeanContext<T> {
     private final String currentPropertyName;
     private final int sequence;
     private final Builder<T> builder;
-    private final Set<String> specProperties = new HashSet<>();
+    private final Set<String> propertySpecProperties = new HashSet<>();
     private final Map<String, Object> specifiedProperties = new LinkedHashMap<>();
     private T built;
 
@@ -32,27 +31,23 @@ public class BeanContext<T> {
         currentPropertyName = propertyNameInParent;
     }
 
-    private void queryOrCreateReferenceBeansAndCollectAllSpecs() {
+    private void queryOrCreateReferencesAndCollectSpecs() {
         builder.properties.forEach((k, v) -> {
-            if (k.contains(".")) {
-                PropertyQueryChain propertyQueryChain = PropertyQueryChain.parse(k);
-                PropertyWriter<T> propertyWriter = getBeanClass().getPropertyWriter(propertyQueryChain.getBaseName());
-                Builder<?> builder = propertyQueryChain.toBuilder(this.builder.factorySet, propertyWriter.getPropertyType(), v);
-                List<?> query = builder.query();
-                if (query.isEmpty()) {
-                    createSub(propertyWriter.getName(), builder, creator -> {
-                        PropertyChain propertyChain = new PropertyChain(absolutePropertyChain(propertyWriter.getName()));
-                        buildingContext.appendPropertiesSpec(propertyChain, new PropertySpec(propertyWriter.getPropertyType(), propertyChain,
-                                creator, k, v));
-                    });
-                    specProperties.add(propertyWriter.getName());
-                } else
-                    specifiedProperties.put(propertyWriter.getName(), query.get(0));
+            QueryExpression<T> queryExpression = new QueryExpression<>(getBeanClass(), k, v);
+            List<?> query = queryExpression.query(builder.factorySet);
+            if (query.isEmpty()) {
+                createSub(queryExpression.getBaseName(), queryExpression.forCreating(builder.factorySet), creator ->
+                        buildingContext.appendPropertiesSpec(new PropertySpec(propertyChain(queryExpression.getBaseName()), creator, queryExpression)));
+                propertySpecProperties.add(queryExpression.getBaseName());
             } else
-                specifiedProperties.put(k, v);
+                specifiedProperties.put(queryExpression.getBaseName(), query.get(0));
         });
         builder.factory.collectSpecs(this, builder.combinations);
         builder.spec.accept(this);
+    }
+
+    private PropertyChain propertyChain(String name) {
+        return new PropertyChain(absolutePropertyChain(parent, name));
     }
 
     public int getCurrentSequence() {
@@ -69,7 +64,7 @@ public class BeanContext<T> {
     }
 
     public boolean isPropertyNotSpecified(String name) {
-        return !specifiedProperties.containsKey(name) && !specProperties.contains(name);
+        return !specifiedProperties.containsKey(name) && !propertySpecProperties.contains(name);
     }
 
     public FactorySet getFactorySet() {
@@ -82,18 +77,10 @@ public class BeanContext<T> {
         return built;
     }
 
-    private List<String> absolutePropertyChain(String property) {
-        return absolutePropertyChain(parent, property);
-    }
-
     private List<String> absolutePropertyChain(BeanContext<?> parent, String property) {
         List<String> chain = parent == null ? new ArrayList<>() : parent.absolutePropertyChain(parent.parent, currentPropertyName);
         chain.addAll(asList(property.split("\\.")));
         return chain;
-    }
-
-    public BuildingContext getBuildingContext() {
-        return buildingContext;
     }
 
     public PropertySpecBuilder property(String property) {
@@ -101,28 +88,26 @@ public class BeanContext<T> {
     }
 
     public BeanContext<T> link(String... properties) {
-        buildingContext.appendLinkSpec(new LinkSpec(Stream.of(properties)
-                .map(p -> new PropertyChain(absolutePropertyChain(p))).collect(Collectors.toList())));
+        buildingContext.appendLinkSpec(new LinkSpec(buildingContext, Stream.of(properties)
+                .map(this::propertyChain).collect(Collectors.toList())));
         return this;
     }
 
     T build() {
-        queryOrCreateReferenceBeansAndCollectAllSpecs();
+        queryOrCreateReferencesAndCollectSpecs();
         T object = newWithProperties();
         buildingContext.applySpecs(object, this);
         return object;
     }
 
     private T subCreate() {
-        T object = newWithProperties();
-        buildingContext.cacheSave(parent.built, object);
-        return object;
+        return buildingContext.cacheSave(parent.built, newWithProperties());
     }
 
     private <T> void createSub(String property, Builder<T> builder, Consumer<Supplier<T>> consumer) {
         BeanContext<T> subBeanContext = new BeanContext<>(buildingContext, this, property, builder);
         consumer.accept(subBeanContext::subCreate);
-        subBeanContext.queryOrCreateReferenceBeansAndCollectAllSpecs();
+        subBeanContext.queryOrCreateReferencesAndCollectSpecs();
     }
 
     public class PropertySpecBuilder {
@@ -138,7 +123,7 @@ public class BeanContext<T> {
 
         public BeanContext<T> from(Supplier<?> supplier) {
             if (isPropertyNotSpecified(property)) {
-                PropertyChain propertyChain = new PropertyChain(absolutePropertyChain(property));
+                PropertyChain propertyChain = propertyChain(property);
                 buildingContext.appendSupplierSpec(propertyChain, new SupplierSpec(propertyChain, supplier));
             }
             return BeanContext.this;
@@ -165,9 +150,9 @@ public class BeanContext<T> {
 
         public BeanContext<T> dependsOn(List<String> dependencies, Function<List<Object>, Object> function) {
             if (isPropertyNotSpecified(property.split("\\.")[0])) {
-                PropertyChain propertyChain = new PropertyChain(absolutePropertyChain(property));
+                PropertyChain propertyChain = propertyChain(property);
                 buildingContext.appendDependencySpec(propertyChain, new DependencySpec(propertyChain,
-                        dependencies.stream().map(d -> new PropertyChain(absolutePropertyChain(d))).collect(Collectors.toList()), function));
+                        dependencies.stream().map(BeanContext.this::propertyChain).collect(Collectors.toList()), function));
             }
             return BeanContext.this;
         }
