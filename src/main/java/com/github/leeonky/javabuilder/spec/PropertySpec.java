@@ -18,7 +18,7 @@ public class PropertySpec {
     }
 
     public void tryMerge(PropertySpec propertySpec) {
-        if (queryExpression.isSameQuery(propertySpec.queryExpression)) {
+        if (queryExpression.sameWith(propertySpec.queryExpression)) {
             supplier = propertySpec.supplier;
         }
     }

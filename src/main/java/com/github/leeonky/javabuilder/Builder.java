@@ -68,13 +68,13 @@ public class Builder<T> {
 
     public T create() {
         BuildingContext buildingContext = new BuildingContext(factorySet);
-        T object = new BeanContext<>(buildingContext, null, null, this).build();
+        T object = new BeanContextImpl<>(buildingContext, null, null, this).build();
         buildingContext.submitCached(object);
         factorySet.getDataRepository().save(object);
         return object;
     }
 
     public T build() {
-        return new BeanContext<>(new BuildingContext(factorySet), null, null, this).build();
+        return new BeanContextImpl<>(new BuildingContext(factorySet), null, null, this).build();
     }
 }

@@ -93,6 +93,8 @@ class BuildWithRepository {
 
             assertThat(bean).isEqualTo(queriedBean.get(0));
 
+            assertThat(factorySet.type(Bean.class).property("stringValue", "not hello").query()).isEmpty();
+
             factorySet.getDataRepository().clear();
             assertThat(factorySet.type(Bean.class).property("stringValue", "hello").query()).isEmpty();
         }

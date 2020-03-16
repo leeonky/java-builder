@@ -2,12 +2,10 @@ package com.github.leeonky.javabuilder;
 
 import com.github.leeonky.javabuilder.spec.QueryExpression;
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.PropertyReader;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public abstract class AbstractDataRepository implements DataRepository {
@@ -22,19 +20,8 @@ public abstract class AbstractDataRepository implements DataRepository {
     }
 
     private <T> boolean criteriaMatches(T object, BeanClass<T> beanClass, Map<String, Object> criteria) {
-        return criteria.entrySet().stream().allMatch(e -> isPropertyValueMatched(beanClass, object, e.getKey(), e.getValue()));
-    }
-
-    @SuppressWarnings("unchecked")
-    private boolean isPropertyValueMatched(BeanClass<?> beanClass, Object o, String key, Object target) {
-        if (o == null)
-            return false;
-        if (key.contains(".")) {
-            QueryExpression queryExpression = new QueryExpression<>(beanClass, key, null);
-            PropertyReader propertyReader = beanClass.getPropertyReader(queryExpression.getBaseName());
-            return isPropertyValueMatched(propertyReader.getPropertyTypeWrapper(), propertyReader.getValue(o), queryExpression.getCondition(), target);
-        }
-        PropertyReader propertyReader = beanClass.getPropertyReader(key);
-        return Objects.equals(propertyReader.getValue(o), propertyReader.tryConvert(target));
+        return criteria.entrySet().stream()
+                .map(e -> new QueryExpression<>(beanClass, e.getKey(), e.getValue()))
+                .allMatch(expression -> expression.matches(object));
     }
 }

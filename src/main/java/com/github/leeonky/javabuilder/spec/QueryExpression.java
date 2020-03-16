@@ -1,15 +1,17 @@
 package com.github.leeonky.javabuilder.spec;
 
+import com.github.leeonky.javabuilder.BeanContextImpl;
 import com.github.leeonky.javabuilder.Builder;
+import com.github.leeonky.javabuilder.BuildingContext;
 import com.github.leeonky.javabuilder.FactorySet;
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.PropertyReader;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.util.Collections.singletonList;
 
 public class QueryExpression<T> {
     private final BeanClass<T> beanClass;
@@ -46,26 +48,8 @@ public class QueryExpression<T> {
             throw new IllegalStateException("Invalid query expression `" + chain + "`");
     }
 
-    public String getBaseName() {
-        return baseName;
-    }
-
-    public String getCondition() {
-        return condition;
-    }
-
-    public Builder<?> forCreating(FactorySet factorySet) {
-        return toBuilder(factorySet, getWritePropertyType());
-    }
-
     private Class<?> getWritePropertyType() {
-        return beanClass.getPropertyWriter(getBaseName()).getPropertyType();
-    }
-
-    public List<?> query(FactorySet factorySet) {
-        if (condition == null)
-            return singletonList(value);
-        return toBuilder(factorySet, beanClass.getPropertyReader(getBaseName()).getPropertyType()).query();
+        return beanClass.getPropertyWriter(baseName).getPropertyType();
     }
 
     private Builder<?> toBuilder(FactorySet factorySet, Class<?> type) {
@@ -74,9 +58,39 @@ public class QueryExpression<T> {
                 .property(condition, value);
     }
 
-    public boolean isSameQuery(QueryExpression another) {
+    public boolean sameWith(QueryExpression another) {
         return getWritePropertyType().equals(another.getWritePropertyType())
                 && condition.equals(another.condition)
                 && Objects.equals(value, another.value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public boolean matches(Object object) {
+        if (object == null)
+            return false;
+        PropertyReader propertyReader = beanClass.getPropertyReader(baseName);
+        Object propertyValue = propertyReader.getValue(object);
+        if (condition == null)
+            return Objects.equals(propertyValue, propertyReader.tryConvert(value));
+        return new QueryExpression(propertyReader.getPropertyTypeWrapper(), condition, value).matches(propertyValue);
+    }
+
+    private boolean queryTo(FactorySet factorySet, Map<String, Object> queried) {
+        if (condition == null) {
+            queried.put(baseName, value);
+            return true;
+        }
+        return toBuilder(factorySet, beanClass.getPropertyReader(baseName).getPropertyType()).query().stream()
+                .peek(o -> queried.put(baseName, o))
+                .findFirst()
+                .isPresent();
+    }
+
+    public void queryOrCreateTo(FactorySet factorySet, BuildingContext buildingContext, BeanContextImpl<T> beanContext, Map<String, Object> queried, Set<String> created) {
+        if (!queryTo(factorySet, queried)) {
+            beanContext.processSubCreate(baseName, toBuilder(factorySet, getWritePropertyType()),
+                    creator -> buildingContext.appendPropertiesSpec(new PropertySpec(beanContext.propertyChain(baseName), creator, this)));
+            created.add(baseName);
+        }
     }
 }
