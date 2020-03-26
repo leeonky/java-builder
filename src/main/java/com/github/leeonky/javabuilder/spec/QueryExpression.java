@@ -7,6 +7,7 @@ import com.github.leeonky.javabuilder.FactorySet;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyReader;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -59,9 +60,15 @@ public class QueryExpression<T> {
     }
 
     public boolean sameWith(QueryExpression another) {
-        return getWritePropertyType().equals(another.getWritePropertyType())
-                && condition.equals(another.condition)
+        return beanClass.getType().equals(another.beanClass.getType())
+                && getWritePropertyType().equals(another.getWritePropertyType())
+                && (isDefaultBuild(another) || (Arrays.equals(combinations, another.combinations) && Objects.equals(specName, another.specName)))
+                && Objects.equals(condition, another.condition)
                 && Objects.equals(value, another.value);
+    }
+
+    private boolean isDefaultBuild(QueryExpression another) {
+        return another.specName == null && another.combinations.length == 0;
     }
 
     @SuppressWarnings("unchecked")

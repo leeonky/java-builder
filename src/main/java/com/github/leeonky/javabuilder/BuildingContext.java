@@ -51,7 +51,7 @@ public class BuildingContext {
         ArrayList<PropertySpec> propertiesSpecList = new ArrayList<>(propertiesSpecs.values());
         for (int i = 0; i < propertiesSpecList.size(); ++i)
             for (int j = i + 1; j < propertiesSpecList.size(); ++j)
-                propertiesSpecList.get(j).tryMerge(propertiesSpecList.get(i));
+                propertiesSpecList.get(i).tryMerge(propertiesSpecList.get(j));
         propertiesSpecList.forEach(spec -> spec.apply(object));
     }
 
