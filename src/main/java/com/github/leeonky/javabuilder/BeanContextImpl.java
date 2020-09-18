@@ -92,6 +92,11 @@ public class BeanContextImpl<T> implements BeanContext<T> {
         return this;
     }
 
+    @Override
+    public Supplier<T> getCurrent() {
+        return () -> built;
+    }
+
     public T build() {
         queryOrCreateReferencesAndCollectSpecs();
         T object = newWithProperties();

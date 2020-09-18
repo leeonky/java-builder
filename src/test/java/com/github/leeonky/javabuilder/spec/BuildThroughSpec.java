@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -127,6 +128,13 @@ class BuildThroughSpec {
         assertThat(buffer.get(2)).isEqualTo(shoppingList);
     }
 
+    @Test
+    void should_support_get_current_building_instance_from_context() {
+        Objects.Order order = new FactorySet().toBuild(Objects.RealOrder.class).create();
+
+        assertThat(order.getLines().get(0).getOrder()).isEqualTo(order);
+    }
+
     public static class Objects {
 
         @Getter
@@ -151,6 +159,29 @@ class BuildThroughSpec {
         @Accessors(chain = true)
         public static class ShoppingList {
             private Product product;
+        }
+
+        @Getter
+        @Setter
+        @Accessors(chain = true)
+        public static class Order {
+            private List<OrderLine> lines;
+        }
+
+        @Getter
+        @Setter
+        @Accessors(chain = true)
+        public static class OrderLine {
+            private Order order;
+            private int price;
+        }
+
+        public static class RealOrder extends BeanSpecs<Order> {
+            @Override
+            public void specs(BeanContext<Order> beanContext) {
+                beanContext.property("lines").from(() ->
+                        Arrays.asList(new OrderLine().setOrder(beanContext.getCurrent().get())));
+            }
         }
 
         public static class USD extends BeanSpecs<Money> {
