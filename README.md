@@ -1,4 +1,5 @@
 # Java-builder
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/daff7b93af5a4458a2a31cd30499e2e8)](https://app.codacy.com/app/leeonky/java-builder?utm_source=github.com&utm_medium=referral&utm_content=leeonky/java-builder&utm_campaign=Badge_Grade_Dashboard)
 [![travis-ci](https://travis-ci.org/leeonky/java-builder.svg?branch=master)](https://travis-ci.org/leeonky/java-builder)
 [![coveralls](https://img.shields.io/coveralls/github/leeonky/java-builder/master.svg)](https://coveralls.io/github/leeonky/java-builder)
 [![Lost commit](https://img.shields.io/github/last-commit/leeonky/java-builder.svg)](https://github.com/leeonky/java-builder)
